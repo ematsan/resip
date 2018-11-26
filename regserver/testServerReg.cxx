@@ -67,7 +67,8 @@ class Server : public ThreadIf
                    //test authorization
                  }
                  else{
-                   auto_ptr<SipMessage> msg401(Helper::makeResponse(*received, 401, mNameAddr));
+                   //auto_ptr<SipMessage> msg401(Helper::makeResponse(*received, 401, mNameAddr));
+                   auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*received, "localhost", true,false));
                    ErrLog( << "Sent 401(Unauthorized) to REGISTER");
                    mStack.send(*msg401);
                 }

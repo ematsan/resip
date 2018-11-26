@@ -33,7 +33,7 @@ class Client
            mContact(contact),
            mFrom(from),
            mTarget(target),
-           mWaitingForBye200(false)
+           mMessage(Helper::makeRegister( target, mFrom, mContact))
       {
          mStack.addTransport(transport, contact.uri().port());
          //auto_ptr<SipMessage> message(Helper::makeInvite( target, mContact, mContact));
@@ -55,40 +55,16 @@ class Client
             {
                if ( received->header(h_StatusLine).responseCode() == 200 )
                {
-                  if (!mWaitingForBye200)
-                  {
-                     ErrLog(<< "Creating dialog.");
-                     DeprecatedDialog dlog(mContact);
-
-                     DebugLog(<< "Creating dialog as UAC.");
-                     dlog.createDialogAsUAC(*received);
-
-                     DebugLog(<< "making ack.");
-                     auto_ptr<SipMessage> ack(dlog.makeAck(*received) );
-                     DebugLog(<< *ack);
-
-                     DebugLog(<< "making bye.");
-                     auto_ptr<SipMessage> bye(dlog.makeBye());
-
-                     DebugLog(<< "Sending ack: << " << endl << *ack);
-                     mStack.send(*ack);
-
-                     DebugLog(<< "Sending bye: << " << endl << *bye);
-                     mStack.send(*bye);
-                     mWaitingForBye200 = true;
-                  }
-                  else
-                  {
-                     auto_ptr<SipMessage> message(Helper::makeInvite( mTarget, mContact, mContact));
-                     mStack.send(*message);
-                     mWaitingForBye200 = false;
-                  }
+                     exit(0);
                }
                if ( received->header(h_StatusLine).responseCode() == 401 )
                {
-                 auto_ptr<SipMessage> message(Helper::makeRegister(mTarget, mFrom, mContact));
-                 message->header(h_Authorizations)//.param(p_username) = "test";
-                 mStack.send(*message);
+                DebugLog(<< "Sending Auth");
+                const Data& cnonce = "156156448";
+                unsigned int n = 9;
+                Helper::addAuthorization(* mMessage, *received, "test", "test", cnonce, n);
+                mStack.send(* mMessage);
+
                }
             }
          }
@@ -98,7 +74,7 @@ class Client
       NameAddr mContact;
       NameAddr mFrom;
       NameAddr mTarget;
-      bool mWaitingForBye200;
+      SipMessage* mMessage;
 };
 
 int
