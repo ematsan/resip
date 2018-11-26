@@ -62,6 +62,10 @@ class Server : public ThreadIf
             {
                auto_ptr<SipMessage> forDel(received);
                MethodTypes meth = received->header(h_RequestLine).getMethod();
+               NameAddr& to = received->header(h_To);
+               NameAddr& from = received->header(h_From);
+              // DebugLog(<<endl<<endl<<endl<<endl<<endl<<"TO"<<to<<"\tFROM"<<from<<endl<<endl<<endl<<endl<<endl<<endl);
+              // DebugLog(<<endl<<endl<<endl<<endl<<endl<<"TAG"<<to.param(p_tag)<<"\tURI"<<to.uri()<<endl<<endl<<endl<<endl<<endl<<endl);
                ErrLog ( << "Server received: " << getMethodName(meth));
                if ( meth == INVITE )
                {
