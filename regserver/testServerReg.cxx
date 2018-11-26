@@ -55,6 +55,8 @@ class Server : public ThreadIf
                auto_ptr<SipMessage> forDel(received);
                MethodTypes meth = received->header(h_RequestLine).getMethod();
                ErrLog ( << "Server received: " << getMethodName(meth));
+
+//!!!!
                if ( meth == REGISTER )
                {
                  NameAddr& to = received->header(h_To);
@@ -77,28 +79,8 @@ class Server : public ThreadIf
                auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, mNameAddr));
                ErrLog( << "Sent 200 to REGISTER");
                mStack.send(*msg200);
-
-               /*if ( meth == REGISTER )
-               {
-                  Data localTag = Helper::computeTag(4);
-                  auto_ptr<SipMessage> msg180(Helper::makeResponse(*received, 180, contact));
-                  msg180->header(h_To).param(p_tag) = localTag;
-                  ErrLog( << "Sent 180");
-                  mStack.send( *msg180);
-
-                  auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, contact));
-                  msg200->header(h_To).param(p_tag) = localTag;
-                  ErrLog( << "Sent 200");
-                  mStack.send(*msg200);
-               }
-               if ( meth == BYE)
-               {
-                  auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, contact));
-                  ErrLog( << "Sent 200 to BYE");
-                  mStack.send(*msg200);
-               }*/
+//timer               
                UInt64 endTime = Timer::getTimeMs();
-
                CritLog(<< "Completed: " << mNumCalls << " calls in " << endTime - startTime << "ms, "
                        << mNumCalls*1000 / (float)(endTime - startTime) << " CPS");
               }
