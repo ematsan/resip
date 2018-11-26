@@ -1,11 +1,11 @@
 LIB=-L../lib -lrutil -lrepro -lresip
 RPATH=-Wl,-rpath=../lib
 
-all: regrunner regconfig reg
+all: client server
 
-regrunner: RegRunner.cxx
+lib: testServer.cxx
 	g++ -c -g -I.. $(RPATH)  RegRunner.cxx -o regrunner.o $(LIB)
-regconfig: RegConfig.cxx
-	g++ -c -g -I.. $(RPATH)  RegConfig.cxx -o regconfig.o $(LIB)
-reg: reg.cxx
-	g++ -g -I.. $(RPATH)  reg.cxx regrunner.o regconfig.o -o reg $(LIB)
+server: testServer.cxx
+	g++ -g -I.. $(RPATH)  testServer.cxx -o server $(LIB)
+client: testClient.cxx
+	g++ -g -I.. $(RPATH)  testClient.cxx -o client $(LIB)
