@@ -1,3 +1,5 @@
+//./client debug "sip:fluffy@127.0.0.1:5070"
+
 #ifndef WIN32
 #include <sys/time.h>
 #include <unistd.h>
@@ -26,7 +28,7 @@ using namespace std;
 class Client
 {
     public:
-      Client(TransportType transport, const NameAddr& contact, const NameAddr& target) 
+      Client(TransportType transport, const NameAddr& contact, const NameAddr& target)
          : mStack(),
            mContact(contact),
            mTarget(target),
@@ -40,12 +42,12 @@ class Client
       void process(unsigned int timeoutMs)
       {
          mStack.process(timeoutMs);
-         
+
          SipMessage* received = mStack.receive();
          if (received)
          {
             InfoLog (<< "Client received: " << received->brief());
-            
+
             auto_ptr<SipMessage> forDel(received);
             if ( (received->isResponse()) )
             {
@@ -55,20 +57,20 @@ class Client
                   {
                      ErrLog(<< "Creating dialog.");
                      DeprecatedDialog dlog(mContact);
-                     
+
                      DebugLog(<< "Creating dialog as UAC.");
                      dlog.createDialogAsUAC(*received);
-                     
+
                      DebugLog(<< "making ack.");
                      auto_ptr<SipMessage> ack(dlog.makeAck(*received) );
                      DebugLog(<< *ack);
 
                      DebugLog(<< "making bye.");
                      auto_ptr<SipMessage> bye(dlog.makeBye());
-                     
+
                      DebugLog(<< "Sending ack: << " << endl << *ack);
                      mStack.send(*ack);
-                     
+
                      DebugLog(<< "Sending bye: << " << endl << *bye);
                      mStack.send(*bye);
                      mWaitingForBye200 = true;
@@ -97,10 +99,11 @@ main(int argc, char* argv[])
    {
       cerr << argv[0] << " LOG_LEVEL TARGET_URI" << endl;
       exit(-1);
-   } 
+   }
    Log::initialize(Log::Cout, Log::toLevel(argv[1]), argv[0]);
 
    NameAddr target(argv[2]);
+   cout<<argv[2]<<endl;
 
    NameAddr contact;
    contact.uri().host() = SipStack::getHostname();
@@ -108,7 +111,7 @@ main(int argc, char* argv[])
    contact.uri().user() = "yffulf";
 
    TransportType protocol;
-   if (isEqualNoCase(target.uri().param(p_transport), "UDP"))
+  /* if (isEqualNoCase(target.uri().param(p_transport), "UDP"))
    {
       protocol = UDP;
    }
@@ -118,10 +121,12 @@ main(int argc, char* argv[])
    }
    else
    {
+      cout << target.uri().param(p_transport)<<endl;
+      //cout << target.uri()<<endl;
       cerr << argv[0] << " LOG_LEVEL TARGET_URI(must include transport parameter)" << endl;
       exit(-1);
-   }
-//   protocol = TCP;
+   }*/
+   protocol = TCP;
    Client c(protocol, contact, target);
 
    while (true)
@@ -130,22 +135,22 @@ main(int argc, char* argv[])
    }
 }
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -155,7 +160,7 @@ main(int argc, char* argv[])
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -169,9 +174,9 @@ main(int argc, char* argv[])
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see
