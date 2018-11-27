@@ -11,9 +11,11 @@
 #include <sys/types.h>
 #include <iostream>
 #include <memory>
-
+//!!!!!!!!!!!!!!!!!!!!!! - read example using messages
 #include "resip/stack/Helper.hxx"
+//!!!!!!!!!!!!!!!!!!!!!! - read example using header
 #include "resip/stack/SipMessage.hxx"
+//!!!!!!!!!!!! resip/stack/NameAddr.hxx - read example using parametrs
 #include "resip/stack/Uri.hxx"
 #include "resip/stack/SipStack.hxx"
 #include "resip/stack/DeprecatedDialog.hxx"

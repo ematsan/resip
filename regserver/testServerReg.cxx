@@ -11,10 +11,13 @@
 #include <sys/types.h>
 #include <iostream>
 #include <memory>
-
+//!!!!!!!!!!!!!!!!!!!!!! - read example using messages
 #include "resip/stack/Helper.hxx"
+//!!!!!!!!!!!!!!!!!!!!!! - read example using header
 #include "resip/stack/SipMessage.hxx"
+//!!!!!!!!!!!! resip/stack/NameAddr.hxx - read example using parametrs address
 #include "resip/stack/Uri.hxx"
+//!!!!!!!!!!!!read example using parametrs auth
 #include "resip/stack/Auth.hxx"
 #include "resip/stack/SipStack.hxx"
 #include "rutil/Logger.hxx"
@@ -79,7 +82,7 @@ class Server : public ThreadIf
                auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, mNameAddr));
                ErrLog( << "Sent 200 to REGISTER");
                mStack.send(*msg200);
-//timer               
+//timer
                UInt64 endTime = Timer::getTimeMs();
                CritLog(<< "Completed: " << mNumCalls << " calls in " << endTime - startTime << "ms, "
                        << mNumCalls*1000 / (float)(endTime - startTime) << " CPS");
