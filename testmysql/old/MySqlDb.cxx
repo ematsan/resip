@@ -9,7 +9,7 @@
 
 #ifdef WIN32
 #include <errmsg.h>
-#else 
+#else
 #include <mysql/errmsg.h>
 #endif
 
@@ -36,7 +36,7 @@ extern "C"
    }
 }
 
-// This class helps ensure that each thread using the MySQL API's 
+// This class helps ensure that each thread using the MySQL API's
 // initialize by calling mysql_thread_init before calling any mySQL functions
 class MySQLInitializer
 {
@@ -56,7 +56,7 @@ class MySQLInitializer
       bool isInitialized()
       {
          // Note:  if value is not set yet then 0 (false) is returned
-         return ThreadIf::tlsGetValue(mThreadStorage) != 0; 
+         return ThreadIf::tlsGetValue(mThreadStorage) != 0;
       }
 
    private:
@@ -64,11 +64,11 @@ class MySQLInitializer
 };
 static MySQLInitializer g_MySQLInitializer;
 
-MySqlDb::MySqlDb(const Data& server, 
-                 const Data& user, 
-                 const Data& password, 
-                 const Data& databaseName, 
-                 unsigned int port, 
+MySqlDb::MySqlDb(const Data& server,
+                 const Data& user,
+                 const Data& password,
+                 const Data& databaseName,
+                 unsigned int port,
                  const Data& customUserAuthQuery) :
    mDBServer(server),
    mDBUser(user),
@@ -77,7 +77,7 @@ MySqlDb::MySqlDb(const Data& server,
    mDBPort(port),
    mCustomUserAuthQuery(customUserAuthQuery),
    mConn(0)
-{ 
+{
    InfoLog( << "Using MySQL DB with server=" << server << ", user=" << user << ", dbName=" << databaseName << ", port=" << port);
 
    for (int i=0;i<MaxTable;i++)
@@ -120,19 +120,19 @@ MySqlDb::disconnectFromDatabase() const
       for (int i=0;i<MaxTable;i++)
       {
          if (mResult[i])
-         {  
-            mysql_free_result(mResult[i]); 
+         {
+            mysql_free_result(mResult[i]);
             mResult[i]=0;
          }
       }
-   
+
       mysql_close(mConn);
       mConn = 0;
       setConnected(false);
    }
 }
 
-int 
+int
 MySqlDb::connectToDatabase() const
 {
    // Disconnect from database first (if required)
@@ -159,10 +159,10 @@ MySqlDb::connectToDatabase() const
                                    CLIENT_MULTI_RESULTS); // client flags (enable multiple results, since some custom stored procedures might require this)
 
    if (ret == 0)
-   { 
+   {
       int rc = mysql_errno(mConn);
       ErrLog( << "MySQL connect failed: error=" << rc << ": " << mysql_error(mConn));
-      mysql_close(mConn); 
+      mysql_close(mConn);
       mConn = 0;
       setConnected(false);
       return rc;
@@ -250,7 +250,7 @@ MySqlDb::singleResultQuery(const Data& queryCommand, std::vector<Data>& fields) 
 {
    MYSQL_RES* result=0;
    int rc = query(queryCommand, &result);
-      
+
    if(rc == 0)
    {
       if(result == 0)
@@ -283,21 +283,21 @@ MySqlDb::singleResultQuery(const Data& queryCommand, std::vector<Data>& fields) 
    return rc;
 }
 
-resip::Data& 
+resip::Data&
 MySqlDb::escapeString(const resip::Data& str, resip::Data& escapedStr) const
 {
    escapedStr.truncate2(mysql_real_escape_string(mConn, (char*)escapedStr.getBuf(str.size()*2+1), str.c_str(), str.size()));
    return escapedStr;
 }
 
-bool 
+bool
 MySqlDb::addUser(const AbstractDb::Key& key, const AbstractDb::UserRecord& rec)
-{ 
+{
    Data command;
    {
       DataStream ds(command);
       ds << "INSERT INTO users (user, domain, realm, passwordHash, passwordHashAlt, name, email, forwardAddress)"
-         << " VALUES('" 
+         << " VALUES('"
          << rec.user << "', '"
          << rec.domain << "', '"
          << rec.realm << "', '"
@@ -307,7 +307,7 @@ MySqlDb::addUser(const AbstractDb::Key& key, const AbstractDb::UserRecord& rec)
          << rec.email << "', '"
          << rec.forwardAddress << "')"
          << " ON DUPLICATE KEY UPDATE"
-         << " user='" << rec.user 
+         << " user='" << rec.user
          << "', domain='" << rec.domain
          << "', realm='" << rec.realm
          << "', passwordHash='" << rec.passwordHash
@@ -321,7 +321,7 @@ MySqlDb::addUser(const AbstractDb::Key& key, const AbstractDb::UserRecord& rec)
 }
 
 
-AbstractDb::UserRecord 
+AbstractDb::UserRecord
 MySqlDb::getUser( const AbstractDb::Key& key ) const
 {
    AbstractDb::UserRecord  ret;
@@ -332,13 +332,13 @@ MySqlDb::getUser( const AbstractDb::Key& key ) const
       ds << "SELECT user, domain, realm, passwordHash, passwordHashAlt, name, email, forwardAddress FROM users ";
       userWhereClauseToDataStream(key, ds);
    }
-   
+
    MYSQL_RES* result=0;
    if(query(command, &result) != 0)
    {
       return ret;
    }
-   
+
    if (result==0)
    {
       ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
@@ -359,15 +359,16 @@ MySqlDb::getUser( const AbstractDb::Key& key ) const
       ret.forwardAddress  = Data(row[col++]);
    }
 
+
    mysql_free_result(result);
 
    return ret;
 }
 
 
-resip::Data 
+resip::Data
 MySqlDb::getUserAuthInfo(  const AbstractDb::Key& key ) const
-{ 
+{
    std::vector<Data> ret;
 
    Data command;
@@ -377,10 +378,10 @@ MySqlDb::getUserAuthInfo(  const AbstractDb::Key& key ) const
       Data domain;
       getUserAndDomainFromKey(key, user, domain);
       ds << "SELECT passwordHash FROM users WHERE user = '" << user << "' AND domain = '" << domain << "' ";
-   
-      // Note: domain is empty when querying for HTTP admin user - for this special user, 
+
+      // Note: domain is empty when querying for HTTP admin user - for this special user,
       // we will only check the repro db, by not adding the UNION statement below
-      if(!mCustomUserAuthQuery.empty() && !domain.empty())  
+      if(!mCustomUserAuthQuery.empty() && !domain.empty())
       {
          ds << " UNION " << mCustomUserAuthQuery;
          ds.flush();
@@ -393,23 +394,23 @@ MySqlDb::getUserAuthInfo(  const AbstractDb::Key& key ) const
    {
       return Data::Empty;
    }
-   
+
    DebugLog( << "Auth password is " << ret.front());
-   
+
    return ret.front();
 }
 
 
-AbstractDb::Key 
+AbstractDb::Key
 MySqlDb::firstUserKey()
-{  
-   // free memory from previous search 
+{
+   // free memory from previous search
    if (mResult[UserTable])
    {
-      mysql_free_result(mResult[UserTable]); 
+      mysql_free_result(mResult[UserTable]);
       mResult[UserTable] = 0;
    }
-   
+
    Data command("SELECT user, domain FROM users");
 
    if(query(command, &mResult[UserTable]) != 0)
@@ -422,36 +423,36 @@ MySqlDb::firstUserKey()
       ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
       return Data::Empty;
    }
-   
+
    return nextUserKey();
 }
 
 
-AbstractDb::Key 
+AbstractDb::Key
 MySqlDb::nextUserKey()
-{ 
+{
    if(mResult[UserTable] == 0)
-   { 
+   {
       return Data::Empty;
    }
-   
+
    MYSQL_ROW row = mysql_fetch_row(mResult[UserTable]);
    if (!row)
    {
-      mysql_free_result(mResult[UserTable]); 
+      mysql_free_result(mResult[UserTable]);
       mResult[UserTable] = 0;
       return Data::Empty;
    }
    Data user(row[0]);
    Data domain(row[1]);
-   
+
    return user+"@"+domain;
 }
 
 
-bool 
-MySqlDb::dbWriteRecord(const Table table, 
-                       const resip::Data& pKey, 
+bool
+MySqlDb::dbWriteRecord(const Table table,
+                       const resip::Data& pKey,
                        const resip::Data& pData)
 {
    Data command;
@@ -474,7 +475,7 @@ MySqlDb::dbWriteRecord(const Table table,
    else
    {
       DataStream ds(command);
-      ds << "REPLACE INTO " << tableName(table) 
+      ds << "REPLACE INTO " << tableName(table)
          << " SET attr='" << escapeString(pKey, escapedKey)
          << "', value='"  << pData.base64encode()
          << "'";
@@ -483,16 +484,16 @@ MySqlDb::dbWriteRecord(const Table table,
    return query(command, 0) == 0;
 }
 
-bool 
-MySqlDb::dbReadRecord(const Table table, 
-                      const resip::Data& pKey, 
+bool
+MySqlDb::dbReadRecord(const Table table,
+                      const resip::Data& pKey,
                       resip::Data& pData) const
-{ 
+{
    Data command;
    Data escapedKey;
    {
       DataStream ds(command);
-      ds << "SELECT value FROM " << tableName(table) 
+      ds << "SELECT value FROM " << tableName(table)
          << " WHERE attr='" << escapeString(pKey, escapedKey)
          << "'";
    }
@@ -523,24 +524,24 @@ MySqlDb::dbReadRecord(const Table table,
 }
 
 
-resip::Data 
+resip::Data
 MySqlDb::dbNextKey(const Table table, bool first)
-{ 
+{
    if(first)
    {
-      // free memory from previous search 
+      // free memory from previous search
       if (mResult[table])
       {
-         mysql_free_result(mResult[table]); 
+         mysql_free_result(mResult[table]);
          mResult[table] = 0;
       }
-      
+
       Data command;
       {
          DataStream ds(command);
          ds << "SELECT attr FROM " << tableName(table);
       }
-      
+
       if(query(command, &mResult[table]) != 0)
       {
          return Data::Empty;
@@ -555,15 +556,15 @@ MySqlDb::dbNextKey(const Table table, bool first)
    else
    {
       if (mResult[table] == 0)
-      { 
+      {
          return Data::Empty;
       }
    }
-   
+
    MYSQL_ROW row = mysql_fetch_row(mResult[table]);
    if (!row)
    {
-      mysql_free_result(mResult[table]); 
+      mysql_free_result(mResult[table]);
       mResult[table] = 0;
       return Data::Empty;
    }
@@ -572,7 +573,7 @@ MySqlDb::dbNextKey(const Table table, bool first)
 }
 
 
-bool 
+bool
 MySqlDb::dbNextRecord(const Table table,
                       const resip::Data& key,
                       resip::Data& data,
@@ -581,13 +582,13 @@ MySqlDb::dbNextRecord(const Table table,
 {
    if(first)
    {
-      // free memory from previous search 
+      // free memory from previous search
       if (mResult[table])
       {
-         mysql_free_result(mResult[table]); 
+         mysql_free_result(mResult[table]);
          mResult[table] = 0;
       }
-      
+
       Data command;
       {
          DataStream ds(command);
@@ -616,16 +617,16 @@ MySqlDb::dbNextRecord(const Table table,
          return false;
       }
    }
-   
+
    if (mResult[table] == 0)
-   { 
+   {
       return false;
    }
-   
+
    MYSQL_ROW row = mysql_fetch_row(mResult[table]);
    if (!row)
    {
-      mysql_free_result(mResult[table]); 
+      mysql_free_result(mResult[table]);
       mResult[table] = 0;
       return false;
    }
@@ -635,7 +636,7 @@ MySqlDb::dbNextRecord(const Table table,
    return true;
 }
 
-bool 
+bool
 MySqlDb::dbBeginTransaction(const Table table)
 {
    Data command("SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ");
@@ -647,7 +648,7 @@ MySqlDb::dbBeginTransaction(const Table table)
    return false;
 }
 
-void 
+void
 MySqlDb::userWhereClauseToDataStream(const Key& key, DataStream& ds) const
 {
    Data user;
@@ -655,28 +656,28 @@ MySqlDb::userWhereClauseToDataStream(const Key& key, DataStream& ds) const
    getUserAndDomainFromKey(key, user, domain);
    ds << " WHERE user='" << user
       << "' AND domain='" << domain
-      << "'";      
+      << "'";
 }
-   
+
 #endif // USE_MYSQL
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -686,7 +687,7 @@ MySqlDb::userWhereClauseToDataStream(const Key& key, DataStream& ds) const
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -700,6 +701,6 @@ MySqlDb::userWhereClauseToDataStream(const Key& key, DataStream& ds) const
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
  */
