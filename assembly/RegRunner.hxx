@@ -6,14 +6,17 @@
 namespace resip
 {
   class SipStack;
+  class ThreadIf;
+  class FdPollGrp;
+  class AsyncProcessHandler;
 }
 
 using namespace std;
 
-#define RESIPROCATE_SUBSYSTEM Subsystem::REGISTRAR
-
 namespace registrar
 {
+//  #define RESIPROCATE_SUBSYSTEM Subsystem::REGISTRAR
+
   class RegConfig : public resip::ConfigParse //not abstract class
   {
   public:
@@ -36,6 +39,10 @@ namespace registrar
      bool mRunning; //server start(true) or not(false)
      RegConfig* mRegConfig; //read config file
      resip::SipStack* mSipStack; //sip stack
+     resip::ThreadIf* mStackThread; //sip thread
+
+     resip::FdPollGrp* mFdPollGrp;   //Polling group callback
+     resip::AsyncProcessHandler* mAsyncProcessHandler;//will be invoked when Messages are posted to the stack
    };
 }
 #endif
