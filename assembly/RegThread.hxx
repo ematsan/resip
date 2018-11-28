@@ -4,6 +4,8 @@
 #include "rutil/ThreadIf.hxx"
 #include "resip/stack/NameAddr.hxx"
 
+#define RESIPROCATE_SUBSYSTEM Subsystem::TEST
+
 namespace resip
 {
   class SipStack;

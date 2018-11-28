@@ -11,7 +11,7 @@
 //!!!!!!!!!!!!read example using parametrs auth
 #include "resip/stack/Auth.hxx"
 #include "resip/stack/SipStack.hxx"
-//#include "rutil/Logger.hxx"
+#include "rutil/Logger.hxx"
 
 
 using namespace resip;
@@ -34,7 +34,7 @@ RegThread::~RegThread()
 void
 RegThread::thread()
 {
-  cout<<"This is the Server";
+  InfoLog(<<"This is the Server");
   while (!isShutdown())
   {
      FdSet fdset;
@@ -47,7 +47,8 @@ RegThread::thread()
      {
         auto_ptr<SipMessage> forDel(received);
         MethodTypes meth = received->header(h_RequestLine).getMethod();
-        cerr << "Server received: " << getMethodName(meth)<<endl;
+        InfoLog(<< "Server received: " << getMethodName(meth));
+        //cout << "Server received: " << getMethodName(meth)<<endl;
 
 //!!!!
         if ( meth == REGISTER )
@@ -64,12 +65,14 @@ RegThread::thread()
           else{
             //auto_ptr<SipMessage> msg401(Helper::makeResponse(*received, 401, mNameAddr));
             auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*received, "localhost", true,false));
-            cerr << "Sent 401(Unauthorized) to REGISTER"<<endl;
+            //cerr << "Sent 401(Unauthorized) to REGISTER"<<endl;
+            ErrLog (<< "Sent 401(Unauthorized) to REGISTER");
             mStack.send(*msg401);
          }
 
         auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, mNameAddr));
-        cout << "Sent 200 to REGISTER" << endl;
+        //cout << "Sent 200 to REGISTER" << endl;
+        InfoLog(<< "Sent 200 to REGISTER");
         mStack.send(*msg200);
        }
      }
