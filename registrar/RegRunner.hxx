@@ -1,7 +1,5 @@
 #if !defined(REGRUNNER_HXX)
 #define REGRUNNER_HXX
-//#include<iostream>
-//#include <memory>
 #include <map>
 
 using namespace std;
