@@ -18,9 +18,9 @@ using namespace resip;
 using namespace std;
 using namespace registrar;
 
-RegThread:: RegThread(SipStack& stack, NameAddr contact)
+RegThread::RegThread(SipStack& stack, Data realm)
    : mStack(stack),
-     mNameAddr(contact)
+     mNameAddr(realm)
 {
   cout<<"RegThread constructor"<<endl;
 }
@@ -48,34 +48,64 @@ RegThread::thread()
         auto_ptr<SipMessage> forDel(received);
         MethodTypes meth = received->header(h_RequestLine).getMethod();
         InfoLog(<< "Server received: " << getMethodName(meth));
-        //cout << "Server received: " << getMethodName(meth)<<endl;
-
-//!!!!
         if ( meth == REGISTER )
         {
-          NameAddr& to = received->header(h_To);
-          NameAddr& from = received->header(h_From);
-          NameAddrs& contacts = received->header(h_Contacts);
-          ExpiresCategory& expires = received->header(h_Expires);
+          //NameAddrs& contacts = received->header(h_Contacts);
+          //ExpiresCategory& expires = received->header(h_Expires);
 
-          if (received->exists(h_Authorizations)){
+          if (received->exists(h_Authorizations))
+           {
             Auths& auth =  received->header(h_Authorizations);
             //test authorization
-          }
-          else{
-            //auto_ptr<SipMessage> msg401(Helper::makeResponse(*received, 401, mNameAddr));
-            auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*received, "localhost", true,false));
-            //cerr << "Sent 401(Unauthorized) to REGISTER"<<endl;
-            ErrLog (<< "Sent 401(Unauthorized) to REGISTER");
-            mStack.send(*msg401);
-         }
 
-        auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, mNameAddr));
-        //cout << "Sent 200 to REGISTER" << endl;
-        InfoLog(<< "Sent 200 to REGISTER");
-        mStack.send(*msg200);
+
+            if(received->exists(h_Contacts))
+                  {
+                     NameAddr& to = received->header(h_To);
+                     NameAddr& from = received->header(h_From);
+                     
+                     //parse all contacts
+                     ParserContainer<NameAddr>& contacts = received->header(h_Contacts);
+                     for (ParserContainer<NameAddr>::iterator i = contacts.begin();
+                             i != contacts.end(); i++){
+                               auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, *i));
+                               mStack.send(*msg200);
+                             }
+                  }
+           InfoLog(<< "Sent 200 to REGISTER");
+          }
+          else
+          {
+              send401(received);
+          }
+
+       }
+       else
+       {
+         send403(received, getMethodName(meth));
        }
      }
   }
+}
 
+
+void
+RegThread::send200(SipMessage* sip){
+
+}
+
+void
+RegThread::send401(SipMessage* sip){
+  //auto_ptr<SipMessage> msg401(Helper::makeResponse(*received, 401, mNameAddr));
+  auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*sip, mNameAddr/*"localhost"*/, true, false));
+  ErrLog (<< "Sent 401(Unauthorized) to REGISTER");
+  mStack.send(*msg401);
+}
+
+void
+RegThread::send403(SipMessage* sip, Data meth)
+{
+  auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
+  mStack.send(*msg403);
+  InfoLog(<< "Sent 403 to "<< meth);
 }

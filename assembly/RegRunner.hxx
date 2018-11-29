@@ -7,8 +7,8 @@ namespace resip
 {
   class SipStack;
   class ThreadIf;
-  class FdPollGrp;
-  class AsyncProcessHandler;
+/*  class FdPollGrp;
+  class AsyncProcessHandler;*/
 }
 
 using namespace std;
@@ -41,8 +41,8 @@ namespace registrar
      resip::SipStack* mSipStack; //sip stack
      resip::ThreadIf* mStackThread; //sip thread
 
-     resip::FdPollGrp* mFdPollGrp;   //Polling group callback
-     resip::AsyncProcessHandler* mAsyncProcessHandler;//will be invoked when Messages are posted to the stack
+     /*resip::FdPollGrp* mFdPollGrp;   //Polling group callback
+     resip::AsyncProcessHandler* mAsyncProcessHandler;//will be invoked when Messages are posted to the stack*/
    };
 }
 #endif

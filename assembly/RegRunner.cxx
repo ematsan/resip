@@ -16,8 +16,8 @@ RegRunner::RegRunner()
    , mRegConfig(0)
    , mSipStack(0)
    , mStackThread(0)
-   , mFdPollGrp(0)
-   , mAsyncProcessHandler(0)
+   /*, mFdPollGrp(0)
+   , mAsyncProcessHandler(0)*/
 {
   cout<<"RegRunner constructor"<<endl;
 }
@@ -56,15 +56,15 @@ RegRunner::run(int argc, char** argv)
   {
     // Create EventThreadInterruptor used to wake up the stack for
     // for reasons other than an Fd signalling
-    resip_assert(!mFdPollGrp);
+    /*resip_assert(!mFdPollGrp);
     mFdPollGrp = FdPollGrp::create();
     resip_assert(!mAsyncProcessHandler);
     mAsyncProcessHandler = new EventThreadInterruptor(*mFdPollGrp);
-    DnsStub::NameserverList dnsServers = DnsStub::EmptyNameserverList;
+    DnsStub::NameserverList dnsServers = DnsStub::EmptyNameserverList;*/
 
-    mSipStack = new SipStack(0, dnsServers, mAsyncProcessHandler, false, 0, 0, mFdPollGrp);
+    mSipStack = new SipStack();//0, dnsServers, mAsyncProcessHandler, false, 0, 0, mFdPollGrp);
 
-    Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);
+  //  Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);
     /*bool isV4Address = DnsUtil::isIpV4Address(ipAddress);
   //  bool isV6Address = DnsUtil::isIpV6Address(ipAddress);
     if (!ipAddress.empty())
@@ -82,21 +82,9 @@ RegRunner::run(int argc, char** argv)
 
     resip_assert(!mStackThread);
     //read contact
-    NameAddr contact;
-    contact.uri().scheme() = mRegConfig->getConfigData("Scheme", "sip");
-    contact.uri().user() = mRegConfig->getConfigData("User","Registrar");
-    contact.uri().host() = SipStack::getHostname();
-    contact.uri().port() = tcpPort;
-    contact.uri().param(p_transport) = Tuple::toData(TCP);
-    //contact.uri().scheme() = "sip";
-    //contact.uri().user() = "fluffy";
-    //contact.uri().host() = SipStack::getHostname();
-    //contact.uri().port() = port;
-    //contact.uri().param(p_transport) = Tuple::toData(protocol);
-    mStackThread = new RegThread (*mSipStack, contact);
-    /*new EventStackThread(*mSipStack,
-                                        *dynamic_cast<EventThreadInterruptor*>(mAsyncProcessHandler),
-                                        *mFdPollGrp);*/
+    Data realm = mRegConfig->getConfigData("Realm", "localhost");
+    mStackThread = new RegThread (*mSipStack, realm);
+
     mSipStack->run();
     mStackThread->run();
   }
@@ -124,8 +112,8 @@ RegRunner::shutdown()
 
   delete mStackThread; mStackThread = 0;
   delete mSipStack; mSipStack = 0;
-  delete mAsyncProcessHandler; mAsyncProcessHandler = 0;
-  delete mFdPollGrp; mFdPollGrp = 0;
+/*  delete mAsyncProcessHandler; mAsyncProcessHandler = 0;
+  delete mFdPollGrp; mFdPollGrp = 0;*/
   delete mRegConfig; mRegConfig = 0;
 
   mRunning = false;
