@@ -16,8 +16,6 @@ RegRunner::RegRunner()
    , mRegConfig(0)
    , mSipStack(0)
    , mStackThread(0)
-   /*, mFdPollGrp(0)
-   , mAsyncProcessHandler(0)*/
 {
   cout<<"RegRunner constructor"<<endl;
 }
@@ -54,13 +52,6 @@ RegRunner::run(int argc, char** argv)
   resip_assert(!mSipStack);
   try
   {
-    // Create EventThreadInterruptor used to wake up the stack for
-    // for reasons other than an Fd signalling
-    /*resip_assert(!mFdPollGrp);
-    mFdPollGrp = FdPollGrp::create();
-    resip_assert(!mAsyncProcessHandler);
-    mAsyncProcessHandler = new EventThreadInterruptor(*mFdPollGrp);
-    DnsStub::NameserverList dnsServers = DnsStub::EmptyNameserverList;*/
 
     mSipStack = new SipStack();//0, dnsServers, mAsyncProcessHandler, false, 0, 0, mFdPollGrp);
 
@@ -112,8 +103,6 @@ RegRunner::shutdown()
 
   delete mStackThread; mStackThread = 0;
   delete mSipStack; mSipStack = 0;
-/*  delete mAsyncProcessHandler; mAsyncProcessHandler = 0;
-  delete mFdPollGrp; mFdPollGrp = 0;*/
   delete mRegConfig; mRegConfig = 0;
 
   mRunning = false;
