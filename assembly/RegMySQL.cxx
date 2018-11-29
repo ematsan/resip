@@ -5,6 +5,7 @@
 #include "rutil/Logger.hxx"
 
 #include "RegMySQL.hxx"
+//#include "RegDB.hxx"
 
 using namespace std;
 using namespace resip;
@@ -123,7 +124,7 @@ void
 RegMySQL::disconnectDB() const{
   if(mConn)
   {
-     for (int i=0; i<MaxTable; i++)
+     for (int i=0; i < MaxTable; i++)
      {
         if (mResult[i])
         {
@@ -146,7 +147,31 @@ RegMySQL::initialize() const{
       mysql_thread_init();
    }
 }
+/*************************************************************************/
+/*                        db work                                        */
+/*************************************************************************/
+// Db manipulation routines
+/*
+bool
+RegMySQL::dbWriteRecord(const Table table,
+                       const Data& pKey,
+                       const Data& pData)
+{
+  return true;
+}
+/// return false if not found
+bool
+RegMySQL::dbReadRecord(const Table table,
+                          const resip::Data& key,
+                          resip::Data& data) const
+{
+  return true;
+}*/
+// allows deleting records from a table that supports secondary keying using a secondary key
 
+/*************************************************************************/
+/*                        query                                          */
+/*************************************************************************/
 int
 RegMySQL::query(const Data& queryCommand, MYSQL_RES** result) const
 {
