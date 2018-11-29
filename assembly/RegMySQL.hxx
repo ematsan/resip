@@ -1,26 +1,27 @@
 #if !defined(REGMYSQL_HXX)
 #define REGMYSQL_HXX
 
+#include <mysql/mysql.h>
+#include <mysql/errmsg.h>
+
 #define RESIPROCATE_SUBSYSTEM Subsystem::TEST
 
 namespace resip
 {
-//  class SipStack;
   class Data;
-  //class SipMessage;
 }
 
 namespace registrar
 {
-class MySQLDB{
+class RegMySQL{
   public:
 
-    MySQLDB(const resip::Data& server,
+    RegMySQL(const resip::Data& server,
             const resip::Data& user,
             const resip::Data& password,
             const resip::Data& databaseName,
             unsigned int port);
-    ~MySQLDB();
+    ~RegMySQL();
 
     int connectDB() const;
     void disconnectDB() const;

@@ -1,6 +1,3 @@
-#include <mysql/mysql.h>
-#include <mysql/errmsg.h>
-
 #include <iostream>
 #include <memory>
 
@@ -19,10 +16,12 @@ class MySQLInitializer
    public:
       MySQLInitializer()
       {
+         cout<<"MySQLInitializer constructor"<<endl;
          ThreadIf::tlsKeyCreate(mThreadStorage, mysqlThreadEnd);
       }
       ~MySQLInitializer()
       {
+         cout<<"MySQLInitializer destructor"<<endl;
          ThreadIf::tlsKeyDelete(mThreadStorage);
       }
       void setInitialized()
@@ -43,7 +42,7 @@ static MySQLInitializer g_MySQLInitializer;
 
 
 
-MySQLDB::MySQLDB(const resip::Data& server,
+RegMySQL::RegMySQL(const resip::Data& server,
           const resip::Data& user,
           const resip::Data& password,
           const resip::Data& databaseName,
@@ -72,14 +71,14 @@ MySQLDB::MySQLDB(const resip::Data& server,
       }
 }
 
-MySQLDB::~MySQLDB(){
+RegMySQL::~RegMySQL(){
     cout<<"RegMySQL destructor"<<endl;
     disconnectDB();
     //mysql_library_end();
 }
 
 int
-MySQLDB::connectDB() const{
+RegMySQL::connectDB() const{
   // Disconnect from database first (if required)
   disconnectDB();
 
@@ -121,7 +120,7 @@ MySQLDB::connectDB() const{
 }
 
 void
-MySQLDB::disconnectDB() const{
+RegMySQL::disconnectDB() const{
   if(mConn)
   {
      for (int i=0; i<MaxTable; i++)
@@ -140,7 +139,7 @@ MySQLDB::disconnectDB() const{
 
 
 void
-MySQLDB::initialize() const{
+RegMySQL::initialize() const{
    if(!g_MySQLInitializer.isInitialized())
    {
       g_MySQLInitializer.setInitialized();
@@ -149,11 +148,11 @@ MySQLDB::initialize() const{
 }
 
 int
-MySQLDB::query(const Data& queryCommand, MYSQL_RES** result) const
+RegMySQL::query(const Data& queryCommand, MYSQL_RES** result) const
 {
    int rc = 0;
    initialize();
-   DebugLog( << "MySqlDb::query: executing query: " << queryCommand);
+   DebugLog( << "RegMySQL::query: executing query: " << queryCommand);
    Lock lock(mMutex);
    if(mConn == 0 || !mConnected)    rc = connectDB();
    if(rc == 0)
@@ -203,7 +202,7 @@ MySQLDB::query(const Data& queryCommand, MYSQL_RES** result) const
 }
 
 int
-MySQLDB::query(const Data& queryCommand) const
+RegMySQL::query(const Data& queryCommand) const
 {
   return query(queryCommand, 0);
 }

@@ -15,6 +15,7 @@ using namespace std;
 
 namespace registrar
 {
+  class RegMySQL;
 //  #define RESIPROCATE_SUBSYSTEM Subsystem::REGISTRAR
 
   class RegConfig : public resip::ConfigParse //not abstract class
@@ -40,6 +41,7 @@ namespace registrar
      RegConfig* mRegConfig; //read config file
      resip::SipStack* mSipStack; //sip stack
      resip::ThreadIf* mStackThread; //sip thread
+     RegMySQL* mBase; //mySQL db
 
      /*resip::FdPollGrp* mFdPollGrp;   //Polling group callback
      resip::AsyncProcessHandler* mAsyncProcessHandler;//will be invoked when Messages are posted to the stack*/

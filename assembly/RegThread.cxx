@@ -18,9 +18,10 @@ using namespace resip;
 using namespace std;
 using namespace registrar;
 
-RegThread::RegThread(SipStack& stack, Data realm)
-   : mStack(stack),
-     mNameAddr(realm)
+RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase)
+   : mStack(stack)
+   , mNameAddr(realm)
+   , mBase(mdatabase)
 {
   cout<<"RegThread constructor"<<endl;
 }
@@ -63,7 +64,7 @@ RegThread::thread()
                   {
                      NameAddr& to = received->header(h_To);
                      NameAddr& from = received->header(h_From);
-                     
+
                      //parse all contacts
                      ParserContainer<NameAddr>& contacts = received->header(h_Contacts);
                      for (ParserContainer<NameAddr>::iterator i = contacts.begin();

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "RegRunner.hxx"
 #include "RegThread.hxx"
+#include "RegMySQL.hxx"
 
 #include "resip/stack/SipStack.hxx"
 #include "resip/stack/EventStackThread.cxx"
@@ -16,6 +17,7 @@ RegRunner::RegRunner()
    , mRegConfig(0)
    , mSipStack(0)
    , mStackThread(0)
+   , mBase(0)
 {
   cout<<"RegRunner constructor"<<endl;
 }
@@ -45,6 +47,20 @@ RegRunner::run(int argc, char** argv)
      return false;
   }
 
+  //connection with bd
+  try{
+    Data dbserver = mRegConfig->getConfigData("DBServer", "localhost");
+    Data dbuser = mRegConfig->getConfigData("DBUser", "repro");
+    Data dbpassword = mRegConfig->getConfigData("DBPassword", "");
+    Data dbname = mRegConfig->getConfigData("DBName", "repro");
+    unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
+    mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
+  }
+  catch(BaseException& ex)
+  {
+       cerr << "Error connection with mysql: " << ex << endl;
+       return false;
+  }
   /* //test mRegConfig
   int port = mRegConfig->getConfigInt("Port", 5080);
   cout<<port<<endl;*/
@@ -74,7 +90,7 @@ RegRunner::run(int argc, char** argv)
     resip_assert(!mStackThread);
     //read contact
     Data realm = mRegConfig->getConfigData("Realm", "localhost");
-    mStackThread = new RegThread (*mSipStack, realm);
+    mStackThread = new RegThread (*mSipStack, realm, mBase);
 
     mSipStack->run();
     mStackThread->run();
@@ -104,6 +120,7 @@ RegRunner::shutdown()
   delete mStackThread; mStackThread = 0;
   delete mSipStack; mSipStack = 0;
   delete mRegConfig; mRegConfig = 0;
+  delete mBase; mBase = 0;
 
   mRunning = false;
 }
