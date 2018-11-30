@@ -67,9 +67,35 @@ RegDB::eraseUser(const Key& key)
 RegDB::UserRecord
 RegDB::getUser(const Key& key) const
 {
-  UserRecord user;
+  UserRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fname, fiddomain FROM tuser"
+        << " WHERE fiduser='" << key
+        << "'";
+  }
 
-  return user;
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mName            = Data(row[col++]);
+       rec.mIdDomain        = Data(row[col++]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec;
 }
 
 RegDB::UserRecordList
@@ -85,8 +111,9 @@ RegDB::getAllUsers()
   }
   return records;
 }
-
-// functions for Domain Records
+/*************************************************************************/
+/*                       DOMAIN                                          */
+/*************************************************************************/
 bool
 RegDB::addDomain(const Key& key, const DomainRecord& rec)
 {
@@ -111,7 +138,34 @@ RegDB::eraseDomain(const Key& key)
 RegDB::DomainRecord
 RegDB::getDomain(const Key& key) const
 {
+  DomainRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fdomain FROM tdomain"
+        << " WHERE fiddomain='" << key
+        << "'";
+  }
 
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mDomain          = Data(row[col++]);
+   }
+  mysql_free_result(result);
+  return rec;
 }
 
 RegDB::DomainRecordList
@@ -128,8 +182,9 @@ RegDB::getAllDomains()
   return records;
 }
 
-
-// functions for Protocol Records
+/*************************************************************************/
+/*                        PROTOCOL                                       */
+/*************************************************************************/
 bool
 RegDB::addProtocol(const Key& key, const ProtocolRecord& rec)
 {
@@ -155,7 +210,34 @@ RegDB::eraseProtocol(const Key& key)
 RegDB::ProtocolRecord
 RegDB::getProtocol(const Key& key) const
 {
+  ProtocolRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fprotocol FROM tprotocol"
+        << " WHERE fidprotocol='" << key
+        << "'";
+  }
 
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mProtocol            = Data(row[col++]);
+   }
+  mysql_free_result(result);
+  return rec;
 }
 
 RegDB::ProtocolRecordList
@@ -171,8 +253,9 @@ RegDB::getAllProtocols()
   }
   return records;
 }
-
-// functions for Forward Records
+/*************************************************************************/
+/*                        FORWARD                                        */
+/*************************************************************************/
 bool
 RegDB::addForward(const Key& key, const ForwardRecord& rec)
 {
@@ -204,7 +287,37 @@ RegDB::eraseForward(const Key& key)
 RegDB::ForwardRecord
 RegDB::getForward(const Key& key) const
 {
+  ForwardRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidprotocol, faddres, fip, fport FROM tforward"
+        << " WHERE fidforward='" << key
+        << "'";
+  }
 
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdProtocol            = Data(row[col++]).convertInt();
+       rec.mAddress               = Data(row[col++]);
+       rec.mIP                    = Data(row[col++]);
+       rec.mPort                  = Data(row[col++]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec;
 }
 
 RegDB::ForwardRecordList
@@ -220,8 +333,9 @@ RegDB::getAllForwards()
   }
   return records;
 }
-
-// functions for Authorization Records
+/*************************************************************************/
+/*                        AUTHORIZATION                                  */
+/*************************************************************************/
 bool
 RegDB::addAuthorization(const Key& key, const AuthorizationRecord& rec)
 {
@@ -251,7 +365,36 @@ RegDB::eraseAuthorization(const Key& key)
 RegDB::AuthorizationRecord
 RegDB::getAuthorization(const Key& key) const
 {
+  AuthorizationRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fiduser, fiddomain, fpassword FROM tauthorization"
+        << " WHERE fidaut='" << key
+        << "'";
+  }
 
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdUser            = Data(row[col++]).convertInt();
+       rec.mIdDomain          = Data(row[col++]).convertInt();
+       rec.mPassword          = Data(row[col++]);
+   }
+  mysql_free_result(result);
+  return rec;
 }
 
 RegDB::AuthorizationRecordList
@@ -268,7 +411,9 @@ RegDB::getAllAuthorizations()
   return records;
 }
 
-// functions for Registrar Records
+/*************************************************************************/
+/*                        REGISTRAR                                      */
+/*************************************************************************/
 bool
 RegDB::addRegistrar(const Key& key, const RegistrarRecord& rec)
 {
@@ -298,7 +443,36 @@ RegDB::eraseRegistrar(const Key& key)
 RegDB::RegistrarRecord
 RegDB::getRegistrar(const Key& key) const
 {
+  RegistrarRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fiduser, fiddomain, fidmain FROM tregistrar"
+        << " WHERE fidreg='" << key
+        << "'";
+  }
 
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdUser            = Data(row[col++]).convertInt();
+       rec.mIdDomain          = Data(row[col++]).convertInt();
+       rec.mIdMain            = Data(row[col++]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec;
 }
 
 RegDB::RegistrarRecordList
@@ -314,8 +488,9 @@ RegDB::getAllRegistrars()
   }
   return records;
 }
-
-// functions for Route Records
+/*************************************************************************/
+/*                        ROUTE                                          */
+/*************************************************************************/
 bool
 RegDB::addRoute(const Key& key, const RouteRecord& rec)
 {
@@ -347,7 +522,37 @@ RegDB::eraseRoute(const Key& key)
 RegDB::RouteRecord
 RegDB::getRoute(const Key& key) const
 {
+  RouteRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidreg, fidforward, ftime, fexpires FROM troute"
+        << " WHERE fidroute='" << key
+        << "'";
+  }
 
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+   }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdReg              = Data(row[col++]).convertInt();
+       rec.mIdForward          = Data(row[col++]).convertInt();
+       rec.mTime               = Data(row[col++]);
+       rec.mExpires            = Data(row[col++]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec;
 }
 
 RegDB::RouteRecordList
@@ -375,7 +580,7 @@ RegDB::dbEraseRecord(const Table table,
      DataStream ds(command);
      Data escapedKey;
      ds << "DELETE FROM " << tableName[table];
-     ds << " WHERE id='" << key << "'";
+     ds << " WHERE "<< keyName[table]<<"='" << key << "'";
   }
   query(command);
 }

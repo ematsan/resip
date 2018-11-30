@@ -139,6 +139,8 @@ class RegDB{
 
     const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidforward",
         "fidprotocol", "fidauthorization", "fidregistrar", "fidroute"};
+
+    mutable MYSQL* mConn;        
     // Db manipulation routines
     /*virtual bool dbWriteRecord(const Table table,
                            const resip::Data& pKey,
