@@ -50,9 +50,9 @@ RegRunner::run(int argc, char** argv)
   //connection with bd
   try{
     Data dbserver = mRegConfig->getConfigData("DBServer", "localhost");
-    Data dbuser = mRegConfig->getConfigData("DBUser", "repro");
+    Data dbuser = mRegConfig->getConfigData("DBUser", "registrar");
     Data dbpassword = mRegConfig->getConfigData("DBPassword", "");
-    Data dbname = mRegConfig->getConfigData("DBName", "repro");
+    Data dbname = mRegConfig->getConfigData("DBName", "registrar");
     unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
     mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
   }
@@ -61,6 +61,8 @@ RegRunner::run(int argc, char** argv)
        cerr << "Error connection with mysql: " << ex << endl;
        return false;
   }
+
+
   /* //test mRegConfig
   int port = mRegConfig->getConfigInt("Port", 5080);
   cout<<port<<endl;*/

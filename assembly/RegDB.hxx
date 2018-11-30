@@ -15,18 +15,21 @@ class RegDB{
   public:
     struct UserRecord
     {
-          resip::Data mUser;
-          resip::Data mDomain;
+          unsigned int mIdUser;
+          resip::Data mName;
+          unsigned int mIdDomain;
     };
 
-    struct RealmRecord
+    struct DomainRecord
     {
+          unsigned int mIdDomain;
           resip::Data mDomain;
     };
 
     struct ForwardRecord
     {
-          resip::Data mProtocol;
+          unsigned int mIdForward;
+          unsigned int mIdProtocol;
           resip::Data mAddress;
           resip::Data mIP;
           unsigned int mPort;
@@ -34,35 +37,88 @@ class RegDB{
 
     struct ProtocolRecord
     {
+          unsigned int mIdProtocol;
           resip::Data mProtocol;
     };
 
+    struct AuthorizationRecord
+    {
+          unsigned int mIdAuth;
+          unsigned int mIdUser;
+          unsigned int mIdDomain;
+          resip::Data mPassword;
+    };
+
+    struct RegistrarRecord
+    {
+          unsigned int mIdReg;
+          unsigned int mIdUser;
+          unsigned int mIdDomain;
+          unsigned int mIdMain;
+    };
+
+    struct RouteRecord
+    {
+          unsigned int mIdRoute;
+          unsigned int mIdReg;
+          unsigned int mIdForward;
+          resip::Data mTime;
+          unsigned int mExpires;
+    };
+
+
+
     typedef resip::Data Key;
     typedef vector<UserRecord> UserRecordList;
+    typedef vector<DomainRecord> DomainRecordList;
+    typedef vector<ForwardRecord> ForwardRecordList;
+    typedef vector<ProtocolRecord> ProtocolRecordList;
+    typedef vector<AuthorizationRecord> AuthorizationRecordList;
+    typedef vector<RegistrarRecord> RegistrarRecordList;
+    typedef vector<RouteRecord> RouteRecordList;
 
     // functions for User Records
     virtual bool addUser(const Key& key, const UserRecord& rec);
     virtual void eraseUser(const Key& key);
-    /*virtual UserRecord getUser(const Key& key) const;
-    virtual resip::Data getUserAuthInfo(const Key& key) const;
-    virtual Key firstUserKey();// return empty if no more
-    virtual Key nextUserKey(); // return empty if no more
+    virtual UserRecord getUser(const Key& key) const;
+    virtual UserRecordList getAllUsers();
+
+    // functions for Domain Records
+    virtual bool addDomain(const Key& key, const DomainRecord& rec);
+    virtual void eraseDomain(const Key& key);
+    virtual DomainRecord getDomain(const Key& key) const;
+    virtual DomainRecordList getAllDomains();
+
+    // functions for Protocol Records
+    virtual bool addProtocol(const Key& key, const ProtocolRecord& rec);
+    virtual void eraseProtocol(const Key& key);
+    virtual ProtocolRecord getProtocol(const Key& key) const;
+    virtual ProtocolRecordList getAllProtocol();
+
+    // functions for Forward Records
+    virtual bool addForward(const Key& key, const ForwardRecord& rec);
+    virtual void eraseForward(const Key& key);
+    virtual ForwardRecord getForward(const Key& key) const;
+    virtual ForwardRecordList getAllForwards();
+
+    // functions for Authorization Records
+    virtual bool addAuthorization(const Key& key, const AuthorizationRecord& rec);
+    virtual void eraseAuthorization(const Key& key);
+    virtual AuthorizationRecord getAuthorization(const Key& key) const;
+    virtual AuthorizationRecordList getAllAuthorizations();
+
+    // functions for Registrar Records
+    virtual bool addRegistrar(const Key& key, const RegistrarRecord& rec);
+    virtual void eraseRegistrar(const Key& key);
+    virtual RegistrarRecord getRegistrar(const Key& key) const;
+    virtual RegistrarRecordList getAllRegistrars();
 
     // functions for Route Records
     virtual bool addRoute(const Key& key, const RouteRecord& rec);
     virtual void eraseRoute(const Key& key);
     virtual RouteRecord getRoute(const Key& key) const;
     virtual RouteRecordList getAllRoutes();
-    virtual Key firstRouteKey();// return empty if no more
-    virtual Key nextRouteKey(); // return empty if no more
 
-    // functions for Config Records
-    virtual bool addConfig(const Key& key, const ConfigRecord& rec);
-    virtual void eraseConfig(const Key& key);
-    virtual ConfigRecordList getAllConfigs();
-    virtual ConfigRecord getConfig(const Key& key) const;
-    virtual Key firstConfigKey();// return empty if no more
-    virtual Key nextConfigKey(); // return empty if no more*/
 
   protected:
 
@@ -72,10 +128,14 @@ class RegDB{
       RealmTable,
       ForwardTable,
       ProtocolTable,
+      AuthorizationTable,
+      RegistrarTable,
+      RouteTable,
       MaxTable  // This one MUST be last
     } Table;
 
-    const char tableName[MaxTable][20] = {"tUser", "tRealm", "tForward", "tProtocol"};
+    const char tableName[MaxTable][20] = {"tuser", "tdomain", "tforward",
+      "tprotocol", "tauthorization", "tregistrar", "troute"};
 
     // Db manipulation routines
     /*virtual bool dbWriteRecord(const Table table,
