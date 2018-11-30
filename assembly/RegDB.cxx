@@ -45,14 +45,14 @@ RegDB::addUser(const Key& key, const UserRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tusers (fname, fid_domain)"
+     ds << "INSERT INTO tuser (fname, fiddomain)"
         << " VALUES('"
-        << rec.mName << "', '"
-        << rec.mIdDomain << "')"
+        << rec.mName << "', "
+        << rec.mIdDomain << ")"
         << " ON DUPLICATE KEY UPDATE"
-        << " fuser='" << rec.mName
-        << "', fid_domain='" << rec.mIdDomain
-        << "'";
+        << " fname='" << rec.mName
+        << "', fiddomain=" << rec.mIdDomain
+        << "";
   }
   return query(command, 0) == 0;
 }
@@ -61,7 +61,7 @@ RegDB::addUser(const Key& key, const UserRecord& rec)
 void
 RegDB::eraseUser(const Key& key)
 {
-  dbEraseRecord( UserTable, key);
+  dbEraseRecord(UserTable, key);
 }
 
 RegDB::UserRecord
@@ -82,12 +82,22 @@ RegDB::getAllUsers()
 bool
 RegDB::addDomain(const Key& key, const DomainRecord& rec)
 {
-  return true;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO tdomain (fdomain)"
+        << " VALUES('"
+        << rec.mDomain << "')"
+        << " ON DUPLICATE KEY UPDATE"
+        << " fdomain='" << rec.mDomain
+        << "'";
+  }
+  return query(command, 0) == 0;
 }
 void
 RegDB::eraseDomain(const Key& key)
 {
-
+  dbEraseRecord(DomainTable, key);
 }
 
 RegDB::DomainRecord
@@ -107,13 +117,23 @@ RegDB::getAllDomains()
 bool
 RegDB::addProtocol(const Key& key, const ProtocolRecord& rec)
 {
-
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO tprotocol (fprotocol)"
+        << " VALUES('"
+        << rec.mProtocol << "')"
+        << " ON DUPLICATE KEY UPDATE"
+        << " fprotocol='" << rec.mProtocol
+        << "'";
+  }
+  return query(command, 0) == 0;
 }
 
 void
 RegDB::eraseProtocol(const Key& key)
 {
-
+  dbEraseRecord(ProtocolTable, key);
 }
 
 RegDB::ProtocolRecord
@@ -132,13 +152,29 @@ RegDB::getAllProtocol()
 bool
 RegDB::addForward(const Key& key, const ForwardRecord& rec)
 {
-
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO tforward (fidprotocol, faddress, fip, fport)"
+        << " VALUES("
+        << rec.mIdProtocol << ", '"
+        << rec.mAddress << "', '"
+        << rec.mIP << "', "
+        << rec.mPort << ")"
+        << " ON DUPLICATE KEY UPDATE"
+        << " fidprotocol=" << rec.mIdProtocol
+        << ", faddress='" << rec.mAddress
+        << "', fip='" << rec.mIP
+        << "', fport=" << rec.mPort
+        << "";
+  }
+  return query(command, 0) == 0;
 }
 
 void
 RegDB::eraseForward(const Key& key)
 {
-
+  dbEraseRecord(ForwardTable, key);
 }
 
 RegDB::ForwardRecord
@@ -157,13 +193,27 @@ RegDB::getAllForwards()
 bool
 RegDB::addAuthorization(const Key& key, const AuthorizationRecord& rec)
 {
-
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO tauthorization (fiduser, fiddomain, fpassword)"
+        << " VALUES("
+        << rec.mIdUser << ", "
+        << rec.mIdDomain << ", '"
+        << rec.mPassword << "')"
+        << " ON DUPLICATE KEY UPDATE"
+        << " fiduser=" << rec.mIdUser
+        << ", fiddomain=" << rec.mIdDomain
+        << ", fpassword='" << rec.mPassword
+        << "'";
+  }
+  return query(command, 0) == 0;
 }
 
 void
 RegDB::eraseAuthorization(const Key& key)
 {
-
+    dbEraseRecord(AuthorizationTable, key);
 }
 
 RegDB::AuthorizationRecord
@@ -182,13 +232,27 @@ RegDB::getAllAuthorizations()
 bool
 RegDB::addRegistrar(const Key& key, const RegistrarRecord& rec)
 {
-
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO tregistrar (fiduser, fiddomain, fidmain)"
+        << " VALUES("
+        << rec.mIdUser << ", "
+        << rec.mIdDomain << ", "
+        << rec.mIdMain << ")"
+        << " ON DUPLICATE KEY UPDATE"
+        << " fiduser=" << rec.mIdUser
+        << ", fiddomain=" << rec.mIdDomain
+        << ", fidmain=" << rec.mIdMain
+        << "";
+  }
+  return query(command, 0) == 0;
 }
 
 void
 RegDB::eraseRegistrar(const Key& key)
 {
-
+  dbEraseRecord(RegistrarTable, key);
 }
 
 RegDB::RegistrarRecord
@@ -207,13 +271,29 @@ RegDB::getAllRegistrars()
 bool
 RegDB::addRoute(const Key& key, const RouteRecord& rec)
 {
-
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO troute (fidreg, fidforward, ftime, fexpires)"
+        << " VALUES("
+        << rec.mIdReg << ", "
+        << rec.mIdForward << ", '"
+        << rec.mTime << "', "
+        << rec.mExpires << ")"
+        << " ON DUPLICATE KEY UPDATE"
+        << " fidreg=" << rec.mIdReg
+        << ", fidforward=" << rec.mIdForward
+        << ", ftime='" << rec.mTime
+        << "', fexpires=" << rec.mExpires
+        << "";
+  }
+  return query(command, 0) == 0;
 }
 
 void
 RegDB::eraseRoute(const Key& key)
 {
-
+  dbEraseRecord(RouteTable, key);
 }
 
 RegDB::RouteRecord
@@ -225,7 +305,7 @@ RegDB::getRoute(const Key& key) const
 RegDB::RouteRecordList
 RegDB::getAllRoutes()
 {
-  
+
 }
 
 /*****************************************************************************/

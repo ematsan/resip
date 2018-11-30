@@ -125,7 +125,7 @@ class RegDB{
     typedef enum
     {
       UserTable=0,
-      RealmTable,
+      DomainTable,
       ForwardTable,
       ProtocolTable,
       AuthorizationTable,
