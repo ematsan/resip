@@ -93,7 +93,7 @@ class RegDB{
     virtual bool addProtocol(const Key& key, const ProtocolRecord& rec);
     virtual void eraseProtocol(const Key& key);
     virtual ProtocolRecord getProtocol(const Key& key) const;
-    virtual ProtocolRecordList getAllProtocol();
+    virtual ProtocolRecordList getAllProtocols();
 
     // functions for Forward Records
     virtual bool addForward(const Key& key, const ForwardRecord& rec);
@@ -137,6 +137,8 @@ class RegDB{
     const char tableName[MaxTable][20] = {"tuser", "tdomain", "tforward",
       "tprotocol", "tauthorization", "tregistrar", "troute"};
 
+    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidforward",
+        "fidprotocol", "fidauthorization", "fidregistrar", "fidroute"};
     // Db manipulation routines
     /*virtual bool dbWriteRecord(const Table table,
                            const resip::Data& pKey,
@@ -148,6 +150,10 @@ class RegDB{
     // allows deleting records from a table that supports secondary keying using a secondary key
     virtual void dbEraseRecord(const Table table,
                                const resip::Data& key);
+
+    virtual resip::Data dbKey(const Table table,
+                               bool first=false) = 0; // return empty if no more
+
 
     virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const = 0;
     virtual int query(const resip::Data& queryCommand) const = 0;

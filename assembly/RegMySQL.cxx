@@ -167,7 +167,63 @@ RegMySQL::dbReadRecord(const Table table,
 {
   return true;
 }*/
-// allows deleting records from a table that supports secondary keying using a secondary key
+//find keys
+// return empty if no more
+resip::Data
+RegMySQL::dbKey(const Table table,
+                bool first=false)
+{
+  //if first select
+  if(first)
+  {
+     // free memory from previous search
+     if (mResult[table])
+     {
+        mysql_free_result(mResult[table]);
+        mResult[table] = 0;
+     }
+
+     Data command;
+     {
+        DataStream ds(command);
+        ds << "SELECT "<<keyName[table] <<" FROM " << tableName[table];
+     }
+
+     if(query(command, &mResult[table]) != 0)
+     {
+        return Data::Empty;
+     }
+
+     if (mResult[table] == 0)
+     {
+        ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+        return Data::Empty;
+     }
+  }
+  else
+  {
+     //if we have no more result
+     if (mResult[table] == 0)
+     {
+        return Data::Empty;
+     }
+  }
+
+  //select next resalt
+  MYSQL_ROW row = mysql_fetch_row(mResult[table]);
+  //if empty
+  if (!row)
+  {
+     mysql_free_result(mResult[table]);
+     mResult[table] = 0;
+     return Data::Empty;
+  }
+
+  return Data(row[0]);
+}
+
+
+
 
 /*************************************************************************/
 /*                        query                                          */

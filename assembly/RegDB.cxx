@@ -68,14 +68,22 @@ RegDB::UserRecord
 RegDB::getUser(const Key& key) const
 {
   UserRecord user;
+
   return user;
 }
 
 RegDB::UserRecordList
 RegDB::getAllUsers()
 {
-  UserRecordList users;
-  return users;
+  UserRecordList records;
+  Key key = dbKey(UserTable, true);
+  while ( !key.empty() )
+  {
+     UserRecord rec = getUser(key);
+     records.push_back(rec);
+     key = dbKey(UserTable, false);
+  }
+  return records;
 }
 
 // functions for Domain Records
@@ -109,7 +117,15 @@ RegDB::getDomain(const Key& key) const
 RegDB::DomainRecordList
 RegDB::getAllDomains()
 {
-
+  DomainRecordList records;
+  Key key = dbKey(DomainTable, true);
+  while ( !key.empty() )
+  {
+     DomainRecord rec = getDomain(key);
+     records.push_back(rec);
+     key = dbKey(DomainTable, false);
+  }
+  return records;
 }
 
 
@@ -143,9 +159,17 @@ RegDB::getProtocol(const Key& key) const
 }
 
 RegDB::ProtocolRecordList
-RegDB::getAllProtocol()
+RegDB::getAllProtocols()
 {
-
+  ProtocolRecordList records;
+  Key key = dbKey(ProtocolTable, true);
+  while ( !key.empty() )
+  {
+     ProtocolRecord rec = getProtocol(key);
+     records.push_back(rec);
+     key = dbKey(ProtocolTable, false);
+  }
+  return records;
 }
 
 // functions for Forward Records
@@ -186,7 +210,15 @@ RegDB::getForward(const Key& key) const
 RegDB::ForwardRecordList
 RegDB::getAllForwards()
 {
-
+  ForwardRecordList records;
+  Key key = dbKey(ForwardTable, true);
+  while ( !key.empty() )
+  {
+     ForwardRecord rec = getForward(key);
+     records.push_back(rec);
+     key = dbKey(ForwardTable, false);
+  }
+  return records;
 }
 
 // functions for Authorization Records
@@ -225,7 +257,15 @@ RegDB::getAuthorization(const Key& key) const
 RegDB::AuthorizationRecordList
 RegDB::getAllAuthorizations()
 {
-
+  AuthorizationRecordList records;
+  Key key = dbKey(AuthorizationTable, true);
+  while ( !key.empty() )
+  {
+     AuthorizationRecord rec = getAuthorization(key);
+     records.push_back(rec);
+     key = dbKey(AuthorizationTable, false);
+  }
+  return records;
 }
 
 // functions for Registrar Records
@@ -264,7 +304,15 @@ RegDB::getRegistrar(const Key& key) const
 RegDB::RegistrarRecordList
 RegDB::getAllRegistrars()
 {
-
+  RegistrarRecordList records;
+  Key key = dbKey(RegistrarTable, true);
+  while ( !key.empty() )
+  {
+     RegistrarRecord rec = getRegistrar(key);
+     records.push_back(rec);
+     key = dbKey(RegistrarTable, false);
+  }
+  return records;
 }
 
 // functions for Route Records
@@ -305,7 +353,15 @@ RegDB::getRoute(const Key& key) const
 RegDB::RouteRecordList
 RegDB::getAllRoutes()
 {
-
+  RouteRecordList records;
+  Key key = dbKey(RouteTable, true);
+  while ( !key.empty() )
+  {
+     RouteRecord rec = getRoute(key);
+     records.push_back(rec);
+     key = dbKey(RouteTable, false);
+  }
+  return records;
 }
 
 /*****************************************************************************/
