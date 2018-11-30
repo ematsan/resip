@@ -105,7 +105,6 @@ main(int argc, char* argv[])
    SipStack stack;
    //read preference
 
-
    //connect mySQL
 
    //read protocol and port from property
@@ -115,6 +114,7 @@ main(int argc, char* argv[])
    protocol = TCP;
    port = 5070;
    stack.addTransport(protocol, port);
+
    //read contact
    NameAddr contact;
    contact.uri().scheme() = "sip";

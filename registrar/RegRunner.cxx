@@ -340,7 +340,7 @@ RegRunner::createSipStack()
                             0,
                             compression,
                             mFdPollGrp);
-
+//cout<<"\n\n\n\n\n\nTETETETETET\n\n\n\n\n\n\n"<<endl;
    // Set any enum suffixes from configuration
   /* std::vector<Data> enumSuffixes;
    mRegConfig->getConfigValue("EnumSuffixes", enumSuffixes);
@@ -491,7 +491,6 @@ RegRunner::addTransports(bool& allTransportsSpecifyRecordRoute)
 {
    resip_assert(mRegConfig);
    resip_assert(mSipStack);
-
    try
    {
        Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);

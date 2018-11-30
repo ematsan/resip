@@ -3,8 +3,8 @@ RPATH=-Wl,-rpath=../lib
 
 all: client server
 
-lib: testServer.cxx
-	g++ -c -g -I.. $(RPATH)  RegRunner.cxx -o regrunner.o $(LIB)
+lib: testServerReg.cxx
+	g++ -c -g -I.. $(RPATH)  testServerReg.cxx -o regrunner.o $(LIB)
 server: testServerReg.cxx
 	g++ -g -I.. $(RPATH)  testServerReg.cxx -o server $(LIB)
 client: testClientReg.cxx

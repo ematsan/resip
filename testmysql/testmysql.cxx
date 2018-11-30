@@ -241,6 +241,7 @@ main(int argc, char* argv[])
   //read data from config file
   MySQLDB* base = new MySQLDB("localhost","repro","Net0Par0!ya","repro",3306);
   MYSQL_RES* result=0;
+  
   Data str = "SELECT * FROM users";
 
   if(base->query(str, &result) != 0)
