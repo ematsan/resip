@@ -4,6 +4,8 @@
 #include "rutil/ThreadIf.hxx"
 #include "resip/stack/NameAddr.hxx"
 
+#include "RegDB.hxx"
+
 #define RESIPROCATE_SUBSYSTEM Subsystem::TEST
 
 namespace resip
@@ -31,13 +33,23 @@ class RegThread : public resip::ThreadIf
       resip::Data mNameAddr;
       RegMySQL* mBase;
 
+      void analisysRequest(resip::SipMessage* sip);
 
       void send200(resip::SipMessage* sip, resip::NameAddr add);
+      void send400(resip::SipMessage* sip);      
       void send401(resip::SipMessage* sip);
       void send403(resip::SipMessage* sip, resip::Data meth);
       void send405(resip::SipMessage* sip, resip::Data meth);
 
       void loadData();
+      RegDB::UserRecordList ulist;
+      RegDB::DomainRecordList dlist;
+      RegDB::ForwardRecordList flist;
+      RegDB::ProtocolRecordList plist;
+      RegDB::AuthorizationRecordList alist;
+      RegDB::RegistrarRecordList reglist;
+      RegDB::RouteRecordList rlist;
+
 };
 }
 #endif

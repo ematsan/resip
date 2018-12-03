@@ -48,11 +48,7 @@ RegDB::addUser(const Key& key, const UserRecord& rec)
      ds << "INSERT INTO tuser (fname, fiddomain)"
         << " VALUES('"
         << rec.mName << "', "
-        << rec.mIdDomain << ")"
-        << " ON DUPLICATE KEY UPDATE"
-        << " fname='" << rec.mName
-        << "', fiddomain=" << rec.mIdDomain
-        << "";
+        << rec.mIdDomain << ")";
   }
   return query(command, 0) == 0;
 }
@@ -91,6 +87,7 @@ RegDB::getUser(const Key& key) const
   if(row)
    {
        int col = 0;
+       rec.mIdUser          = Data(key).convertInt();
        rec.mName            = Data(row[col++]);
        rec.mIdDomain        = Data(row[col++]).convertInt();
    }
@@ -120,12 +117,10 @@ RegDB::addDomain(const Key& key, const DomainRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tdomain (fdomain)"
+     ds << "INSERT INTO tdomain (fdomain, fidrealm)"
         << " VALUES('"
-        << rec.mDomain << "')"
-        << " ON DUPLICATE KEY UPDATE"
-        << " fdomain='" << rec.mDomain
-        << "'";
+        << rec.mDomain << ","
+        << rec.mIdRealm<<"')";
   }
   return query(command, 0) == 0;
 }
@@ -142,7 +137,7 @@ RegDB::getDomain(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fdomain FROM tdomain"
+     ds << "SELECT fdomain, fidrealm FROM tdomain"
         << " WHERE fiddomain='" << key
         << "'";
   }
@@ -162,7 +157,9 @@ RegDB::getDomain(const Key& key) const
   if(row)
    {
        int col = 0;
+       rec.mIdDomain          = Data(key).convertInt();
        rec.mDomain          = Data(row[col++]);
+       rec.mIdRealm          = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
   return rec;
@@ -181,7 +178,74 @@ RegDB::getAllDomains()
   }
   return records;
 }
+/*************************************************************************/
+/*                       REALM                                         */
+/*************************************************************************/
+bool
+RegDB::addRealm(const Key& key, const RealmRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO trealm (frealm)"
+        << " VALUES('"
+        << rec.mRealm << "')";
+  }
+  return query(command, 0) == 0;
+}
+void
+RegDB::eraseRealm(const Key& key)
+{
+  dbEraseRecord(RealmTable, key);
+}
 
+RegDB::RealmRecord
+RegDB::getRealm(const Key& key) const
+{
+  RealmRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT frealm FROM trealm"
+        << " WHERE fidrealm='" << key
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdRealm = Data(key).convertInt();
+       rec.mRealm          = Data(row[col++]);
+   }
+  mysql_free_result(result);
+  return rec;
+}
+
+RegDB::RealmRecordList
+RegDB::getAllRealms()
+{
+  RealmRecordList records;
+  Key key = dbKey(RealmTable, true);
+  while ( !key.empty() )
+  {
+     RealmRecord rec = getRealm(key);
+     records.push_back(rec);
+     key = dbKey(RealmTable, false);
+  }
+  return records;
+}
 /*************************************************************************/
 /*                        PROTOCOL                                       */
 /*************************************************************************/
@@ -193,11 +257,8 @@ RegDB::addProtocol(const Key& key, const ProtocolRecord& rec)
      DataStream ds(command);
      ds << "INSERT INTO tprotocol (fprotocol)"
         << " VALUES('"
-        << rec.mProtocol << "')"
-        << " ON DUPLICATE KEY UPDATE"
-        << " fprotocol='" << rec.mProtocol
-        << "'";
-  }
+        << rec.mProtocol << "')";
+    }
   return query(command, 0) == 0;
 }
 
@@ -234,6 +295,7 @@ RegDB::getProtocol(const Key& key) const
   if(row)
    {
        int col = 0;
+       rec.mIdProtocol          = Data(key).convertInt();
        rec.mProtocol            = Data(row[col++]);
    }
   mysql_free_result(result);
@@ -267,13 +329,7 @@ RegDB::addForward(const Key& key, const ForwardRecord& rec)
         << rec.mIdProtocol << ", '"
         << rec.mAddress << "', '"
         << rec.mIP << "', "
-        << rec.mPort << ")"
-        << " ON DUPLICATE KEY UPDATE"
-        << " fidprotocol=" << rec.mIdProtocol
-        << ", faddress='" << rec.mAddress
-        << "', fip='" << rec.mIP
-        << "', fport=" << rec.mPort
-        << "";
+        << rec.mPort << ")";
   }
   return query(command, 0) == 0;
 }
@@ -311,6 +367,7 @@ RegDB::getForward(const Key& key) const
   if(row)
    {
        int col = 0;
+       rec.mIdForward            = Data(key).convertInt();
        rec.mIdProtocol            = Data(row[col++]).convertInt();
        rec.mAddress               = Data(row[col++]);
        rec.mIP                    = Data(row[col++]);
@@ -342,16 +399,11 @@ RegDB::addAuthorization(const Key& key, const AuthorizationRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tauthorization (fiduser, fiddomain, fpassword)"
+     ds << "INSERT INTO tauthorization (fiduser, fidrealm, fpassword)"
         << " VALUES("
         << rec.mIdUser << ", "
-        << rec.mIdDomain << ", '"
-        << rec.mPassword << "')"
-        << " ON DUPLICATE KEY UPDATE"
-        << " fiduser=" << rec.mIdUser
-        << ", fiddomain=" << rec.mIdDomain
-        << ", fpassword='" << rec.mPassword
-        << "'";
+        << rec.mIdRealm << ", '"
+        << rec.mPassword << "')";
   }
   return query(command, 0) == 0;
 }
@@ -369,7 +421,7 @@ RegDB::getAuthorization(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiduser, fiddomain, fpassword FROM tauthorization"
+     ds << "SELECT fiduser, fidrealm, fpassword FROM tauthorization"
         << " WHERE fidauth='" << key
         << "'";
   }
@@ -390,7 +442,7 @@ RegDB::getAuthorization(const Key& key) const
    {
        int col = 0;
        rec.mIdUser            = Data(row[col++]).convertInt();
-       rec.mIdDomain          = Data(row[col++]).convertInt();
+       rec.mIdRealm         = Data(row[col++]).convertInt();
        rec.mPassword          = Data(row[col++]);
    }
   mysql_free_result(result);
@@ -420,16 +472,13 @@ RegDB::addRegistrar(const Key& key, const RegistrarRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tregistrar (fiduser, fiddomain, fidmain)"
+     ds << "INSERT INTO tregistrar (fiduser, fiddomain, fcallid, fidmain)"
         << " VALUES("
         << rec.mIdUser << ", "
         << rec.mIdDomain << ", "
-        << rec.mIdMain << ")"
-        << " ON DUPLICATE KEY UPDATE"
-        << " fiduser=" << rec.mIdUser
-        << ", fiddomain=" << rec.mIdDomain
-        << ", fidmain=" << rec.mIdMain
-        << "";
+        << rec.mCallId<<", "
+        << rec.mIdMain << ")";
+
   }
   return query(command, 0) == 0;
 }
@@ -447,7 +496,7 @@ RegDB::getRegistrar(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiduser, fiddomain, fidmain FROM tregistrar"
+     ds << "SELECT fiduser, fiddomain, fcallid, fidmain FROM tregistrar"
         << " WHERE fidreg='" << key
         << "'";
   }
@@ -467,8 +516,10 @@ RegDB::getRegistrar(const Key& key) const
   if(row)
    {
        int col = 0;
+       rec.mIdReg             = Data(key).convertInt();
        rec.mIdUser            = Data(row[col++]).convertInt();
        rec.mIdDomain          = Data(row[col++]).convertInt();
+       rec.mCallId            = Data(row[col++]);
        rec.mIdMain            = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
@@ -502,13 +553,7 @@ RegDB::addRoute(const Key& key, const RouteRecord& rec)
         << rec.mIdReg << ", "
         << rec.mIdForward << ", '"
         << rec.mTime << "', "
-        << rec.mExpires << ")"
-        << " ON DUPLICATE KEY UPDATE"
-        << " fidreg=" << rec.mIdReg
-        << ", fidforward=" << rec.mIdForward
-        << ", ftime='" << rec.mTime
-        << "', fexpires=" << rec.mExpires
-        << "";
+        << rec.mExpires << ")";
   }
   return query(command, 0) == 0;
 }
@@ -546,6 +591,7 @@ RegDB::getRoute(const Key& key) const
   if(row)
    {
        int col = 0;
+       rec.mIdRoute            = Data(key).convertInt();
        rec.mIdReg              = Data(row[col++]).convertInt();
        rec.mIdForward          = Data(row[col++]).convertInt();
        rec.mTime               = Data(row[col++]);

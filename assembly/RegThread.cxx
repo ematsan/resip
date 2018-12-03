@@ -26,12 +26,33 @@ RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase)
    , mBase(mdatabase)
 {
   cout<<"RegThread constructor"<<endl;
+  //select all data
+  loadData();
 }
 
 
 RegThread::~RegThread()
 {
    cout<<"RegThread destructor"<<endl;
+}
+
+void
+RegThread::loadData()
+{
+  ulist = mBase->getAllUsers();
+  if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
+  dlist = mBase->getAllDomains();
+  if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
+  flist = mBase->getAllForwards();
+  if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
+  plist = mBase->getAllProtocols();
+  if (plist.empty())  { ErrLog(<< "No element in table tProtocol"); }
+  alist = mBase->getAllAuthorizations();
+  if (alist.empty()) { ErrLog(<< "No element in table tAuthorization");}
+  reglist = mBase->getAllRegistrars();
+  if (reglist.empty()) { ErrLog(<< "No element in table tRegistrar"); }
+  rlist = mBase->getAllRoutes();
+  if (rlist.empty()) { ErrLog(<< "No element in table tRoute"); }
 }
 
 void
@@ -55,40 +76,14 @@ RegThread::thread()
         {
           //NameAddrs& contacts = received->header(h_Contacts);
           //ExpiresCategory& expires = received->header(h_Expires);
-
           if (received->exists(h_Authorizations))
            {
-            Auths& auth =  received->header(h_Authorizations);
-            //test authorization
-            if(received->exists(h_Contacts))
-                  {
-                     NameAddr& to = received->header(h_To);
-                     NameAddr& from = received->header(h_From);
-                     //select all data
-                     loadData();
-
-                     /*for(RegDB::AuthorizationRecord auth: alist){
-                       cout<<"\n\n\n\n\n"<<auth.mIdDomain<<"\n\n\n\n\n";
-                     }*/
-                     //parse all contacts
-                     ParserContainer<NameAddr>& contacts = received->header(h_Contacts);
-                     for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
-                             {
-                              /* auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, *i));
-                               mStack.send(*msg200);
-                               InfoLog(<< "Sent 200 to REGISTER");*/
-                               /*NameAddr add = *i;
-                               send200(received, &add);*/
-                               send200(received, *i);
-                             }
-                  }
-
+              analisysRequest(received);
           }
           else
           {
               send401(received);
           }
-
        }
        else
        {
@@ -98,25 +93,38 @@ RegThread::thread()
   }
 }
 
-
 void
-RegThread::loadData()
+RegThread::analisysRequest(resip::SipMessage* sip)
 {
-  RegDB::UserRecordList ulist = mBase->getAllUsers();
-  if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
-  RegDB::DomainRecordList dlist = mBase->getAllDomains();
-  if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
-  RegDB::ForwardRecordList flist = mBase->getAllForwards();
-  if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
-  RegDB::ProtocolRecordList plist = mBase->getAllProtocols();
-  if (plist.empty())  { ErrLog(<< "No element in table tProtocol"); }
-  RegDB::AuthorizationRecordList alist = mBase->getAllAuthorizations();
-  if (alist.empty()) { ErrLog(<< "No element in table tAuthorization");}
-  RegDB::RegistrarRecordList reglist = mBase->getAllRegistrars();
-  if (reglist.empty()) { ErrLog(<< "No element in table tRegistrar"); }
-  RegDB::RouteRecordList rlist = mBase->getAllRoutes();
-  if (rlist.empty()) { ErrLog(<< "No element in table tRoute"); }
+  Auths& auth =  sip->header(h_Authorizations);
+  //test authorization
+  if(sip->exists(h_Contacts))
+        {
+           NameAddr& to = sip->header(h_To);
+           NameAddr& from = sip->header(h_From);
+
+           Data fuser = from.uri().user();
+           Data fhost = from.uri().host();
+           cout<<"\n\n\n\n\n"<<from.uri().user()<<"\n\n\n\n\n";
+           cout<<"\n\n\n\n\n"<<from.uri().host()<<"\n\n\n\n\n";
+           /*for(RegDB::AuthorizationRecord auth: alist)
+           {
+             cout<<"\n\n\n\n\n"<<auth.mIdDomain<<"\n\n\n\n\n";
+           }*/
+           //parse all contacts
+           ParserContainer<NameAddr>& contacts = sip->header(h_Contacts);
+           for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
+                   {
+                     send200(sip, *i);
+                   }
+        }
+        else
+        {
+             send400(sip);
+        }
 }
+
+
 /******************************************************************************/
 /*                         MESSAGES                                           */
 /******************************************************************************/
@@ -128,6 +136,12 @@ RegThread::send200(SipMessage* sip, NameAddr add)
   InfoLog(<< "Sent 200 to REGISTER");
 }
 
+void
+RegThread::send400(SipMessage* sip){
+  auto_ptr<SipMessage> msg400(Helper::makeResponse(*sip, 400));
+  ErrLog (<< "Sent 400(Bad Request) to REGISTER");
+  mStack.send(*msg400);
+}
 
 void
 RegThread::send401(SipMessage* sip){

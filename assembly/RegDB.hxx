@@ -24,6 +24,13 @@ class RegDB{
     {
           unsigned int mIdDomain;
           resip::Data mDomain;
+          unsigned int mIdRealm;
+    };
+
+    struct RealmRecord
+    {
+          unsigned int mIdRealm;
+          resip::Data mRealm;
     };
 
     struct ForwardRecord
@@ -45,7 +52,7 @@ class RegDB{
     {
           unsigned int mIdAuth;
           unsigned int mIdUser;
-          unsigned int mIdDomain;
+          unsigned int mIdRealm;
           resip::Data mPassword;
     };
 
@@ -55,6 +62,7 @@ class RegDB{
           unsigned int mIdUser;
           unsigned int mIdDomain;
           unsigned int mIdMain;
+          resip::Data mCallId;
     };
 
     struct RouteRecord
@@ -71,6 +79,7 @@ class RegDB{
     typedef resip::Data Key;
     typedef vector<UserRecord> UserRecordList;
     typedef vector<DomainRecord> DomainRecordList;
+    typedef vector<RealmRecord> RealmRecordList;
     typedef vector<ForwardRecord> ForwardRecordList;
     typedef vector<ProtocolRecord> ProtocolRecordList;
     typedef vector<AuthorizationRecord> AuthorizationRecordList;
@@ -88,6 +97,12 @@ class RegDB{
     virtual void eraseDomain(const Key& key);
     virtual DomainRecord getDomain(const Key& key) const;
     virtual DomainRecordList getAllDomains();
+
+    // functions for Realm Records
+    virtual bool addRealm(const Key& key, const RealmRecord& rec);
+    virtual void eraseRealm(const Key& key);
+    virtual RealmRecord getRealm(const Key& key) const;
+    virtual RealmRecordList getAllRealms();
 
     // functions for Protocol Records
     virtual bool addProtocol(const Key& key, const ProtocolRecord& rec);
@@ -126,6 +141,7 @@ class RegDB{
     {
       UserTable=0,
       DomainTable,
+      RealmTable,
       ForwardTable,
       ProtocolTable,
       AuthorizationTable,
@@ -134,10 +150,10 @@ class RegDB{
       MaxTable  // This one MUST be last
     } Table;
 
-    const char tableName[MaxTable][20] = {"tuser", "tdomain", "tforward",
+    const char tableName[MaxTable][20] = {"tuser", "tdomain", "trealm", "tforward",
       "tprotocol", "tauthorization", "tregistrar", "troute"};
 
-    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidforward",
+    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidrealm", "fidforward",
         "fidprotocol", "fidauth", "fidreg", "fidroute"};
 
     mutable MYSQL* mConn;
