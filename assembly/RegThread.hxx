@@ -32,9 +32,12 @@ class RegThread : public resip::ThreadIf
       RegMySQL* mBase;
 
 
-      void send200(resip::SipMessage* sip);
+      void send200(resip::SipMessage* sip, resip::NameAddr add);
       void send401(resip::SipMessage* sip);
       void send403(resip::SipMessage* sip, resip::Data meth);
+      void send405(resip::SipMessage* sip, resip::Data meth);
+
+      void loadData();
 };
 }
 #endif

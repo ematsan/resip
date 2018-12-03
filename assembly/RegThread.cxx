@@ -60,28 +60,12 @@ RegThread::thread()
            {
             Auths& auth =  received->header(h_Authorizations);
             //test authorization
-
-
             if(received->exists(h_Contacts))
                   {
                      NameAddr& to = received->header(h_To);
                      NameAddr& from = received->header(h_From);
-
                      //select all data
-                     RegDB::UserRecordList ulist = mBase->getAllUsers();
-                     if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
-                     RegDB::DomainRecordList dlist = mBase->getAllDomains();
-                     if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
-                     RegDB::ForwardRecordList flist = mBase->getAllForwards();
-                     if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
-                     RegDB::ProtocolRecordList plist = mBase->getAllProtocols();
-                     if (plist.empty())  { ErrLog(<< "No element in table tProtocol"); }
-                     RegDB::AuthorizationRecordList alist = mBase->getAllAuthorizations();
-                     if (alist.empty()) { ErrLog(<< "No element in table tAuthorization");}
-                     RegDB::RegistrarRecordList reglist = mBase->getAllRegistrars();
-                     if (reglist.empty()) { ErrLog(<< "No element in table tRegistrar"); }
-                     RegDB::RouteRecordList rlist = mBase->getAllRoutes();
-                     if (rlist.empty()) { ErrLog(<< "No element in table tRoute"); }
+                     loadData();
 
                      /*for(RegDB::AuthorizationRecord auth: alist){
                        cout<<"\n\n\n\n\n"<<auth.mIdDomain<<"\n\n\n\n\n";
@@ -90,11 +74,15 @@ RegThread::thread()
                      ParserContainer<NameAddr>& contacts = received->header(h_Contacts);
                      for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
                              {
-                               auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, *i));
+                              /* auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, *i));
                                mStack.send(*msg200);
+                               InfoLog(<< "Sent 200 to REGISTER");*/
+                               /*NameAddr add = *i;
+                               send200(received, &add);*/
+                               send200(received, *i);
                              }
                   }
-           InfoLog(<< "Sent 200 to REGISTER");
+
           }
           else
           {
@@ -104,7 +92,7 @@ RegThread::thread()
        }
        else
        {
-         send403(received, getMethodName(meth));
+         send405(received, getMethodName(meth));
        }
      }
   }
@@ -112,8 +100,32 @@ RegThread::thread()
 
 
 void
-RegThread::send200(SipMessage* sip){
-
+RegThread::loadData()
+{
+  RegDB::UserRecordList ulist = mBase->getAllUsers();
+  if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
+  RegDB::DomainRecordList dlist = mBase->getAllDomains();
+  if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
+  RegDB::ForwardRecordList flist = mBase->getAllForwards();
+  if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
+  RegDB::ProtocolRecordList plist = mBase->getAllProtocols();
+  if (plist.empty())  { ErrLog(<< "No element in table tProtocol"); }
+  RegDB::AuthorizationRecordList alist = mBase->getAllAuthorizations();
+  if (alist.empty()) { ErrLog(<< "No element in table tAuthorization");}
+  RegDB::RegistrarRecordList reglist = mBase->getAllRegistrars();
+  if (reglist.empty()) { ErrLog(<< "No element in table tRegistrar"); }
+  RegDB::RouteRecordList rlist = mBase->getAllRoutes();
+  if (rlist.empty()) { ErrLog(<< "No element in table tRoute"); }
+}
+/******************************************************************************/
+/*                         MESSAGES                                           */
+/******************************************************************************/
+void
+RegThread::send200(SipMessage* sip, NameAddr add)
+{
+  auto_ptr<SipMessage> msg200(Helper::makeResponse(*sip, 200, add));
+  mStack.send(*msg200);
+  InfoLog(<< "Sent 200 to REGISTER");
 }
 
 
@@ -126,9 +138,20 @@ RegThread::send401(SipMessage* sip){
 }
 
 void
+RegThread::send405(SipMessage* sip, Data meth)
+{
+  int IMMethodList[] = {(int) REGISTER };
+  const int IMMethodListSize = sizeof(IMMethodList) / sizeof(*IMMethodList);
+  auto_ptr<SipMessage> msg405(Helper::make405(*sip, IMMethodList, IMMethodListSize));
+  mStack.send(*msg405);
+  ErrLog(<< "Sent 405 to "<< meth);
+}
+
+
+void
 RegThread::send403(SipMessage* sip, Data meth)
 {
   auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
   mStack.send(*msg403);
-  InfoLog(<< "Sent 403 to "<< meth);
+  ErrLog(<< "Sent 403 to "<< meth);
 }
