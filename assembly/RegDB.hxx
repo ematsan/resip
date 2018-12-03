@@ -138,9 +138,9 @@ class RegDB{
       "tprotocol", "tauthorization", "tregistrar", "troute"};
 
     const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidforward",
-        "fidprotocol", "fidauthorization", "fidregistrar", "fidroute"};
+        "fidprotocol", "fidauth", "fidreg", "fidroute"};
 
-    mutable MYSQL* mConn;        
+    mutable MYSQL* mConn;
     // Db manipulation routines
     /*virtual bool dbWriteRecord(const Table table,
                            const resip::Data& pKey,
@@ -154,7 +154,7 @@ class RegDB{
                                const resip::Data& key);
 
     virtual resip::Data dbKey(const Table table,
-                               bool first=false) = 0; // return empty if no more
+                               bool first = false) = 0; // return empty if no more
 
 
     virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const = 0;

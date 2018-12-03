@@ -150,28 +150,12 @@ RegMySQL::initialize() const{
 /*************************************************************************/
 /*                        db work                                        */
 /*************************************************************************/
-// Db manipulation routines
-/*
-bool
-RegMySQL::dbWriteRecord(const Table table,
-                       const Data& pKey,
-                       const Data& pData)
-{
-  return true;
-}
-/// return false if not found
-bool
-RegMySQL::dbReadRecord(const Table table,
-                          const resip::Data& key,
-                          resip::Data& data) const
-{
-  return true;
-}*/
-//find keys
+// Db manipulation
+// find keys
 // return empty if no more
 resip::Data
 RegMySQL::dbKey(const Table table,
-                bool first=false)
+                bool first)
 {
   //if first select
   if(first)

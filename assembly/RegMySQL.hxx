@@ -35,15 +35,7 @@ class RegMySQL: public RegDB
 
 
   private:
-    // Db manipulation routines
-  /*  virtual bool dbWriteRecord(const Table table,
-                           const resip::Data& pKey,
-                           const resip::Data& pData);
-
-    /// return false if not found
-    virtual bool dbReadRecord(const Table table,
-                           const resip::Data& key,
-                           resip::Data& data) const;*/    
+    virtual resip::Data dbKey(const Table table, bool first = false); 
     virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const;
     virtual int query(const resip::Data& queryCommand) const;
 

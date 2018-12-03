@@ -1,5 +1,7 @@
 #include <iostream>
 #include "RegThread.hxx"
+#include "RegMySQL.hxx"
+#include "RegDB.hxx"
 //#include "RegRunner.hxx"
 
 //!!!!!!!!!!!!!!!!!!!!!! - read example using messages
@@ -65,10 +67,29 @@ RegThread::thread()
                      NameAddr& to = received->header(h_To);
                      NameAddr& from = received->header(h_From);
 
+                     //select all data
+                     RegDB::UserRecordList ulist = mBase->getAllUsers();
+                     if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
+                     RegDB::DomainRecordList dlist = mBase->getAllDomains();
+                     if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
+                     RegDB::ForwardRecordList flist = mBase->getAllForwards();
+                     if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
+                     RegDB::ProtocolRecordList plist = mBase->getAllProtocols();
+                     if (plist.empty())  { ErrLog(<< "No element in table tProtocol"); }
+                     RegDB::AuthorizationRecordList alist = mBase->getAllAuthorizations();
+                     if (alist.empty()) { ErrLog(<< "No element in table tAuthorization");}
+                     RegDB::RegistrarRecordList reglist = mBase->getAllRegistrars();
+                     if (reglist.empty()) { ErrLog(<< "No element in table tRegistrar"); }
+                     RegDB::RouteRecordList rlist = mBase->getAllRoutes();
+                     if (rlist.empty()) { ErrLog(<< "No element in table tRoute"); }
+
+                     /*for(RegDB::AuthorizationRecord auth: alist){
+                       cout<<"\n\n\n\n\n"<<auth.mIdDomain<<"\n\n\n\n\n";
+                     }*/
                      //parse all contacts
                      ParserContainer<NameAddr>& contacts = received->header(h_Contacts);
-                     for (ParserContainer<NameAddr>::iterator i = contacts.begin();
-                             i != contacts.end(); i++){
+                     for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
+                             {
                                auto_ptr<SipMessage> msg200(Helper::makeResponse(*received, 200, *i));
                                mStack.send(*msg200);
                              }
@@ -94,6 +115,7 @@ void
 RegThread::send200(SipMessage* sip){
 
 }
+
 
 void
 RegThread::send401(SipMessage* sip){

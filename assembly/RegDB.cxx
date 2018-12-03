@@ -370,7 +370,7 @@ RegDB::getAuthorization(const Key& key) const
   {
      DataStream ds(command);
      ds << "SELECT fiduser, fiddomain, fpassword FROM tauthorization"
-        << " WHERE fidaut='" << key
+        << " WHERE fidauth='" << key
         << "'";
   }
 
