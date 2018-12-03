@@ -100,27 +100,72 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   //test authorization
   if(sip->exists(h_Contacts))
         {
+
            NameAddr& to = sip->header(h_To);
            NameAddr& from = sip->header(h_From);
+           CallId& callid = sip->header(h_CallId);
 
            Data fuser = from.uri().user();
            Data fhost = from.uri().host();
-           cout<<"\n\n\n\n\n"<<from.uri().user()<<"\n\n\n\n\n";
-           cout<<"\n\n\n\n\n"<<from.uri().host()<<"\n\n\n\n\n";
+           Data tuser = to.uri().user();
+           Data thost = to.uri().host();
+
+
+           //cout<<"\n\n\n\n\n"<<callid<<"\n\n\n\n\n";
            /*for(RegDB::AuthorizationRecord auth: alist)
            {
              cout<<"\n\n\n\n\n"<<auth.mIdDomain<<"\n\n\n\n\n";
            }*/
+           //registration time
+           unsigned int expires = 0;
+           if (sip->exists(h_Expires))
+           {
+             expires = sip->header(h_Expires).value();
+           }
+           else
+           {
+             expires = 3600;
+           }
+
            //parse all contacts
            ParserContainer<NameAddr>& contacts = sip->header(h_Contacts);
+
+
            for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
                    {
-                     send200(sip, *i);
+                     //test format     
+                     if (!i->isWellFormed())
+                     {
+                       send400(sip);
+                       return;
+                     }
+                     // Check for "Contact: *" style deregistration
+                      if (i->isAllContacts())
+                      {
+                        if (contacts.size() > 1 || expires != 0)
+                          {
+                              send400(sip);
+                              return;
+                           }
+                        //removeAllContacts(to);
+                        return;
+                      }
+
+                      NameAddr addr = *i;
+
+                      Data user = addr.uri().user();
+                      Data host = addr.uri().host();
+                      if (addr.exists(p_expires))
+                         expires = addr.param(p_expires);
+                      //to.param(p_tag)
+                      //cout<<"\n\n\n\n\n"<<from.param(p_tag)<<"\n\n\n\n\n";
+                      cout<<"\n\n\n\n\n"<<host<<"\n\n\n\n\n";
+                      send200(sip, *i);
                    }
         }
         else
         {
-             send400(sip);
+             //send400(sip);
         }
 }
 
