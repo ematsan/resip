@@ -202,6 +202,7 @@ RegThread::removeAllContacts(resip::SipMessage* sip)
 bool
 RegThread::testAuthorization(resip::SipMessage* sip)
 {
+
   return true;
 }
 bool
