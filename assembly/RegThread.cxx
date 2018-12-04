@@ -104,7 +104,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
      return;
    }
   //test Registrar
-  unsigned int idreg = testRegistrar(sip);
+  unsigned int idreg = findRegistrar(sip);
   if (0 == idreg)
   {
      send400(sip);
@@ -167,10 +167,27 @@ RegThread::analisysRequest(resip::SipMessage* sip)
 
                       NameAddr addr = *i;
 
-                      Data user = addr.uri().user();
+                      /*Data user = addr.uri().user();
                       Data host = addr.uri().host();
+                      unsigned int port = addr.uri().port();
+                      Data scheme = addr.uri().scheme();
+                      cout<<user<<" - "<< host <<" - "<< port <<" - " << scheme <<"\n\n\n\n\n\n\n\n";*/
                       if (addr.exists(p_expires))
                          expires = addr.param(p_expires);
+
+                      unsigned int idf = findForward(addr, expires);
+                      if (0 == idf)
+                      {
+                         send400(sip);
+                         return;
+                       }
+
+                      //need to delete record
+                      if (0 == expires)
+                      {
+                         /*******************************************/
+
+                      }
                       //to.param(p_tag)
                       //cout<<"\n\n\n\n\n"<<from.param(p_tag)<<"\n\n\n\n\n";
                       //cout<<"\n\n\n\n\n"<<host<<"\n\n\n\n\n";
@@ -188,16 +205,26 @@ void
 RegThread::removeAllContacts(resip::SipMessage* sip)
 {
   //remove user contacts
-   NameAddr& to = sip->header(h_To);
-   NameAddr& from = sip->header(h_From);
-   CallId& callid = sip->header(h_CallId);
-
-   Data fuser = from.uri().user();
-   Data fhost = from.uri().host();
-   Data tuser = to.uri().user();
-   Data thost = to.uri().host();
-
-
+  //find registrar information
+   unsigned int idreg = findRegistrar(sip);
+   if (0 != idreg)
+    {
+        bool del = false;
+        for(RegDB::RouteRecord rec : rlist)
+        {
+          if (rec.mIdReg == idreg)
+          {
+             mBase->eraseRoute(Data(rec.mIdRoute));
+             del = true;
+           }
+        }
+        //if remove then reload data
+        if (del)
+        {
+          rlist.clear();
+          rlist = mBase->getAllRoutes();
+        }
+    }
 }
 
 bool
@@ -213,7 +240,124 @@ RegThread::testAuthorization(resip::SipMessage* sip)
 }
 
 int
-RegThread::testRegistrar(resip::SipMessage* sip)
+RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
+{
+  unsigned int expires = reg;
+  Data user = addr.uri().user();
+  Data host = addr.uri().host();
+  unsigned int port = addr.uri().port();
+  Data scheme = addr.uri().scheme();
+  //cout<<user<<" - "<< host <<" - "<< port <<" - " << scheme <<"\n\n\n\n\n\n\n\n";
+  unsigned int idp = findProtocol(scheme);
+  if (0 == idp)
+  {
+     return 0;
+  }
+
+  unsigned int idd = findDomain(host);
+  if (0 == idd)
+  {
+     return 0;
+  }
+
+  unsigned int idf = findForward(idp, idd, host, port);
+  if (0 == idf)
+  {
+     return idf;
+  }
+
+  return idf;
+}
+
+int
+RegThread::findForward(const unsigned int& idp,
+                const unsigned int& idd,
+                const resip::Data& ip = "127.0.0.1",
+                const unsigned int& port = 0)
+{
+  //ip and port do not use
+  //wait nat
+  unsigned int idf = 0;
+  for (RegDB::ForwardRecord rec : flist)
+  {
+     if ((idp == rec.mIdProtocol) && (idd == rec.mIdDomain))
+     {
+       idf = rec.mIdForward;
+       break;
+     }
+  }
+  //add forward
+  if (0 == idp)
+  {
+     RegDB::ForwardRecord rec;
+     rec.mIdProtocol = idp;
+     rec.mIdDomain = idd;
+     //ip and port do not use
+     //wait nat
+     mBase->addForward(Data(rec.mIdForward), rec);
+     //reload
+     flist.clear();
+     flist = mBase->getAllForwards();
+     idf = flist.back().mIdForward;
+  }
+  return idf;
+}
+
+
+int
+RegThread::findProtocol(resip::Data& protocol)
+{
+  unsigned int idp = 0;
+  for (RegDB::ProtocolRecord rec : plist)
+  {
+     if (protocol == rec.mProtocol)
+     {
+       idp = rec.mIdProtocol;
+       break;
+     }
+  }
+  //add protocol
+  if (0 == idp)
+  {
+     RegDB::ProtocolRecord rec;
+     rec.mProtocol = protocol;
+     mBase->addProtocol(Data(rec.mIdProtocol), rec);
+     //reload
+     plist.clear();
+     plist = mBase->getAllProtocols();
+     idp = plist.back().mIdProtocol;
+  }
+  return idp;
+}
+
+int
+RegThread::findDomain(resip::Data& host)
+{
+  unsigned int idd = 0;
+  for (RegDB::DomainRecord rec : dlist)
+  {
+     if (host == rec.mDomain)
+     {
+       idd = rec.mIdDomain;
+       break;
+     }
+  }
+  //add domain
+  if (0 == idd)
+  {
+     RegDB::DomainRecord rec;
+     rec.mDomain = host;
+     mBase->addDomain(Data(rec.mIdDomain), rec);
+     //reload
+     dlist.clear();
+     dlist = mBase->getAllDomains();
+     idd = dlist.back().mIdDomain;
+  }
+  return idd;
+}
+
+int
+RegThread::findRegistrar(resip::SipMessage* sip)
 {
   NameAddr& to = sip->header(h_To);
   NameAddr& from = sip->header(h_From);
@@ -227,12 +371,11 @@ RegThread::testRegistrar(resip::SipMessage* sip)
   unsigned int fidd = 0, tidd = 0;
   unsigned int fidu = 0, tidu = 0;
   bool equal = false;
-  cout << to.uri() << "\n\n\n\n\n";
-  cout << from.uri() << "\n\n\n\n\n";
+//  cout << to.uri() << "\n\n\n\n\n";
+//  cout << from.uri() << "\n\n\n\n\n";
   //if (to.uri() == from.uri())
   if ((fuser == tuser) && (thost == fhost))
   {
-    //cout<<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n\n\n\n\n";
     equal = true;
   }
   //find id domain
@@ -261,7 +404,7 @@ RegThread::testRegistrar(resip::SipMessage* sip)
          break;
        }
   }
-  cout << fidu << "\t"<< tidu << "\t"<< fidd << "\t"<< tidd << "\n\n\n";
+  //cout << fidu << "\t"<< tidu << "\t"<< fidd << "\t"<< tidd << "\n\n\n";
   if ((0 == fidu) ||
       (0 == tidu) ||
       (0 == fidd) ||
@@ -276,7 +419,7 @@ RegThread::testRegistrar(resip::SipMessage* sip)
     //-------------------------------------------------------------//
     //-------------------Test CallId-------------------------------//
     //-------------------------------------------------------------//
-    if ((callid == rec.mCallId) &&
+    if (//(callid == rec.mCallId) &&
         (fidu == rec.mIdMain) &&
         (tidu == rec.mIdUser) &&
         (tidd == rec.mIdDomain))
@@ -286,7 +429,6 @@ RegThread::testRegistrar(resip::SipMessage* sip)
       }
   }
   //add registrar
-  cout << idreg <<" - "<<equal<<"\n\n\n\n\n";
   if ((idreg == 0) && (equal))
   {
       RegDB::RegistrarRecord rec;
@@ -298,6 +440,7 @@ RegThread::testRegistrar(resip::SipMessage* sip)
       RegDB::Key key;
       mBase->addRegistrar(key, rec);
       //reload
+      reglist.clear();
       reglist = mBase->getAllRegistrars();
       idreg = reglist.back().mIdReg;
       InfoLog(<< "Add registrar");

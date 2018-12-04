@@ -36,7 +36,14 @@ class RegThread : public resip::ThreadIf
       void analisysRequest(resip::SipMessage* sip);
       void removeAllContacts(resip::SipMessage* sip);
       bool testAuthorization(resip::SipMessage* sip);
-      int testRegistrar(resip::SipMessage* sip);
+      int findRegistrar(resip::SipMessage* sip);
+      int findForward(resip::NameAddr& addr, unsigned int reg);
+      int findDomain(resip::Data& host);
+      int findProtocol(resip::Data& protocol);
+      int findForward(const unsigned int& idp,
+                      const unsigned int& idd,
+                      const resip::Data& ip,
+                      const unsigned int& port);
 
       void send200(resip::SipMessage* sip, resip::NameAddr add);
       void send400(resip::SipMessage* sip);

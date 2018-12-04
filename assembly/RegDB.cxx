@@ -324,10 +324,11 @@ RegDB::addForward(const Key& key, const ForwardRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tforward (fidprotocol, faddress, fip, fport)"
+     ds << "INSERT INTO tforward (fidprotocol, fiddomain, fip, fport)"
         << " VALUES("
         << rec.mIdProtocol << ", '"
-        << rec.mAddress << "', '"
+        //<< rec.mAddress << "', '"
+        << rec.mIdDomain << "', '"
         << rec.mIP << "', "
         << rec.mPort << ")";
   }
@@ -347,7 +348,7 @@ RegDB::getForward(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidprotocol, faddres, fip, fport FROM tforward"
+     ds << "SELECT fidprotocol, fiddomain, fip, fport FROM tforward"
         << " WHERE fidforward='" << key
         << "'";
   }
@@ -369,7 +370,8 @@ RegDB::getForward(const Key& key) const
        int col = 0;
        rec.mIdForward            = Data(key).convertInt();
        rec.mIdProtocol            = Data(row[col++]).convertInt();
-       rec.mAddress               = Data(row[col++]);
+       //rec.mAddress               = Data(row[col++]);
+       rec.mIdDomain               = Data(row[col++]).convertInt();
        rec.mIP                    = Data(row[col++]);
        rec.mPort                  = Data(row[col++]).convertInt();
    }
