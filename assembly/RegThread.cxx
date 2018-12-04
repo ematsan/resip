@@ -172,7 +172,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                          expires = addr.param(p_expires);
                       //to.param(p_tag)
                       //cout<<"\n\n\n\n\n"<<from.param(p_tag)<<"\n\n\n\n\n";
-                      cout<<"\n\n\n\n\n"<<host<<"\n\n\n\n\n";
+                      //cout<<"\n\n\n\n\n"<<host<<"\n\n\n\n\n";
                       send200(sip, *i);
                    }
         }
@@ -202,12 +202,19 @@ RegThread::removeAllContacts(resip::SipMessage* sip)
 bool
 RegThread::testAuthorization(resip::SipMessage* sip)
 {
-
-  return true;
+  for (RegDB::AuthorizationRecord auth : alist)
+  {
+     //cout<< auth.mIdAuth<< " - "<<auth.mPassword<<"\n\n\n\n\n";
+     if (Helper::authenticateRequestWithA1(*sip, mNameAddr, auth.mPassword, 0) == Helper::Authenticated)
+        return true;
+  }
+  return false;
 }
+
 bool
 RegThread::testRegistrar(resip::SipMessage* sip)
 {
+
   return true;
 }
 

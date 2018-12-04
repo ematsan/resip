@@ -441,6 +441,7 @@ RegDB::getAuthorization(const Key& key) const
   if(row)
    {
        int col = 0;
+       rec.mIdAuth            = Data(key).convertInt();
        rec.mIdUser            = Data(row[col++]).convertInt();
        rec.mIdRealm         = Data(row[col++]).convertInt();
        rec.mPassword          = Data(row[col++]);
