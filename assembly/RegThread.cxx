@@ -104,7 +104,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
      return;
    }
   //test Registrar
-  if (!testRegistrar(sip))
+  unsigned int idreg = testRegistrar(sip);
+  if (0 == idreg)
   {
      send400(sip);
      return;
@@ -211,11 +212,101 @@ RegThread::testAuthorization(resip::SipMessage* sip)
   return false;
 }
 
-bool
+int
 RegThread::testRegistrar(resip::SipMessage* sip)
 {
+  NameAddr& to = sip->header(h_To);
+  NameAddr& from = sip->header(h_From);
+  //CallId&
+  Data& callid = sip->header(h_CallId).value();
 
-  return true;
+  Data fuser = from.uri().user();
+  Data fhost = from.uri().host();
+  Data tuser = to.uri().user();
+  Data thost = to.uri().host();
+  unsigned int fidd = 0, tidd = 0;
+  unsigned int fidu = 0, tidu = 0;
+  bool equal = false;
+  cout << to.uri() << "\n\n\n\n\n";
+  cout << from.uri() << "\n\n\n\n\n";
+  //if (to.uri() == from.uri())
+  if ((fuser == tuser) && (thost == fhost))
+  {
+    //cout<<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n\n\n\n\n";
+    equal = true;
+  }
+  //find id domain
+  for (RegDB::DomainRecord rec : dlist)
+  {
+      if (fhost == rec.mDomain)
+         fidd = rec.mIdDomain;
+      if (thost == rec.mDomain)
+          tidd = rec.mIdDomain;
+      if ((0 != tidd) && (0 != fidd))
+         break;
+  }
+  //find id user
+  for (RegDB::UserRecord rec : ulist)
+  {
+      if ((fuser == rec.mName) && (rec.mIdDomain == fidd))
+      {
+         fidu = rec.mIdUser;
+       }
+      if ((tuser == rec.mName) && (rec.mIdDomain == tidd))
+      {
+          tidu = rec.mIdUser;
+        }
+      if ((0 != tidu) && (0 != fidu))
+      {
+         break;
+       }
+  }
+  cout << fidu << "\t"<< tidu << "\t"<< fidd << "\t"<< tidd << "\n\n\n";
+  if ((0 == fidu) ||
+      (0 == tidu) ||
+      (0 == fidd) ||
+      (0 == tidd))
+      {
+        return 0;
+      }
+  //find registrar
+  unsigned int idreg = 0;
+  for (RegDB::RegistrarRecord rec : reglist)
+  {
+    //-------------------------------------------------------------//
+    //-------------------Test CallId-------------------------------//
+    //-------------------------------------------------------------//
+    if ((callid == rec.mCallId) &&
+        (fidu == rec.mIdMain) &&
+        (tidu == rec.mIdUser) &&
+        (tidd == rec.mIdDomain))
+        {
+           idreg = rec.mIdReg;
+           break;
+      }
+  }
+  //add registrar
+  cout << idreg <<" - "<<equal<<"\n\n\n\n\n";
+  if ((idreg == 0) && (equal))
+  {
+      RegDB::RegistrarRecord rec;
+      rec.mIdUser = fidu;
+      rec.mIdMain = fidu;
+      rec.mCallId = callid;
+      rec.mIdDomain = tidd;
+      rec.mIdReg = 0;
+      RegDB::Key key;
+      mBase->addRegistrar(key, rec);
+      //reload
+      reglist = mBase->getAllRegistrars();
+      idreg = reglist.back().mIdReg;
+      InfoLog(<< "Add registrar");
+  }
+  if (0 == idreg)
+  {
+    ErrLog(<< "No registrat record\n\n\n\n\n");
+  }
+  return idreg;
 }
 
 

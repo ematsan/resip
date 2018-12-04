@@ -36,7 +36,7 @@ class RegThread : public resip::ThreadIf
       void analisysRequest(resip::SipMessage* sip);
       void removeAllContacts(resip::SipMessage* sip);
       bool testAuthorization(resip::SipMessage* sip);
-      bool testRegistrar(resip::SipMessage* sip);
+      int testRegistrar(resip::SipMessage* sip);
 
       void send200(resip::SipMessage* sip, resip::NameAddr add);
       void send400(resip::SipMessage* sip);

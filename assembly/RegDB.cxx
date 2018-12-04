@@ -476,8 +476,8 @@ RegDB::addRegistrar(const Key& key, const RegistrarRecord& rec)
      ds << "INSERT INTO tregistrar (fiduser, fiddomain, fcallid, fidmain)"
         << " VALUES("
         << rec.mIdUser << ", "
-        << rec.mIdDomain << ", "
-        << rec.mCallId<<", "
+        << rec.mIdDomain << ", '"
+        << rec.mCallId<<"', "
         << rec.mIdMain << ")";
 
   }
