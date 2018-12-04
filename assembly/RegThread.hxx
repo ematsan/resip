@@ -34,9 +34,12 @@ class RegThread : public resip::ThreadIf
       RegMySQL* mBase;
 
       void analisysRequest(resip::SipMessage* sip);
+      void removeAllContacts(resip::SipMessage* sip);
+      bool testAuthorization(resip::SipMessage* sip);
+      bool testRegistrar(resip::SipMessage* sip);
 
       void send200(resip::SipMessage* sip, resip::NameAddr add);
-      void send400(resip::SipMessage* sip);      
+      void send400(resip::SipMessage* sip);
       void send401(resip::SipMessage* sip);
       void send403(resip::SipMessage* sip, resip::Data meth);
       void send405(resip::SipMessage* sip, resip::Data meth);

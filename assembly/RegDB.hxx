@@ -132,7 +132,8 @@ class RegDB{
     virtual bool addRoute(const Key& key, const RouteRecord& rec);
     virtual void eraseRoute(const Key& key);
     virtual RouteRecord getRoute(const Key& key) const;
-    virtual RouteRecordList getAllRoutes();
+    virtual RouteRecordList getAllRoutes();    
+    virtual bool updateRoute(const Key& key, const RouteRecord& rec);
 
 
   protected:

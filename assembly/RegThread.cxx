@@ -97,7 +97,19 @@ void
 RegThread::analisysRequest(resip::SipMessage* sip)
 {
   Auths& auth =  sip->header(h_Authorizations);
-  //test authorization
+  //test Authorization
+  if (!testAuthorization(sip))
+  {
+     send400(sip);
+     return;
+   }
+  //test Registrar
+  if (!testRegistrar(sip))
+  {
+     send400(sip);
+     return;
+   }
+
   if(sip->exists(h_Contacts))
         {
 
@@ -133,7 +145,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
 
            for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
                    {
-                     //test format     
+                     //test format
                      if (!i->isWellFormed())
                      {
                        send400(sip);
@@ -147,7 +159,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                               send400(sip);
                               return;
                            }
-                        //removeAllContacts(to);
+                        //remove users contacts
+                        removeAllContacts(sip);
                         return;
                       }
 
@@ -163,10 +176,38 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       send200(sip, *i);
                    }
         }
-        else
+        else //no contacts
         {
-             //send400(sip);
+              //do nothing
+              //send400(sip);
         }
+}
+
+void
+RegThread::removeAllContacts(resip::SipMessage* sip)
+{
+  //remove user contacts
+   NameAddr& to = sip->header(h_To);
+   NameAddr& from = sip->header(h_From);
+   CallId& callid = sip->header(h_CallId);
+
+   Data fuser = from.uri().user();
+   Data fhost = from.uri().host();
+   Data tuser = to.uri().user();
+   Data thost = to.uri().host();
+
+
+}
+
+bool
+RegThread::testAuthorization(resip::SipMessage* sip)
+{
+  return true;
+}
+bool
+RegThread::testRegistrar(resip::SipMessage* sip)
+{
+  return true;
 }
 
 

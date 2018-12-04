@@ -615,6 +615,23 @@ RegDB::getAllRoutes()
   return records;
 }
 
+bool
+RegDB::updateRoute(const Key& key, const RouteRecord& rec)
+{
+  Data command;
+  {
+     //UPDATE t1 SET c=c+1 WHERE a=1;
+     DataStream ds(command);
+     ds << "UPDATE troute SET"
+        << " fidreg = " << rec.mIdReg
+        << ", fidforward = " << rec.mIdForward
+        << ", ftime = " << rec.mTime
+        << ", fexpires = " << rec.mExpires
+        << " WHERE fidroute = " << key;
+  }
+  return query(command, 0) == 0;
+}
+
 /*****************************************************************************/
 
 void
@@ -626,7 +643,7 @@ RegDB::dbEraseRecord(const Table table,
      DataStream ds(command);
      Data escapedKey;
      ds << "DELETE FROM " << tableName[table];
-     ds << " WHERE "<< keyName[table]<<"='" << key << "'";
+     ds << " WHERE "<< keyName[table]<<" = '" << key << "'";
   }
   query(command);
 }
