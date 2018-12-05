@@ -88,49 +88,49 @@ class RegDB{
     typedef vector<RouteRecord> RouteRecordList;
 
     // functions for User Records
-    virtual bool addUser(const Key& key, const UserRecord& rec);
+    virtual bool addUser(const UserRecord& rec);
     virtual void eraseUser(const Key& key);
     virtual UserRecord getUser(const Key& key) const;
     virtual UserRecordList getAllUsers();
 
     // functions for Domain Records
-    virtual bool addDomain(const Key& key, const DomainRecord& rec);
+    virtual bool addDomain(const DomainRecord& rec);
     virtual void eraseDomain(const Key& key);
     virtual DomainRecord getDomain(const Key& key) const;
     virtual DomainRecordList getAllDomains();
 
     // functions for Realm Records
-    virtual bool addRealm(const Key& key, const RealmRecord& rec);
+    virtual bool addRealm(const RealmRecord& rec);
     virtual void eraseRealm(const Key& key);
     virtual RealmRecord getRealm(const Key& key) const;
     virtual RealmRecordList getAllRealms();
 
     // functions for Protocol Records
-    virtual bool addProtocol(const Key& key, const ProtocolRecord& rec);
+    virtual bool addProtocol(const ProtocolRecord& rec);
     virtual void eraseProtocol(const Key& key);
     virtual ProtocolRecord getProtocol(const Key& key) const;
     virtual ProtocolRecordList getAllProtocols();
 
     // functions for Forward Records
-    virtual bool addForward(const Key& key, const ForwardRecord& rec);
+    virtual bool addForward(const ForwardRecord& rec);
     virtual void eraseForward(const Key& key);
     virtual ForwardRecord getForward(const Key& key) const;
     virtual ForwardRecordList getAllForwards();
 
     // functions for Authorization Records
-    virtual bool addAuthorization(const Key& key, const AuthorizationRecord& rec);
+    virtual bool addAuthorization(const AuthorizationRecord& rec);
     virtual void eraseAuthorization(const Key& key);
     virtual AuthorizationRecord getAuthorization(const Key& key) const;
     virtual AuthorizationRecordList getAllAuthorizations();
 
     // functions for Registrar Records
-    virtual bool addRegistrar(const Key& key, const RegistrarRecord& rec);
+    virtual bool addRegistrar(const RegistrarRecord& rec);
     virtual void eraseRegistrar(const Key& key);
     virtual RegistrarRecord getRegistrar(const Key& key) const;
     virtual RegistrarRecordList getAllRegistrars();
 
     // functions for Route Records
-    virtual bool addRoute(const Key& key, const RouteRecord& rec);
+    virtual bool addRoute(const RouteRecord& rec);
     virtual void eraseRoute(const Key& key);
     virtual RouteRecord getRoute(const Key& key) const;
     virtual RouteRecordList getAllRoutes();

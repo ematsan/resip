@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 #include "RegThread.hxx"
 #include "RegMySQL.hxx"
 #include "RegDB.hxx"
@@ -34,23 +35,37 @@ RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase)
 RegThread::~RegThread()
 {
    cout<<"RegThread destructor"<<endl;
+   ulist.clear();
+   dlist.clear();
+   flist.clear();
+   plist.clear();
+   alist.clear();
+   reglist.clear();
+   rlist.clear();
 }
 
 void
 RegThread::loadData()
 {
+  ulist.clear();
   ulist = mBase->getAllUsers();
   if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
+  dlist.clear();
   dlist = mBase->getAllDomains();
   if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
+  flist.clear();
   flist = mBase->getAllForwards();
   if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
+  plist.clear();
   plist = mBase->getAllProtocols();
   if (plist.empty())  { ErrLog(<< "No element in table tProtocol"); }
+  alist.clear();
   alist = mBase->getAllAuthorizations();
   if (alist.empty()) { ErrLog(<< "No element in table tAuthorization");}
+  reglist.clear();
   reglist = mBase->getAllRegistrars();
   if (reglist.empty()) { ErrLog(<< "No element in table tRegistrar"); }
+  rlist.clear();
   rlist = mBase->getAllRoutes();
   if (rlist.empty()) { ErrLog(<< "No element in table tRoute"); }
 }
@@ -183,14 +198,55 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                        }
 
                       //need to delete record
+                      bool upd = false;
                       if (0 == expires)
                       {
-                         /*******************************************/
-
+                        for(RegDB::RouteRecord rec : rlist)
+                        {
+                          if ((rec.mIdReg == idreg)  && (rec.mIdForward == idf))
+                          {
+                             mBase->eraseRoute(Data(rec.mIdRoute));
+                             upd = true;
+                           }
+                        }
+                      }
+                      else //need add or update
+                      {
+                        for(RegDB::RouteRecord rec : rlist)
+                        {
+                          //if find - update
+                          if ((rec.mIdReg == idreg)  && (rec.mIdForward == idf))
+                          {
+                             rec.mExpires = expires;
+                             time_t now = time(0);
+                             rec.mTime = ctime(&now);
+                             mBase->updateRoute(Data(rec.mIdRoute), rec);
+                             upd = true;
+                           }
+                        }
+                        //not find - add
+                        if (!upd)
+                        {
+                            RegDB::RouteRecord rec;
+                            rec.mIdReg = idreg;
+                            rec.mIdForward = idf;
+                            rec.mExpires = expires;
+                            time_t now = time(0);
+                            rec.mTime = ctime(&now);
+                            mBase->addRoute(rec);
+                            upd = true;
+                        }
                       }
                       //to.param(p_tag)
                       //cout<<"\n\n\n\n\n"<<from.param(p_tag)<<"\n\n\n\n\n";
                       //cout<<"\n\n\n\n\n"<<host<<"\n\n\n\n\n";
+                      //if remove then reload data
+                      if (upd)
+                      {
+                        rlist.clear();
+                        rlist = mBase->getAllRoutes();
+                      }
+
                       send200(sip, *i);
                    }
         }
@@ -294,7 +350,7 @@ RegThread::findForward(const unsigned int& idp,
      rec.mIdDomain = idd;
      //ip and port do not use
      //wait nat
-     mBase->addForward(Data(rec.mIdForward), rec);
+     mBase->addForward(rec);
      //reload
      flist.clear();
      flist = mBase->getAllForwards();
@@ -321,7 +377,7 @@ RegThread::findProtocol(resip::Data& protocol)
   {
      RegDB::ProtocolRecord rec;
      rec.mProtocol = protocol;
-     mBase->addProtocol(Data(rec.mIdProtocol), rec);
+     mBase->addProtocol(rec);
      //reload
      plist.clear();
      plist = mBase->getAllProtocols();
@@ -347,7 +403,7 @@ RegThread::findDomain(resip::Data& host)
   {
      RegDB::DomainRecord rec;
      rec.mDomain = host;
-     mBase->addDomain(Data(rec.mIdDomain), rec);
+     mBase->addDomain(rec);
      //reload
      dlist.clear();
      dlist = mBase->getAllDomains();
@@ -437,8 +493,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
       rec.mCallId = callid;
       rec.mIdDomain = tidd;
       rec.mIdReg = 0;
-      RegDB::Key key;
-      mBase->addRegistrar(key, rec);
+      mBase->addRegistrar(rec);
       //reload
       reglist.clear();
       reglist = mBase->getAllRegistrars();

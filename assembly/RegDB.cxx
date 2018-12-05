@@ -40,7 +40,7 @@ decodeString(iDataStream& s, Data& data)
 /*                        USER                                           */
 /*************************************************************************/
 bool
-RegDB::addUser(const Key& key, const UserRecord& rec)
+RegDB::addUser(const UserRecord& rec)
 {
   Data command;
   {
@@ -112,7 +112,7 @@ RegDB::getAllUsers()
 /*                       DOMAIN                                          */
 /*************************************************************************/
 bool
-RegDB::addDomain(const Key& key, const DomainRecord& rec)
+RegDB::addDomain(const DomainRecord& rec)
 {
   Data command;
   {
@@ -182,7 +182,7 @@ RegDB::getAllDomains()
 /*                       REALM                                         */
 /*************************************************************************/
 bool
-RegDB::addRealm(const Key& key, const RealmRecord& rec)
+RegDB::addRealm(const RealmRecord& rec)
 {
   Data command;
   {
@@ -250,7 +250,7 @@ RegDB::getAllRealms()
 /*                        PROTOCOL                                       */
 /*************************************************************************/
 bool
-RegDB::addProtocol(const Key& key, const ProtocolRecord& rec)
+RegDB::addProtocol(const ProtocolRecord& rec)
 {
   Data command;
   {
@@ -319,7 +319,7 @@ RegDB::getAllProtocols()
 /*                        FORWARD                                        */
 /*************************************************************************/
 bool
-RegDB::addForward(const Key& key, const ForwardRecord& rec)
+RegDB::addForward(const ForwardRecord& rec)
 {
   Data command;
   {
@@ -396,7 +396,7 @@ RegDB::getAllForwards()
 /*                        AUTHORIZATION                                  */
 /*************************************************************************/
 bool
-RegDB::addAuthorization(const Key& key, const AuthorizationRecord& rec)
+RegDB::addAuthorization(const AuthorizationRecord& rec)
 {
   Data command;
   {
@@ -470,7 +470,7 @@ RegDB::getAllAuthorizations()
 /*                        REGISTRAR                                      */
 /*************************************************************************/
 bool
-RegDB::addRegistrar(const Key& key, const RegistrarRecord& rec)
+RegDB::addRegistrar(const RegistrarRecord& rec)
 {
   Data command;
   {
@@ -546,7 +546,7 @@ RegDB::getAllRegistrars()
 /*                        ROUTE                                          */
 /*************************************************************************/
 bool
-RegDB::addRoute(const Key& key, const RouteRecord& rec)
+RegDB::addRoute(const RouteRecord& rec)
 {
   Data command;
   {
