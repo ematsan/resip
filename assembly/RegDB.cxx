@@ -507,6 +507,7 @@ RegDB::getRoute(const Key& key) const
   Data command;
   {
      DataStream ds(command);
+     //ds << "SELECT fidreg, fidforward, UNIX_TIMESTAMP(ftime), fexpires FROM troute"
      ds << "SELECT fidreg, fidforward, ftime, fexpires FROM troute"
         << " WHERE fidroute='" << key
         << "'";
@@ -531,6 +532,19 @@ RegDB::getRoute(const Key& key) const
        rec.mIdReg              = Data(row[col++]).convertInt();
        rec.mIdForward          = Data(row[col++]).convertInt();
        rec.mTime               = Data(row[col++]);
+       //https://stackoverflow.com/questions/38100936/convert-mysql-datetime-to-c-stdtime-t
+       //std::time_t t =  res->getInt("rectime");
+       //std::time_t t = rec.mTime.convertInt();
+       //https://www.tutorialspoint.com/cplusplus/cpp_date_time.htm
+       //tm *ltm = localtime(&t);
+       // print various components of tm structure.
+       //http://mycpp.ru/cpp/scpp/cppd_datetime.htm
+       /*cout << "Year:" << 1900 + ltm->tm_year<<endl;
+       cout << "Month: "<< 1 + ltm->tm_mon<< endl;
+       cout << "Day: "<<  ltm->tm_mday << endl;
+       cout << "Time: "<< ltm->tm_hour << ":";
+       cout << ltm->tm_min << ":";
+       cout << ltm->tm_sec << endl;*/
        rec.mExpires            = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
