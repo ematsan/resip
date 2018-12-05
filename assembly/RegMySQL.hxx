@@ -35,7 +35,7 @@ class RegMySQL: public RegDB
 
 
   private:
-    virtual resip::Data dbKey(const Table table, bool first = false); 
+    virtual resip::Data dbKey(const Table table, bool first = false);
     virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const;
     virtual int query(const resip::Data& queryCommand) const;
 

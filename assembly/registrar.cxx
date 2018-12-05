@@ -24,7 +24,7 @@ main(int argc, char** argv)
   //https://ru.cppreference.com/w/cpp/utility/program/signal
   //initiate worker for signal
   Log::initialize(Log::Cout, Log::toLevel("debug"), argv[0]);
-  
+
   if ( signal( SIGINT, signalHandler ) == SIG_ERR )
   {
      cerr << "Couldn't install signal handler for SIGINT" << endl;

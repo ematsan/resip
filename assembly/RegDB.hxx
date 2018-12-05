@@ -27,12 +27,6 @@ class RegDB{
           unsigned int mIdRealm;
     };
 
-    struct RealmRecord
-    {
-          unsigned int mIdRealm;
-          resip::Data mRealm;
-    };
-
     struct ForwardRecord
     {
           unsigned int mIdForward;
@@ -80,7 +74,6 @@ class RegDB{
     typedef resip::Data Key;
     typedef vector<UserRecord> UserRecordList;
     typedef vector<DomainRecord> DomainRecordList;
-    typedef vector<RealmRecord> RealmRecordList;
     typedef vector<ForwardRecord> ForwardRecordList;
     typedef vector<ProtocolRecord> ProtocolRecordList;
     typedef vector<AuthorizationRecord> AuthorizationRecordList;
@@ -98,12 +91,6 @@ class RegDB{
     virtual void eraseDomain(const Key& key);
     virtual DomainRecord getDomain(const Key& key) const;
     virtual DomainRecordList getAllDomains();
-
-    // functions for Realm Records
-    virtual bool addRealm(const RealmRecord& rec);
-    virtual void eraseRealm(const Key& key);
-    virtual RealmRecord getRealm(const Key& key) const;
-    virtual RealmRecordList getAllRealms();
 
     // functions for Protocol Records
     virtual bool addProtocol(const ProtocolRecord& rec);
