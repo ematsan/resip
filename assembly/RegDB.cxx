@@ -533,7 +533,7 @@ RegDB::getRoute(const Key& key) const
        rec.mIdForward          = Data(row[col++]).convertInt();
        rec.mTime               = Data(row[col++]);
        //https://stackoverflow.com/questions/38100936/convert-mysql-datetime-to-c-stdtime-t
-       //std::time_t t =  res->getInt("rectime");
+       //std::time_t t =  res->getInt("UNIX_TIMESTAMP(ftime)");
        //std::time_t t = rec.mTime.convertInt();
        //https://www.tutorialspoint.com/cplusplus/cpp_date_time.htm
        //tm *ltm = localtime(&t);
