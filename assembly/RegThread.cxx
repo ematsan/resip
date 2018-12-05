@@ -116,6 +116,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   if (!testAuthorization(sip))
   {
      send400(sip);
+     ErrLog(<< "User not register");
+     //cout<<"\n\n\n\n\n\n\n";
      return;
    }
   //test Registrar
@@ -123,6 +125,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   if (0 == idreg)
   {
      send400(sip);
+     ErrLog(<< "No access to add record");
+     //cout<<"\n\n\n\n\n\n\n";
      return;
    }
 
@@ -138,12 +142,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
            Data tuser = to.uri().user();
            Data thost = to.uri().host();
 
-
-           //cout<<"\n\n\n\n\n"<<callid<<"\n\n\n\n\n";
-           /*for(RegDB::AuthorizationRecord auth: alist)
-           {
-             cout<<"\n\n\n\n\n"<<auth.mIdDomain<<"\n\n\n\n\n";
-           }*/
            //registration time
            unsigned int expires = 0;
            if (sip->exists(h_Expires))
@@ -165,6 +163,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                      if (!i->isWellFormed())
                      {
                        send400(sip);
+                       ErrLog(<< "Not well formed");
+                       //cout<<"\n\n\n\n\n\n\n";
                        return;
                      }
                      // Check for "Contact: *" style deregistration
@@ -173,6 +173,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                         if (contacts.size() > 1 || expires != 0)
                           {
                               send400(sip);
+                              ErrLog(<< "Error us Contact:*");
+                              //cout<<"\n\n\n\n\n\n\n";
                               return;
                            }
                         //remove users contacts
@@ -194,6 +196,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       if (0 == idf)
                       {
                          send400(sip);
+                         ErrLog(<< "Not find Forward");
+                         //cout<<"\n\n\n\n\n\n\n";
                          return;
                        }
 
@@ -219,7 +223,24 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                           {
                              rec.mExpires = expires;
                              time_t now = time(0);
-                             rec.mTime = ctime(&now);
+                             //https://www.tutorialspoint.com/cplusplus/cpp_date_time.htm
+                             tm *ltm = localtime(&now);
+                             // print various components of tm structure.
+                             //http://mycpp.ru/cpp/scpp/cppd_datetime.htm
+                             /*cout << "Year:" << 1900 + ltm->tm_year<<endl;
+                             cout << "Month: "<< 1 + ltm->tm_mon<< endl;
+                             cout << "Day: "<<  ltm->tm_mday << endl;
+                             cout << "Time: "<< ltm->tm_hour << ":";
+                             cout << ltm->tm_min << ":";
+                             cout << ltm->tm_sec << endl;*/
+
+                             //rec.mTime = ctime(&now);
+                             rec.mTime = Data(1900 + ltm->tm_year) + "-" +
+                                         Data(1 + ltm->tm_mon) + "-" +
+                                         Data(ltm->tm_mday) + " "+
+                                         Data(ltm->tm_hour) + ":"+
+                                         Data(ltm->tm_min) + ":" +
+                                         Data(ltm->tm_sec);
                              mBase->updateRoute(Data(rec.mIdRoute), rec);
                              upd = true;
                            }
@@ -232,7 +253,14 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                             rec.mIdForward = idf;
                             rec.mExpires = expires;
                             time_t now = time(0);
-                            rec.mTime = ctime(&now);
+                            //rec.mTime = ctime(&now);
+                            tm *ltm = localtime(&now);
+                            rec.mTime = Data(1900 + ltm->tm_year) + "-" +
+                                        Data(1 + ltm->tm_mon) + "-"+
+                                        Data(ltm->tm_mday) + " "+
+                                        Data(ltm->tm_hour) + ":"+
+                                        Data(ltm->tm_min) + ":" +
+                                        Data(ltm->tm_sec);
                             mBase->addRoute(rec);
                             upd = true;
                         }
@@ -307,12 +335,16 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
   unsigned int idp = findProtocol(scheme);
   if (0 == idp)
   {
+     ErrLog(<< "Not find Protocol");
+     //cout<<"\n\n\n\n\n\n\n";
      return 0;
   }
 
   unsigned int idd = findDomain(host);
   if (0 == idd)
   {
+     ErrLog(<< "Not find Domain");
+     //cout<<"\n\n\n\n\n\n\n";
      return 0;
   }
 
@@ -343,11 +375,13 @@ RegThread::findForward(const unsigned int& idp,
      }
   }
   //add forward
-  if (0 == idp)
+  if (0 == idf)
   {
      RegDB::ForwardRecord rec;
      rec.mIdProtocol = idp;
      rec.mIdDomain = idd;
+     rec.mIP = "127.0.0.1";
+     rec.mPort = 0;
      //ip and port do not use
      //wait nat
      mBase->addForward(rec);

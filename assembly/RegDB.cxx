@@ -486,6 +486,7 @@ RegDB::addRoute(const RouteRecord& rec)
      ds << "INSERT INTO troute (fidreg, fidforward, ftime, fexpires)"
         << " VALUES("
         << rec.mIdReg << ", "
+        //<< rec.mIdForward << ", NOW(), "
         << rec.mIdForward << ", '"
         << rec.mTime << "', "
         << rec.mExpires << ")";
@@ -560,8 +561,8 @@ RegDB::updateRoute(const Key& key, const RouteRecord& rec)
      ds << "UPDATE troute SET"
         << " fidreg = " << rec.mIdReg
         << ", fidforward = " << rec.mIdForward
-        << ", ftime = " << rec.mTime
-        << ", fexpires = " << rec.mExpires
+        << ", ftime = '" << rec.mTime
+        << "', fexpires = " << rec.mExpires
         << " WHERE fidroute = " << key;
   }
   return query(command, 0) == 0;
