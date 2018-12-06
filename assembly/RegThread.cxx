@@ -368,7 +368,9 @@ RegThread::findForward(const unsigned int& idp,
   unsigned int idf = 0;
   for (RegDB::ForwardRecord rec : flist)
   {
-     if ((idp == rec.mIdProtocol) && (idd == rec.mIdDomain))
+     if ((idp == rec.mIdProtocol) &&
+         (port == rec.mPort) &&
+         (idd == rec.mIdDomain))
      {
        idf = rec.mIdForward;
        break;
@@ -380,10 +382,11 @@ RegThread::findForward(const unsigned int& idp,
      RegDB::ForwardRecord rec;
      rec.mIdProtocol = idp;
      rec.mIdDomain = idd;
-     rec.mIP = "127.0.0.1";
-     rec.mPort = 0;
      //ip and port do not use
      //wait nat
+     //rec.mIP = "127.0.0.1";
+     //rec.mPort = 0;
+     rec.mPort = port;
      mBase->addForward(rec);
      //reload
      flist.clear();
