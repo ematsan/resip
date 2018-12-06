@@ -115,7 +115,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   //test Authorization
   if (!testAuthorization(sip))
   {
-     send400(sip);
+     send403(sip,"REGISTER");
      ErrLog(<< "User not register");
      //cout<<"\n\n\n\n\n\n\n";
      return;
@@ -124,7 +124,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   unsigned int idreg = findRegistrar(sip);
   if (0 == idreg)
   {
-     send400(sip);
+     send403(sip,"REGISTER");
      ErrLog(<< "No access to add record");
      //cout<<"\n\n\n\n\n\n\n";
      return;
@@ -509,14 +509,16 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   unsigned int idreg = 0;
   for (RegDB::RegistrarRecord rec : reglist)
   {
-    //-------------------------------------------------------------//
-    //-------------------Test CallId-------------------------------//
-    //-------------------------------------------------------------//
     if (//(callid == rec.mCallId) &&
         (fidu == rec.mIdMain) &&
         (tidu == rec.mIdUser) &&
         (tidd == rec.mIdDomain))
         {
+           if(callid != rec.mCallId)
+           {
+             rec.mCallId = callid;
+             mBase->updateRegistrar(Data(rec.mIdReg),rec);
+           }
            idreg = rec.mIdReg;
            break;
       }

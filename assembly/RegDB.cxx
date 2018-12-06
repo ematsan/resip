@@ -474,6 +474,21 @@ RegDB::getAllRegistrars()
   }
   return records;
 }
+
+
+bool
+RegDB::updateRegistrar(const Key& key, const RegistrarRecord& rec)
+{
+  Data command;
+  {
+     //UPDATE t1 SET c=c+1 WHERE a=1;
+     DataStream ds(command);
+     ds << "UPDATE tregistrar SET"
+        << " fcallid = '" << rec.mCallId
+        << "' WHERE fidreg = " << key;
+  }
+  return query(command, 0) == 0;
+}
 /*************************************************************************/
 /*                        ROUTE                                          */
 /*************************************************************************/

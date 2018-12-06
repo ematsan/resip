@@ -115,6 +115,7 @@ class RegDB{
     virtual void eraseRegistrar(const Key& key);
     virtual RegistrarRecord getRegistrar(const Key& key) const;
     virtual RegistrarRecordList getAllRegistrars();
+    virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec);    
 
     // functions for Route Records
     virtual bool addRoute(const RouteRecord& rec);
