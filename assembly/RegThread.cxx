@@ -195,7 +195,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       unsigned int idf = findForward(addr, expires);
                       if (0 == idf)
                       {
-                         send400(sip);
+                         send500(sip);
                          ErrLog(<< "Not find Forward");
                          //cout<<"\n\n\n\n\n\n\n";
                          return;
@@ -588,4 +588,11 @@ RegThread::send403(SipMessage* sip, Data meth)
   auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
   mStack.send(*msg403);
   ErrLog(<< "Sent 403 to "<< meth);
+}
+
+void
+RegThread::send500(SipMessage* sip){
+  auto_ptr<SipMessage> msg500(Helper::makeResponse(*sip, 500));
+  ErrLog (<< "Sent 500(Server Internal Error) to REGISTER");
+  mStack.send(*msg500);
 }

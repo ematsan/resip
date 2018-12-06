@@ -50,6 +50,7 @@ class RegThread : public resip::ThreadIf
       void send401(resip::SipMessage* sip);
       void send403(resip::SipMessage* sip, resip::Data meth);
       void send405(resip::SipMessage* sip, resip::Data meth);
+      void send500(resip::SipMessage* sip);      
 
       void loadData();
       RegDB::UserRecordList ulist;
