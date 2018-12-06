@@ -3,7 +3,6 @@
 #include "RegThread.hxx"
 #include "RegMySQL.hxx"
 #include "RegDB.hxx"
-//#include "RegRunner.hxx"
 
 //!!!!!!!!!!!!!!!!!!!!!! - read example using messages
 #include "resip/stack/Helper.hxx"
@@ -15,7 +14,6 @@
 #include "resip/stack/Auth.hxx"
 #include "resip/stack/SipStack.hxx"
 #include "rutil/Logger.hxx"
-
 
 using namespace resip;
 using namespace std;
@@ -31,41 +29,40 @@ RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase)
   loadData();
 }
 
-
 RegThread::~RegThread()
 {
    cout<<"RegThread destructor"<<endl;
-   ulist.clear();
-   dlist.clear();
-   flist.clear();
-   plist.clear();
-   alist.clear();
-   reglist.clear();
-   rlist.clear();
+   clearData();
+}
+
+void
+RegThread::clearData()
+{
+  ulist.clear();
+  dlist.clear();
+  flist.clear();
+  plist.clear();
+  alist.clear();
+  reglist.clear();
+  rlist.clear();
 }
 
 void
 RegThread::loadData()
 {
-  ulist.clear();
+  clearData();
   ulist = mBase->getAllUsers();
   if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
-  dlist.clear();
   dlist = mBase->getAllDomains();
   if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
-  flist.clear();
   flist = mBase->getAllForwards();
   if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
-  plist.clear();
   plist = mBase->getAllProtocols();
   if (plist.empty())  { ErrLog(<< "No element in table tProtocol"); }
-  alist.clear();
   alist = mBase->getAllAuthorizations();
   if (alist.empty()) { ErrLog(<< "No element in table tAuthorization");}
-  reglist.clear();
   reglist = mBase->getAllRegistrars();
   if (reglist.empty()) { ErrLog(<< "No element in table tRegistrar"); }
-  rlist.clear();
   rlist = mBase->getAllRoutes();
   if (rlist.empty()) { ErrLog(<< "No element in table tRoute"); }
 }
@@ -84,7 +81,7 @@ RegThread::thread()
      SipMessage* received = mStack.receive();
      if (received)
      {
-        auto_ptr<SipMessage> forDel(received);
+        //auto_ptr<SipMessage> forDel(received);
         MethodTypes meth = received->header(h_RequestLine).getMethod();
         InfoLog(<< "Server received: " << getMethodName(meth));
         if ( meth == REGISTER )
@@ -105,6 +102,7 @@ RegThread::thread()
          send405(received, getMethodName(meth));
        }
      }
+     delete received;
   }
 }
 
@@ -117,7 +115,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   {
      send403(sip);
      ErrLog(<< "User not register");
-     //cout<<"\n\n\n\n\n\n\n";
      return;
    }
   //test Registrar
@@ -126,13 +123,11 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   {
      send403(sip);
      ErrLog(<< "No access to add record");
-     //cout<<"\n\n\n\n\n\n\n";
      return;
    }
 
   if(sip->exists(h_Contacts))
         {
-
            NameAddr& to = sip->header(h_To);
            NameAddr& from = sip->header(h_From);
            CallId& callid = sip->header(h_CallId);
@@ -141,7 +136,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
            Data fhost = from.uri().host();
            Data tuser = to.uri().user();
            Data thost = to.uri().host();
-
            //registration time
            unsigned int expires = 0;
            if (sip->exists(h_Expires))
@@ -152,10 +146,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
            {
              expires = 3600;
            }
-
            //parse all contacts
            ParserContainer<NameAddr>& contacts = sip->header(h_Contacts);
-
 
            for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
                    {
@@ -164,7 +156,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                      {
                        send400(sip);
                        ErrLog(<< "Not well formed");
-                       //cout<<"\n\n\n\n\n\n\n";
                        return;
                      }
                      // Check for "Contact: *" style deregistration
@@ -174,7 +165,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                           {
                               send400(sip);
                               ErrLog(<< "Error us Contact:*");
-                              //cout<<"\n\n\n\n\n\n\n";
                               return;
                            }
                         //remove users contacts
@@ -184,11 +174,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
 
                       NameAddr addr = *i;
 
-                      /*Data user = addr.uri().user();
-                      Data host = addr.uri().host();
-                      unsigned int port = addr.uri().port();
-                      Data scheme = addr.uri().scheme();
-                      cout<<user<<" - "<< host <<" - "<< port <<" - " << scheme <<"\n\n\n\n\n\n\n\n";*/
                       if (addr.exists(p_expires))
                          expires = addr.param(p_expires);
 
@@ -197,10 +182,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       {
                          send500(sip);
                          ErrLog(<< "Not find Forward");
-                         //cout<<"\n\n\n\n\n\n\n";
                          return;
                        }
-
                       //need to delete record
                       bool upd = false;
                       if (0 == expires)
@@ -233,8 +216,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                              cout << "Time: "<< ltm->tm_hour << ":";
                              cout << ltm->tm_min << ":";
                              cout << ltm->tm_sec << endl;*/
-
-                             //rec.mTime = ctime(&now);
                              rec.mTime = Data(1900 + ltm->tm_year) + "-" +
                                          Data(1 + ltm->tm_mon) + "-" +
                                          Data(ltm->tm_mday) + " "+
@@ -253,7 +234,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                             rec.mIdForward = idf;
                             rec.mExpires = expires;
                             time_t now = time(0);
-                            //rec.mTime = ctime(&now);
                             tm *ltm = localtime(&now);
                             rec.mTime = Data(1900 + ltm->tm_year) + "-" +
                                         Data(1 + ltm->tm_mon) + "-"+
@@ -267,22 +247,16 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       }
                       //to.param(p_tag)
                       //cout<<"\n\n\n\n\n"<<from.param(p_tag)<<"\n\n\n\n\n";
-                      //cout<<"\n\n\n\n\n"<<host<<"\n\n\n\n\n";
                       //if remove then reload data
                       if (upd)
                       {
                         rlist.clear();
                         rlist = mBase->getAllRoutes();
                       }
-
                       send200(sip, *i);
                    }
         }
-        else //no contacts
-        {
-              //do nothing
-              //send400(sip);
-        }
+        else ;//no contacts - do nothing
 }
 
 void
@@ -316,7 +290,6 @@ RegThread::testAuthorization(resip::SipMessage* sip)
 {
   for (RegDB::AuthorizationRecord auth : alist)
   {
-     //cout<< auth.mIdAuth<< " - "<<auth.mPassword<<"\n\n\n\n\n";
      if (Helper::authenticateRequestWithA1(*sip, mNameAddr, auth.mPassword, 0) == Helper::Authenticated)
         return true;
   }
@@ -331,12 +304,11 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
   Data host = addr.uri().host();
   unsigned int port = addr.uri().port();
   Data scheme = addr.uri().scheme();
-  //cout<<user<<" - "<< host <<" - "<< port <<" - " << scheme <<"\n\n\n\n\n\n\n\n";
+
   unsigned int idp = findProtocol(scheme);
   if (0 == idp)
   {
      ErrLog(<< "Not find Protocol");
-     //cout<<"\n\n\n\n\n\n\n";
      return 0;
   }
 
@@ -344,7 +316,6 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
   if (0 == idd)
   {
      ErrLog(<< "Not find Domain");
-     //cout<<"\n\n\n\n\n\n\n";
      return 0;
   }
 
@@ -363,8 +334,7 @@ RegThread::findForward(const unsigned int& idp,
                 const resip::Data& ip = "127.0.0.1",
                 const unsigned int& port = 0)
 {
-  //ip and port do not use
-  //wait nat
+  //ip do not use wait nat
   unsigned int idf = 0;
   for (RegDB::ForwardRecord rec : flist)
   {
@@ -382,10 +352,8 @@ RegThread::findForward(const unsigned int& idp,
      RegDB::ForwardRecord rec;
      rec.mIdProtocol = idp;
      rec.mIdDomain = idd;
-     //ip and port do not use
-     //wait nat
+     //ip do not use wait nat
      //rec.mIP = "127.0.0.1";
-     //rec.mPort = 0;
      rec.mPort = port;
      mBase->addForward(rec);
      //reload
@@ -395,7 +363,6 @@ RegThread::findForward(const unsigned int& idp,
   }
   return idf;
 }
-
 
 int
 RegThread::findProtocol(resip::Data& protocol)
@@ -454,7 +421,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
 {
   NameAddr& to = sip->header(h_To);
   NameAddr& from = sip->header(h_From);
-  //CallId&
+
   Data& callid = sip->header(h_CallId).value();
 
   Data fuser = from.uri().user();
@@ -464,9 +431,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   unsigned int fidd = 0, tidd = 0;
   unsigned int fidu = 0, tidu = 0;
   bool equal = false;
-//  cout << to.uri() << "\n\n\n\n\n";
-//  cout << from.uri() << "\n\n\n\n\n";
-  //if (to.uri() == from.uri())
+
   if ((fuser == tuser) && (thost == fhost))
   {
     equal = true;
@@ -497,7 +462,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
          break;
        }
   }
-  //cout << fidu << "\t"<< tidu << "\t"<< fidd << "\t"<< tidd << "\n\n\n";
+
   if ((0 == fidu) ||
       (0 == tidu) ||
       (0 == fidd) ||
@@ -567,7 +532,6 @@ RegThread::send400(SipMessage* sip){
 
 void
 RegThread::send401(SipMessage* sip){
-  //auto_ptr<SipMessage> msg401(Helper::makeResponse(*received, 401, mNameAddr));
   auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*sip, mNameAddr/*"localhost"*/, true, false));
   ErrLog (<< "Sent 401(Unauthorized) to REGISTER");
   mStack.send(*msg401);

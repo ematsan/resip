@@ -51,9 +51,6 @@ class RegMySQL: public RegDB
   // mutex calls to mysql_query and mysql_store_result:
   // http://dev.mysql.com/doc/refman/5.1/en/threaded-clients.html
     mutable resip::Mutex mMutex;
-
 };
-
 }
-
 #endif

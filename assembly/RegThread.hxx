@@ -22,8 +22,6 @@ class RegMySQL;
 class RegThread : public resip::ThreadIf
 {
     public:
-
-      //RegThread(resip::SipStack& stack, resip::NameAddr contact);
       RegThread(resip::SipStack& stack, resip::Data realm, RegMySQL* mdatabase);
       ~RegThread();
 
@@ -53,6 +51,7 @@ class RegThread : public resip::ThreadIf
       void send500(resip::SipMessage* sip);
 
       void loadData();
+      void clearData();
       RegDB::UserRecordList ulist;
       RegDB::DomainRecordList dlist;
       RegDB::ForwardRecordList flist;
@@ -60,7 +59,6 @@ class RegThread : public resip::ThreadIf
       RegDB::AuthorizationRecordList alist;
       RegDB::RegistrarRecordList reglist;
       RegDB::RouteRecordList rlist;
-
 };
 }
 #endif

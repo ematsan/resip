@@ -10,7 +10,6 @@
 using namespace std;
 
 namespace registrar{
-
 //create SQL query to DB
 class RegDB{
   public:
@@ -20,14 +19,12 @@ class RegDB{
           resip::Data mName;
           unsigned int mIdDomain;
     };
-
     struct DomainRecord
     {
           unsigned int mIdDomain;
           resip::Data mDomain;
           unsigned int mIdRealm;
     };
-
     struct ForwardRecord
     {
           unsigned int mIdForward;
@@ -36,13 +33,11 @@ class RegDB{
           resip::Data mIP;
           unsigned int mPort;
     };
-
     struct ProtocolRecord
     {
           unsigned int mIdProtocol;
           resip::Data mProtocol;
     };
-
     struct AuthorizationRecord
     {
           unsigned int mIdAuth;
@@ -50,7 +45,6 @@ class RegDB{
           unsigned int mIdRealm;
           resip::Data mPassword;
     };
-
     struct RegistrarRecord
     {
           unsigned int mIdReg;
@@ -59,7 +53,6 @@ class RegDB{
           unsigned int mIdMain;
           resip::Data mCallId;
     };
-
     struct RouteRecord
     {
           unsigned int mIdRoute;
@@ -68,8 +61,6 @@ class RegDB{
           resip::Data mTime;
           unsigned int mExpires;
     };
-
-
 
     typedef resip::Data Key;
     typedef vector<UserRecord> UserRecordList;
@@ -124,7 +115,6 @@ class RegDB{
     virtual RouteRecordList getAllRoutes();
     virtual bool updateRoute(const Key& key, const RouteRecord& rec);
 
-
   protected:
 
     typedef enum
@@ -154,12 +144,8 @@ class RegDB{
     virtual resip::Data dbKey(const Table table,
                                bool first = false) = 0; // return empty if no more
 
-
     virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const = 0;
     virtual int query(const resip::Data& queryCommand) const = 0;
 };
-
 }
-
-
 #endif

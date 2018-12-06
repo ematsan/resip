@@ -6,36 +6,7 @@ using namespace registrar;
 using namespace resip;
 
 #define RESIPROCATE_SUBSYSTEM Subsystem::TEST
-/*
-static void
-encodeString(oDataStream& s, const Data& data)
-{
-   short len = (short)data.size();
-   s.write( (char*)(&len) , sizeof( len ) );
-   s.write( data.data(), len );
-}
 
-
-static void
-decodeString(iDataStream& s, Data& data)
-{
-   data.clear();
-
-   if(s.eof()) return;
-
-   short len;
-   s.read((char*)(&len), sizeof(len));
-   if(s.eof()) return;
-
-   // [TODO] This is probably OK for now, but we can do better than this.
-   if (len > 8192)
-   {
-      ErrLog( << "Tried to decode a database record that was much larger (>8k) than expected.  Returning an empty Data instead." );
-      return;
-   }
-
-   s.read(data.getBuf(len), len);
-}*/
 /*************************************************************************/
 /*                        USER                                           */
 /*************************************************************************/
@@ -52,7 +23,6 @@ RegDB::addUser(const UserRecord& rec)
   }
   return query(command, 0) == 0;
 }
-
 
 void
 RegDB::eraseUser(const Key& key)
@@ -124,6 +94,7 @@ RegDB::addDomain(const DomainRecord& rec)
   }
   return query(command, 0) == 0;
 }
+
 void
 RegDB::eraseDomain(const Key& key)
 {
@@ -397,7 +368,6 @@ RegDB::getAllAuthorizations()
   }
   return records;
 }
-
 /*************************************************************************/
 /*                        REGISTRAR                                      */
 /*************************************************************************/
@@ -413,7 +383,6 @@ RegDB::addRegistrar(const RegistrarRecord& rec)
         << rec.mIdDomain << ", '"
         << rec.mCallId<<"', "
         << rec.mIdMain << ")";
-
   }
   return query(command, 0) == 0;
 }
@@ -475,13 +444,11 @@ RegDB::getAllRegistrars()
   return records;
 }
 
-
 bool
 RegDB::updateRegistrar(const Key& key, const RegistrarRecord& rec)
 {
   Data command;
   {
-     //UPDATE t1 SET c=c+1 WHERE a=1;
      DataStream ds(command);
      ds << "UPDATE tregistrar SET"
         << " fcallid = '" << rec.mCallId
@@ -501,7 +468,6 @@ RegDB::addRoute(const RouteRecord& rec)
      ds << "INSERT INTO troute (fidreg, fidforward, ftime, fexpires)"
         << " VALUES("
         << rec.mIdReg << ", "
-        //<< rec.mIdForward << ", NOW(), "
         << rec.mIdForward << ", '"
         << rec.mTime << "', "
         << rec.mExpires << ")";
@@ -585,7 +551,6 @@ RegDB::updateRoute(const Key& key, const RouteRecord& rec)
 {
   Data command;
   {
-     //UPDATE t1 SET c=c+1 WHERE a=1;
      DataStream ds(command);
      ds << "UPDATE troute SET"
         << " fidreg = " << rec.mIdReg
@@ -596,9 +561,7 @@ RegDB::updateRoute(const Key& key, const RouteRecord& rec)
   }
   return query(command, 0) == 0;
 }
-
 /*****************************************************************************/
-
 void
 RegDB::dbEraseRecord(const Table table,
                         const Data& key)
