@@ -11,6 +11,7 @@ using namespace std;
 
 namespace registrar{
 
+//create SQL query to DB
 class RegDB{
   public:
     struct UserRecord
@@ -31,7 +32,6 @@ class RegDB{
     {
           unsigned int mIdForward;
           unsigned int mIdProtocol;
-//          resip::Data mAddress;
           unsigned int mIdDomain;
           resip::Data mIP;
           unsigned int mPort;
@@ -115,7 +115,7 @@ class RegDB{
     virtual void eraseRegistrar(const Key& key);
     virtual RegistrarRecord getRegistrar(const Key& key) const;
     virtual RegistrarRecordList getAllRegistrars();
-    virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec);    
+    virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec);
 
     // functions for Route Records
     virtual bool addRoute(const RouteRecord& rec);
@@ -131,7 +131,6 @@ class RegDB{
     {
       UserTable=0,
       DomainTable,
-      RealmTable,
       ForwardTable,
       ProtocolTable,
       AuthorizationTable,
@@ -140,22 +139,15 @@ class RegDB{
       MaxTable  // This one MUST be last
     } Table;
 
-    const char tableName[MaxTable][20] = {"tuser", "tdomain", "trealm", "tforward",
+    const char tableName[MaxTable][20] = {"tuser", "tdomain", "tforward",
       "tprotocol", "tauthorization", "tregistrar", "troute"};
 
-    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidrealm", "fidforward",
+    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidforward",
         "fidprotocol", "fidauth", "fidreg", "fidroute"};
 
     mutable MYSQL* mConn;
     // Db manipulation routines
-    /*virtual bool dbWriteRecord(const Table table,
-                           const resip::Data& pKey,
-                           const resip::Data& pData) = 0;
-    /// return false if not found
-    virtual bool dbReadRecord(const Table table,
-                              const resip::Data& key,
-                              resip::Data& data) const =0;*/
-    // allows deleting records from a table that supports secondary keying using a secondary key
+    // allows deleting records from a table
     virtual void dbEraseRecord(const Table table,
                                const resip::Data& key);
 

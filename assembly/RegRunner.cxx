@@ -62,32 +62,18 @@ RegRunner::run(int argc, char** argv)
        return false;
   }
 
-
-  /* //test mRegConfig
-  int port = mRegConfig->getConfigInt("Port", 5080);
-  cout<<port<<endl;*/
   // Create SipStack and associated objects
   resip_assert(!mSipStack);
   try
   {
-
     mSipStack = new SipStack();//0, dnsServers, mAsyncProcessHandler, false, 0, 0, mFdPollGrp);
 
-  //  Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);
-    /*bool isV4Address = DnsUtil::isIpV4Address(ipAddress);
-  //  bool isV6Address = DnsUtil::isIpV6Address(ipAddress);
-    if (!ipAddress.empty())
-    {
-       ErrLog(<< "Malformed IP-address found in IPAddress setting, ignoring (binding to all interfaces): " << ipAddress);
-       return false;
-    }*/
     int udpPort = mRegConfig->getConfigInt("UDPPort", 5060);
     int tcpPort = mRegConfig->getConfigInt("TCPPort", 5060);
     if (udpPort)
         mSipStack->addTransport(UDP, udpPort);
     if (tcpPort)
         mSipStack->addTransport(TCP, tcpPort);
-
 
     resip_assert(!mStackThread);
     //read contact
@@ -111,13 +97,11 @@ void
 RegRunner::shutdown()
 {
   cout<<"RegRunner shutdown"<<endl;
-
   if(!mRunning) return;
   mStackThread->shutdown();
   // Wait for all threads to shutdown, and destroy objects
   mSipStack->shutdownAndJoinThreads();
   mStackThread->join();
-
 
   delete mStackThread; mStackThread = 0;
   delete mSipStack; mSipStack = 0;

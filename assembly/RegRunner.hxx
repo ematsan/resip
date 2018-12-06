@@ -7,8 +7,6 @@ namespace resip
 {
   class SipStack;
   class ThreadIf;
-/*  class FdPollGrp;
-  class AsyncProcessHandler;*/
 }
 
 using namespace std;
@@ -16,7 +14,6 @@ using namespace std;
 namespace registrar
 {
   class RegMySQL;
-//  #define RESIPROCATE_SUBSYSTEM Subsystem::REGISTRAR
 
   class RegConfig : public resip::ConfigParse //not abstract class
   {
@@ -42,9 +39,6 @@ namespace registrar
      resip::SipStack* mSipStack; //sip stack
      resip::ThreadIf* mStackThread; //sip thread
      RegMySQL* mBase; //mySQL db
-
-     /*resip::FdPollGrp* mFdPollGrp;   //Polling group callback
-     resip::AsyncProcessHandler* mAsyncProcessHandler;//will be invoked when Messages are posted to the stack*/
    };
 }
 #endif

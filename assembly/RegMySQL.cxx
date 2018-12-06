@@ -41,8 +41,6 @@ class MySQLInitializer
 static MySQLInitializer g_MySQLInitializer;
 
 
-
-
 RegMySQL::RegMySQL(const resip::Data& server,
           const resip::Data& user,
           const resip::Data& password,
@@ -192,7 +190,6 @@ RegMySQL::dbKey(const Table table,
         return Data::Empty;
      }
   }
-
   //select next resalt
   MYSQL_ROW row = mysql_fetch_row(mResult[table]);
   //if empty
@@ -205,9 +202,6 @@ RegMySQL::dbKey(const Table table,
 
   return Data(row[0]);
 }
-
-
-
 
 /*************************************************************************/
 /*                        query                                          */

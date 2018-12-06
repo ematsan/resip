@@ -16,6 +16,7 @@ namespace resip
 
 namespace registrar
 {
+//connection with db, make query to db
 class RegMySQL: public RegDB
 {
   public:
@@ -27,12 +28,9 @@ class RegMySQL: public RegDB
             unsigned int port);
     ~RegMySQL();
 
-
-
     int connectDB() const;
     void disconnectDB() const;
     void initialize() const;
-
 
   private:
     virtual resip::Data dbKey(const Table table, bool first = false);
@@ -46,7 +44,6 @@ class RegMySQL: public RegDB
     unsigned int mDBPort;
 
     mutable bool mConnected;
-
     mutable MYSQL* mConn;
     mutable MYSQL_RES* mResult[MaxTable];
 
