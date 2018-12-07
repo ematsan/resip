@@ -70,10 +70,12 @@ RegRunner::run(int argc, char** argv)
 
     int udpPort = mRegConfig->getConfigInt("UDPPort", 5060);
     int tcpPort = mRegConfig->getConfigInt("TCPPort", 5060);
+    Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);
+
     if (udpPort)
-        mSipStack->addTransport(UDP, udpPort);
+        mSipStack->addTransport(UDP, udpPort, V4, StunDisabled, ipAddress);
     if (tcpPort)
-        mSipStack->addTransport(TCP, tcpPort);
+        mSipStack->addTransport(TCP, tcpPort, V4, StunDisabled, ipAddress);
 
     resip_assert(!mStackThread);
     //read contact
