@@ -96,7 +96,8 @@ main(int argc, char* argv[])
    //contact.uri().host() = SipStack::getHostname();
    contact.uri().host() = "127.0.0.1";
    contact.uri().port() = 5080;
-   contact.uri().user() = "yffulf";
+   //contact.uri().user() = "yffulf";
+   contact.uri().user() = "test";
 
    TransportType protocol;
    protocol = TCP;
