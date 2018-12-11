@@ -113,16 +113,16 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   //test Authorization
   if (!testAuthorization(sip))
   {
-     send403(sip);
-     ErrLog(<< "User not register");
+     send403(sip, "User not register");
+     //ErrLog(<< "User not register");
      return;
    }
   //test Registrar
   unsigned int idreg = findRegistrar(sip);
   if (0 == idreg)
   {
-     send403(sip);
-     ErrLog(<< "No access to add record");
+     send403(sip, "User not have access to add record");
+     //ErrLog(<< "No access to add record");
      return;
    }
 
@@ -549,11 +549,11 @@ RegThread::send405(SipMessage* sip, Data meth)
 
 
 void
-RegThread::send403(SipMessage* sip)
+RegThread::send403(SipMessage* sip, Data mes)
 {
-  auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
+  auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403, mes));
   mStack.send(*msg403);
-  ErrLog(<< "Sent 403(Forbidded) to REGISTER");
+  ErrLog(<< "Sent 403(Forbidded) to REGISTER :" + mes);
 }
 
 void
