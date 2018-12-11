@@ -42,7 +42,7 @@ void
 RegThread::reloadDomain()
 {
   //if (std::find(configDomains.begin(), configDomains.end(), realm) != configDomains.end())
-  bool reload = false;
+  /*bool reload = false;
   for (RegDB::DomainRecord rec : dlist)
   {
      bool kept = false;
@@ -87,6 +87,23 @@ RegThread::reloadDomain()
     dlist = mBase->getAllDomains();
     if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
   }
+*/
+  RegDB::DomainRecordList tlist = dlist;
+  dlist.clear();
+  for (Data domain: mConfigDomains)
+  {
+    for (RegDB::DomainRecord rec : tlist)
+    {
+       if (rec.mDomain == domain)
+       {
+         //kept = true;
+         dlist.push_back(rec);
+         break;
+       }
+    }
+  }
+
+
 }
 
 void

@@ -100,17 +100,17 @@ RegRunner::run(int argc, char** argv)
     Data realm = mRegConfig->getConfigData("Realm", "localhost");
     std::vector<Data> configDomains;
     mRegConfig->getConfigValue("Domains", configDomains);
-    if (std::find(configDomains.begin(), configDomains.end(), realm) == configDomains.end())
-    {
-      configDomains.push_back(realm);
-    }
     if (configDomains.empty())
     {
       configDomains.push_back("localhost");
       configDomains.push_back("127.0.0.1");
-    //  configDomains.push_back("192.168.64.85");
-      configDomains.push_back(realm);
+    //configDomains.push_back("192.168.64.85");
+    //configDomains.push_back(realm);
     }
+    /*if (std::find(configDomains.begin(), configDomains.end(), realm) == configDomains.end())
+    {
+      configDomains.push_back(realm);
+    }*/
 
     mStackThread = new RegThread (*mSipStack, realm, mBase, configDomains);
 
