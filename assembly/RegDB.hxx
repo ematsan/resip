@@ -52,7 +52,7 @@ class RegDB{
     {
           unsigned int mIdReg;
           unsigned int mIdUDFk;
-          unsigned int mIdUserFk;
+          unsigned int mIdMainFk;
           resip::Data mCallId;
     };
     struct RouteRecord

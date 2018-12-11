@@ -156,7 +156,7 @@ RegDB::addUserDomain(const UserDomainRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tuserdomain (fiduser, fiddomain)"
+     ds << "INSERT INTO tuserdomain (fiduserfk, fiddomainfk)"
         << " VALUES('"
         << rec.mIdUserFk << ","
         << rec.mIdDomainFk<<"')";
@@ -177,7 +177,7 @@ RegDB::getUserDomain(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiddomain, fiduser FROM tuserdomain"
+     ds << "SELECT fiddomainfk, fiduserfk FROM tuserdomain"
         << " WHERE fidud='" << key
         << "'";
   }
@@ -296,7 +296,7 @@ RegDB::addForward(const ForwardRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tforward (fidprotocol, fiddomain, fport)"
+     ds << "INSERT INTO tforward (fidprotocolfk, fiddomainfk, fport)"
         << " VALUES("
         << rec.mIdProtocolFk << ", "
         << rec.mIdDomainFk << ", "
@@ -318,7 +318,7 @@ RegDB::getForward(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidprotocol, fiddomain, fport FROM tforward"
+     ds << "SELECT fidprotocolfk, fiddomainfk, fport FROM tforward"
         << " WHERE fidforward='" << key
         << "'";
   }
@@ -369,7 +369,7 @@ RegDB::addAuthorization(const AuthorizationRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tauthorization (fidud, fpassword)"
+     ds << "INSERT INTO tauthorization (fidudfk, fpassword)"
         << " VALUES("
         << rec.mIdUDFk << ", '"
         << rec.mPassword << "')";
@@ -440,11 +440,11 @@ RegDB::addRegistrar(const RegistrarRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tregistrar (fidudfk, fcallid, fiduserfk)"
+     ds << "INSERT INTO tregistrar (fidudfk, fcallid, fidmainfk)"
         << " VALUES("
         << rec.mIdUDFk << ", '"
         << rec.mCallId<<"', "
-        << rec.mIdUserFk << ")";
+        << rec.mIdMainFk << ")";
   }
   return query(command, 0) == 0;
 }
@@ -462,7 +462,7 @@ RegDB::getRegistrar(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidudfk, fcallid, fiduserfk FROM tregistrar"
+     ds << "SELECT fidudfk, fcallid, fidmainfk FROM tregistrar"
         << " WHERE fidreg='" << key
         << "'";
   }
@@ -485,7 +485,7 @@ RegDB::getRegistrar(const Key& key) const
        rec.mIdReg             = Data(key).convertInt();
        rec.mIdUDFk            = Data(row[col++]).convertInt();
        rec.mCallId            = Data(row[col++]);
-       rec.mIdUserFk          = Data(row[col++]).convertInt();
+       rec.mIdMainFk          = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
   return rec;

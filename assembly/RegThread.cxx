@@ -469,7 +469,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
       {
           tidud = rec.mIdUD;
         }
-      if ((0 != tidu) && (0 != fidu))
+      if ((0 != tidud) && (0 != fidud))
       {
          break;
        }
@@ -503,7 +503,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   unsigned int idreg = 0;
   for (RegDB::RegistrarRecord rec : reglist)
   {
-    if ((fidu == rec.mIdUserFk) &&
+    if ((fidud == rec.mIdMainFk) &&
         (tidud == rec.mIdUDFk))
         {
            if(callid != rec.mCallId)
@@ -520,7 +520,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   {
       RegDB::RegistrarRecord rec;
       rec.mIdUDFk = tidud;
-      rec.mIdUserFk = fidu;
+      rec.mIdMainFk = fidud;
       rec.mCallId = callid;
       rec.mIdReg = 0;
       mBase->addRegistrar(rec);
