@@ -40,6 +40,7 @@ RegThread::clearData()
 {
   ulist.clear();
   dlist.clear();
+  udlist.clear();
   flist.clear();
   plist.clear();
   alist.clear();
@@ -55,6 +56,8 @@ RegThread::loadData()
   if (ulist.empty()){ ErrLog(<< "No element in table tUser"); }
   dlist = mBase->getAllDomains();
   if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
+  udlist = mBase->getAllUserDomains();
+  if (udlist.empty()) { ErrLog(<< "No element in table tUserDomain"); }
   flist = mBase->getAllForwards();
   if (flist.empty()){ ErrLog(<< "No element in table tForward"); }
   plist = mBase->getAllProtocols();
@@ -190,7 +193,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       {
                         for(RegDB::RouteRecord rec : rlist)
                         {
-                          if ((rec.mIdReg == idreg)  && (rec.mIdForward == idf))
+                          if ((rec.mIdRegFk == idreg)  && (rec.mIdForwardFk == idf))
                           {
                              mBase->eraseRoute(Data(rec.mIdRoute));
                              upd = true;
@@ -202,7 +205,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                         for(RegDB::RouteRecord rec : rlist)
                         {
                           //if find - update
-                          if ((rec.mIdReg == idreg)  && (rec.mIdForward == idf))
+                          if ((rec.mIdRegFk == idreg)  && (rec.mIdForwardFk == idf))
                           {
                              rec.mExpires = expires;
                              time_t now = time(0);
@@ -230,8 +233,8 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                         if (!upd)
                         {
                             RegDB::RouteRecord rec;
-                            rec.mIdReg = idreg;
-                            rec.mIdForward = idf;
+                            rec.mIdRegFk = idreg;
+                            rec.mIdForwardFk = idf;
                             rec.mExpires = expires;
                             time_t now = time(0);
                             tm *ltm = localtime(&now);
@@ -270,7 +273,7 @@ RegThread::removeAllContacts(resip::SipMessage* sip)
         bool del = false;
         for(RegDB::RouteRecord rec : rlist)
         {
-          if (rec.mIdReg == idreg)
+          if (rec.mIdRegFk == idreg)
           {
              mBase->eraseRoute(Data(rec.mIdRoute));
              del = true;
@@ -319,7 +322,7 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
      return 0;
   }
 
-  unsigned int idf = findForward(idp, idd, host, port);
+  unsigned int idf = findForward(idp, idd, port);
   if (0 == idf)
   {
      return idf;
@@ -331,16 +334,14 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
 int
 RegThread::findForward(const unsigned int& idp,
                 const unsigned int& idd,
-                const resip::Data& ip = "127.0.0.1",
                 const unsigned int& port = 0)
 {
-  //ip do not use wait nat
   unsigned int idf = 0;
   for (RegDB::ForwardRecord rec : flist)
   {
-     if ((idp == rec.mIdProtocol) &&
+     if ((idp == rec.mIdProtocolFk) &&
          (port == rec.mPort) &&
-         (idd == rec.mIdDomain))
+         (idd == rec.mIdDomainFk))
      {
        idf = rec.mIdForward;
        break;
@@ -350,10 +351,8 @@ RegThread::findForward(const unsigned int& idp,
   if (0 == idf)
   {
      RegDB::ForwardRecord rec;
-     rec.mIdProtocol = idp;
-     rec.mIdDomain = idd;
-     //ip do not use wait nat
-     //rec.mIP = "127.0.0.1";
+     rec.mIdProtocolFk = idp;
+     rec.mIdDomainFk = idd;
      rec.mPort = port;
      mBase->addForward(rec);
      //reload
@@ -430,6 +429,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   Data thost = to.uri().host();
   unsigned int fidd = 0, tidd = 0;
   unsigned int fidu = 0, tidu = 0;
+  unsigned int fidud = 0, tidud = 0;
   bool equal = false;
 
   if ((fuser == tuser) && (thost == fhost))
@@ -449,6 +449,33 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   //find id user
   for (RegDB::UserRecord rec : ulist)
   {
+      if (fuser == rec.mName)
+          fidu = rec.mIdUser;
+      if (tuser == rec.mName)
+          tidu = rec.mIdUser;
+      if ((0 != tidu) && (0 != fidu))
+      {
+         break;
+       }
+  }
+
+  for (RegDB::UserDomainRecord rec : udlist)
+  {
+      if ((fidu == rec.mIdUserFk) && (rec.mIdDomainFk == fidd))
+      {
+         fidud = rec.mIdUD;
+       }
+      if ((tidu == rec.mIdUserFk) && (rec.mIdDomainFk == tidd))
+      {
+          tidud = rec.mIdUD;
+        }
+      if ((0 != tidu) && (0 != fidu))
+      {
+         break;
+       }
+  }
+  /*for (RegDB::UserRecord rec : ulist)
+  {
       if ((fuser == rec.mName) && (rec.mIdDomain == fidd))
       {
          fidu = rec.mIdUser;
@@ -461,12 +488,14 @@ RegThread::findRegistrar(resip::SipMessage* sip)
       {
          break;
        }
-  }
+  }*/
 
   if ((0 == fidu) ||
       (0 == tidu) ||
       (0 == fidd) ||
-      (0 == tidd))
+      (0 == tidd) ||
+      (0 == tidud) ||
+      (0 == fidud) )
       {
         return 0;
       }
@@ -474,10 +503,8 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   unsigned int idreg = 0;
   for (RegDB::RegistrarRecord rec : reglist)
   {
-    if (//(callid == rec.mCallId) &&
-        (fidu == rec.mIdMain) &&
-        (tidu == rec.mIdUser) &&
-        (tidd == rec.mIdDomain))
+    if ((fidu == rec.mIdUserFk) &&
+        (tidud == rec.mIdUDFk))
         {
            if(callid != rec.mCallId)
            {
@@ -492,10 +519,9 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   if ((idreg == 0) && (equal))
   {
       RegDB::RegistrarRecord rec;
-      rec.mIdUser = fidu;
-      rec.mIdMain = fidu;
+      rec.mIdUDFk = tidud;
+      rec.mIdUserFk = fidu;
       rec.mCallId = callid;
-      rec.mIdDomain = tidd;
       rec.mIdReg = 0;
       mBase->addRegistrar(rec);
       //reload

@@ -40,7 +40,6 @@ class RegThread : public resip::ThreadIf
       int findProtocol(resip::Data& protocol);
       int findForward(const unsigned int& idp,
                       const unsigned int& idd,
-                      const resip::Data& ip,
                       const unsigned int& port);
 
       void send200(resip::SipMessage* sip, resip::NameAddr add);
@@ -54,6 +53,7 @@ class RegThread : public resip::ThreadIf
       void clearData();
       RegDB::UserRecordList ulist;
       RegDB::DomainRecordList dlist;
+      RegDB::UserDomainRecordList udlist;
       RegDB::ForwardRecordList flist;
       RegDB::ProtocolRecordList plist;
       RegDB::AuthorizationRecordList alist;

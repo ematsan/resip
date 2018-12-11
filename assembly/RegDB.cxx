@@ -296,12 +296,10 @@ RegDB::addForward(const ForwardRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tforward (fidprotocol, fiddomain, fip, fport)"
+     ds << "INSERT INTO tforward (fidprotocol, fiddomain, fport)"
         << " VALUES("
-        << rec.mIdProtocol << ", '"
-        //<< rec.mAddress << "', '"
-        << rec.mIdDomain << "', '"
-        << rec.mIP << "', "
+        << rec.mIdProtocolFk << ", "
+        << rec.mIdDomainFk << ", "
         << rec.mPort << ")";
   }
   return query(command, 0) == 0;
@@ -320,7 +318,7 @@ RegDB::getForward(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidprotocol, fiddomain, fip, fport FROM tforward"
+     ds << "SELECT fidprotocol, fiddomain, fport FROM tforward"
         << " WHERE fidforward='" << key
         << "'";
   }
@@ -341,10 +339,8 @@ RegDB::getForward(const Key& key) const
    {
        int col = 0;
        rec.mIdForward            = Data(key).convertInt();
-       rec.mIdProtocol            = Data(row[col++]).convertInt();
-       //rec.mAddress               = Data(row[col++]);
-       rec.mIdDomain               = Data(row[col++]).convertInt();
-       rec.mIP                    = Data(row[col++]);
+       rec.mIdProtocolFk            = Data(row[col++]).convertInt();
+       rec.mIdDomainFk               = Data(row[col++]).convertInt();
        rec.mPort                  = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
@@ -373,10 +369,9 @@ RegDB::addAuthorization(const AuthorizationRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tauthorization (fiduser, fidrealm, fpassword)"
+     ds << "INSERT INTO tauthorization (fidud, fpassword)"
         << " VALUES("
-        << rec.mIdUser << ", "
-        << rec.mIdRealm << ", '"
+        << rec.mIdUDFk << ", '"
         << rec.mPassword << "')";
   }
   return query(command, 0) == 0;
@@ -395,7 +390,7 @@ RegDB::getAuthorization(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiduser, fidrealm, fpassword FROM tauthorization"
+     ds << "SELECT fidudfk, fpassword FROM tauthorization"
         << " WHERE fidauth='" << key
         << "'";
   }
@@ -416,8 +411,7 @@ RegDB::getAuthorization(const Key& key) const
    {
        int col = 0;
        rec.mIdAuth            = Data(key).convertInt();
-       rec.mIdUser            = Data(row[col++]).convertInt();
-       rec.mIdRealm         = Data(row[col++]).convertInt();
+       rec.mIdUDFk            = Data(row[col++]).convertInt();
        rec.mPassword          = Data(row[col++]);
    }
   mysql_free_result(result);
@@ -446,12 +440,11 @@ RegDB::addRegistrar(const RegistrarRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tregistrar (fiduser, fiddomain, fcallid, fidmain)"
+     ds << "INSERT INTO tregistrar (fidudfk, fcallid, fiduserfk)"
         << " VALUES("
-        << rec.mIdUser << ", "
-        << rec.mIdDomain << ", '"
+        << rec.mIdUDFk << ", '"
         << rec.mCallId<<"', "
-        << rec.mIdMain << ")";
+        << rec.mIdUserFk << ")";
   }
   return query(command, 0) == 0;
 }
@@ -469,7 +462,7 @@ RegDB::getRegistrar(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiduser, fiddomain, fcallid, fidmain FROM tregistrar"
+     ds << "SELECT fidudfk, fcallid, fiduserfk FROM tregistrar"
         << " WHERE fidreg='" << key
         << "'";
   }
@@ -490,10 +483,9 @@ RegDB::getRegistrar(const Key& key) const
    {
        int col = 0;
        rec.mIdReg             = Data(key).convertInt();
-       rec.mIdUser            = Data(row[col++]).convertInt();
-       rec.mIdDomain          = Data(row[col++]).convertInt();
+       rec.mIdUDFk            = Data(row[col++]).convertInt();
        rec.mCallId            = Data(row[col++]);
-       rec.mIdMain            = Data(row[col++]).convertInt();
+       rec.mIdUserFk          = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
   return rec;
@@ -534,10 +526,10 @@ RegDB::addRoute(const RouteRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO troute (fidreg, fidforward, ftime, fexpires)"
+     ds << "INSERT INTO troute (fidregfk, fidforwardfk, ftime, fexpires)"
         << " VALUES("
-        << rec.mIdReg << ", "
-        << rec.mIdForward << ", '"
+        << rec.mIdRegFk << ", "
+        << rec.mIdForwardFk << ", '"
         << rec.mTime << "', "
         << rec.mExpires << ")";
   }
@@ -558,7 +550,7 @@ RegDB::getRoute(const Key& key) const
   {
      DataStream ds(command);
      //ds << "SELECT fidreg, fidforward, UNIX_TIMESTAMP(ftime), fexpires FROM troute"
-     ds << "SELECT fidreg, fidforward, ftime, fexpires FROM troute"
+     ds << "SELECT fidregfk, fidforwardfk, ftime, fexpires FROM troute"
         << " WHERE fidroute='" << key
         << "'";
   }
@@ -579,8 +571,8 @@ RegDB::getRoute(const Key& key) const
    {
        int col = 0;
        rec.mIdRoute            = Data(key).convertInt();
-       rec.mIdReg              = Data(row[col++]).convertInt();
-       rec.mIdForward          = Data(row[col++]).convertInt();
+       rec.mIdRegFk              = Data(row[col++]).convertInt();
+       rec.mIdForwardFk          = Data(row[col++]).convertInt();
        rec.mTime               = Data(row[col++]);
        //https://stackoverflow.com/questions/38100936/convert-mysql-datetime-to-c-stdtime-t
        //std::time_t t =  res->getInt("UNIX_TIMESTAMP(ftime)");
@@ -622,8 +614,8 @@ RegDB::updateRoute(const Key& key, const RouteRecord& rec)
   {
      DataStream ds(command);
      ds << "UPDATE troute SET"
-        << " fidreg = " << rec.mIdReg
-        << ", fidforward = " << rec.mIdForward
+        << " fidregfk = " << rec.mIdRegFk
+        << ", fidforwardfk = " << rec.mIdForwardFk
         << ", ftime = '" << rec.mTime
         << "', fexpires = " << rec.mExpires
         << " WHERE fidroute = " << key;

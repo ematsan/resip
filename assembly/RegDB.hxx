@@ -30,14 +30,6 @@ class RegDB{
           unsigned int mIdDomainFk;
           unsigned int mIdUserFk;
     };
-    struct ForwardRecord
-    {
-          unsigned int mIdForward;
-          unsigned int mIdProtocol;
-          unsigned int mIdDomain;
-          resip::Data mIP;
-          unsigned int mPort;
-    };
     struct ProtocolRecord
     {
           unsigned int mIdProtocol;
@@ -46,23 +38,28 @@ class RegDB{
     struct AuthorizationRecord
     {
           unsigned int mIdAuth;
-          unsigned int mIdUser;
-          unsigned int mIdRealm;
+          unsigned int mIdUDFk;
           resip::Data mPassword;
+    };
+    struct ForwardRecord
+    {
+          unsigned int mIdForward;
+          unsigned int mIdProtocolFk;
+          unsigned int mIdDomainFk;
+          unsigned int mPort;
     };
     struct RegistrarRecord
     {
           unsigned int mIdReg;
-          unsigned int mIdUser;
-          unsigned int mIdDomain;
-          unsigned int mIdMain;
+          unsigned int mIdUDFk;
+          unsigned int mIdUserFk;
           resip::Data mCallId;
     };
     struct RouteRecord
     {
           unsigned int mIdRoute;
-          unsigned int mIdReg;
-          unsigned int mIdForward;
+          unsigned int mIdRegFk;
+          unsigned int mIdForwardFk;
           resip::Data mTime;
           unsigned int mExpires;
     };
@@ -71,9 +68,9 @@ class RegDB{
     typedef vector<UserRecord> UserRecordList;
     typedef vector<DomainRecord> DomainRecordList;
     typedef vector<UserDomainRecord> UserDomainRecordList;
-    typedef vector<ForwardRecord> ForwardRecordList;
     typedef vector<ProtocolRecord> ProtocolRecordList;
     typedef vector<AuthorizationRecord> AuthorizationRecordList;
+    typedef vector<ForwardRecord> ForwardRecordList;
     typedef vector<RegistrarRecord> RegistrarRecordList;
     typedef vector<RouteRecord> RouteRecordList;
 
@@ -102,17 +99,17 @@ class RegDB{
     virtual ProtocolRecord getProtocol(const Key& key) const;
     virtual ProtocolRecordList getAllProtocols();
 
-    // functions for Forward Records
-    virtual bool addForward(const ForwardRecord& rec);
-    virtual void eraseForward(const Key& key);
-    virtual ForwardRecord getForward(const Key& key) const;
-    virtual ForwardRecordList getAllForwards();
-
     // functions for Authorization Records
     virtual bool addAuthorization(const AuthorizationRecord& rec);
     virtual void eraseAuthorization(const Key& key);
     virtual AuthorizationRecord getAuthorization(const Key& key) const;
     virtual AuthorizationRecordList getAllAuthorizations();
+
+    // functions for Forward Records
+    virtual bool addForward(const ForwardRecord& rec);
+    virtual void eraseForward(const Key& key);
+    virtual ForwardRecord getForward(const Key& key) const;
+    virtual ForwardRecordList getAllForwards();
 
     // functions for Registrar Records
     virtual bool addRegistrar(const RegistrarRecord& rec);
