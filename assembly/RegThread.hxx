@@ -22,7 +22,10 @@ class RegMySQL;
 class RegThread : public resip::ThreadIf
 {
     public:
-      RegThread(resip::SipStack& stack, resip::Data realm, RegMySQL* mdatabase);
+      RegThread(resip::SipStack& stack,
+                 resip::Data realm,
+                 RegMySQL* mdatabase,
+                 const std::vector<resip::Data>& configDomains);
       ~RegThread();
 
       void thread();
@@ -30,6 +33,7 @@ class RegThread : public resip::ThreadIf
       resip::SipStack& mStack;
       resip::Data mNameAddr;
       RegMySQL* mBase;
+      std::vector<resip::Data> mConfigDomains;
 
       void analisysRequest(resip::SipMessage* sip);
       void removeAllContacts(resip::SipMessage* sip);
@@ -51,6 +55,8 @@ class RegThread : public resip::ThreadIf
 
       void loadData();
       void clearData();
+      void reloadDomain(); 
+
       RegDB::UserRecordList ulist;
       RegDB::DomainRecordList dlist;
       RegDB::UserDomainRecordList udlist;

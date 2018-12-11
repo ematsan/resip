@@ -54,6 +54,7 @@ RegRunner::run(int argc, char** argv)
     Data dbpassword = mRegConfig->getConfigData("DBPassword", "");
     Data dbname = mRegConfig->getConfigData("DBName", "registrar");
     unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
+
     mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
   }
   catch(BaseException& ex)
@@ -66,32 +67,8 @@ RegRunner::run(int argc, char** argv)
   resip_assert(!mSipStack);
   try
   {
-    bool mUseV6, mUseV4;
-    mUseV4 = !mRegConfig->getConfigBool("DisableIPv4", false);
- #ifdef USE_IPV6
-    mUseV6 = mRegConfig->getConfigBool("EnableIPv6", true);
- #else
-    bool useV6 = false;
- #endif
-    if (mUseV4)
-       InfoLog (<<"V4 enabled");
-    if (mUseV6)
-       InfoLog (<<"V6 enabled");
-    // Build DNS Server list from config
-    DnsStub::NameserverList dnsServers;
-    std::vector<resip::Data> dnsServersConfig;
-    mRegConfig->getConfigValue("DNSServers", dnsServersConfig);
-    for(std::vector<resip::Data>::iterator it = dnsServersConfig.begin(); it != dnsServersConfig.end(); it++)
-    {
-       if((mUseV4 && DnsUtil::isIpV4Address(*it)) || (mUseV6 && DnsUtil::isIpV6Address(*it)))
-       {
-          InfoLog(<< "Using DNS Server from config: " << *it);
-          dnsServers.push_back(Tuple(*it, 0, UNKNOWN_TRANSPORT).toGenericIPAddress());
-       }
-    }
 
-
-    mSipStack = new SipStack(0, dnsServers);//, mAsyncProcessHandler, false, 0, 0, mFdPollGrp);
+    mSipStack = new SipStack();//0, dnsServers);//, mAsyncProcessHandler, false, 0, 0, mFdPollGrp);
 
     int udpPort = mRegConfig->getConfigInt("UDPPort", 5060);
     int tcpPort = mRegConfig->getConfigInt("TCPPort", 5060);
@@ -121,7 +98,21 @@ RegRunner::run(int argc, char** argv)
     resip_assert(!mStackThread);
     //read contact
     Data realm = mRegConfig->getConfigData("Realm", "localhost");
-    mStackThread = new RegThread (*mSipStack, realm, mBase);
+    std::vector<Data> configDomains;
+    mRegConfig->getConfigValue("Domains", configDomains);
+    if (std::find(configDomains.begin(), configDomains.end(), realm) == configDomains.end())
+    {
+      configDomains.push_back(realm);
+    }
+    if (configDomains.empty())
+    {
+      configDomains.push_back("localhost");
+      configDomains.push_back("127.0.0.1");
+    //  configDomains.push_back("192.168.64.85");
+      configDomains.push_back(realm);
+    }
+
+    mStackThread = new RegThread (*mSipStack, realm, mBase, configDomains);
 
     mSipStack->run();
     mStackThread->run();

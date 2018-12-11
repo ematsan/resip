@@ -87,8 +87,8 @@ RegDB::addDomain(const DomainRecord& rec)
      DataStream ds(command);
      ds << "INSERT INTO tdomain (fdomain, fidrealm)"
         << " VALUES('"
-        << rec.mDomain << ","
-        << rec.mIdRealm<<"')";
+        << rec.mDomain << "', "
+        << rec.mIdRealm<<")";
   }
   return query(command, 0) == 0;
 }

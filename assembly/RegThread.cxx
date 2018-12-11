@@ -19,20 +19,74 @@ using namespace resip;
 using namespace std;
 using namespace registrar;
 
-RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase)
+RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase, const vector<Data>& configDomains)
    : mStack(stack)
    , mNameAddr(realm)
    , mBase(mdatabase)
+   , mConfigDomains(configDomains)
 {
   cout<<"RegThread constructor"<<endl;
   //select all data
   loadData();
+  reloadDomain();
+
 }
 
 RegThread::~RegThread()
 {
    cout<<"RegThread destructor"<<endl;
    clearData();
+}
+
+void
+RegThread::reloadDomain()
+{
+  //if (std::find(configDomains.begin(), configDomains.end(), realm) != configDomains.end())
+  bool reload = false;
+  for (RegDB::DomainRecord rec : dlist)
+  {
+     bool kept = false;
+     for (Data domain: mConfigDomains)
+     {
+        if (rec.mDomain == domain)
+        {
+          kept = true;
+          break;
+        }
+     }
+     if (!kept)
+     {
+         mBase->eraseDomain(Data(rec.mIdDomain));
+         reload = true;
+     }
+  }
+
+  for (Data domain: mConfigDomains)
+  {
+    bool kept = false;
+    for (RegDB::DomainRecord rec : dlist)
+    {
+       if (rec.mDomain == domain)
+       {
+         kept = true;
+         break;
+       }
+    }
+    if (!kept)
+    {
+        RegDB::DomainRecord n;
+        n.mDomain = domain;
+        mBase->addDomain(n);
+        reload = true;
+    }
+  }
+  //if change list of domains - reload all domains
+  if (!reload)
+  {
+    dlist.clear();
+    dlist = mBase->getAllDomains();
+    if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
+  }
 }
 
 void
@@ -577,7 +631,8 @@ RegThread::send405(SipMessage* sip, Data meth)
 void
 RegThread::send403(SipMessage* sip, Data mes)
 {
-  auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403, mes));
+  //auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403, mes));
+  auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
   mStack.send(*msg403);
   ErrLog(<< "Sent 403(Forbidded) to REGISTER :" + mes);
 }
