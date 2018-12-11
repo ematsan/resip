@@ -16,10 +16,9 @@ RegDB::addUser(const UserRecord& rec)
   Data command;
   {
      DataStream ds(command);
-     ds << "INSERT INTO tuser (fname, fiddomain)"
+     ds << "INSERT INTO tuser (fname)"
         << " VALUES('"
-        << rec.mName << "', "
-        << rec.mIdDomain << ")";
+        << rec.mName << "')";
   }
   return query(command, 0) == 0;
 }
@@ -37,7 +36,7 @@ RegDB::getUser(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fname, fiddomain FROM tuser"
+     ds << "SELECT fname FROM tuser"
         << " WHERE fiduser='" << key
         << "'";
   }
@@ -59,7 +58,6 @@ RegDB::getUser(const Key& key) const
        int col = 0;
        rec.mIdUser          = Data(key).convertInt();
        rec.mName            = Data(row[col++]);
-       rec.mIdDomain        = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
   return rec;
@@ -146,6 +144,77 @@ RegDB::getAllDomains()
      DomainRecord rec = getDomain(key);
      records.push_back(rec);
      key = dbKey(DomainTable, false);
+  }
+  return records;
+}
+/*************************************************************************/
+/*                       USER DOMAIN                                     */
+/*************************************************************************/
+bool
+RegDB::addUserDomain(const UserDomainRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "INSERT INTO tuserdomain (fiduser, fiddomain)"
+        << " VALUES('"
+        << rec.mIdUserFk << ","
+        << rec.mIdDomainFk<<"')";
+  }
+  return query(command, 0) == 0;
+}
+
+void
+RegDB::eraseUserDomain(const Key& key)
+{
+  dbEraseRecord(UserDomainTable, key);
+}
+
+RegDB::UserDomainRecord
+RegDB::getUserDomain(const Key& key) const
+{
+  UserDomainRecord rec;
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fiddomain, fiduser FROM tuserdomain"
+        << " WHERE fidud='" << key
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return rec;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return rec;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdUD          = Data(key).convertInt();
+       rec.mIdDomainFk       = Data(row[col++]).convertInt();
+       rec.mIdUserFk          = Data(row[col++]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec;
+}
+
+RegDB::UserDomainRecordList
+RegDB::getAllUserDomains()
+{
+  UserDomainRecordList records;
+  Key key = dbKey(UserDomainTable, true);
+  while ( !key.empty() )
+  {
+     UserDomainRecord rec = getUserDomain(key);
+     records.push_back(rec);
+     key = dbKey(UserDomainTable, false);
   }
   return records;
 }

@@ -17,13 +17,18 @@ class RegDB{
     {
           unsigned int mIdUser;
           resip::Data mName;
-          unsigned int mIdDomain;
     };
     struct DomainRecord
     {
           unsigned int mIdDomain;
           resip::Data mDomain;
           unsigned int mIdRealm;
+    };
+    struct UserDomainRecord
+    {
+          unsigned int mIdUD;
+          unsigned int mIdDomainFk;
+          unsigned int mIdUserFk;
     };
     struct ForwardRecord
     {
@@ -65,6 +70,7 @@ class RegDB{
     typedef resip::Data Key;
     typedef vector<UserRecord> UserRecordList;
     typedef vector<DomainRecord> DomainRecordList;
+    typedef vector<UserDomainRecord> UserDomainRecordList;
     typedef vector<ForwardRecord> ForwardRecordList;
     typedef vector<ProtocolRecord> ProtocolRecordList;
     typedef vector<AuthorizationRecord> AuthorizationRecordList;
@@ -82,6 +88,13 @@ class RegDB{
     virtual void eraseDomain(const Key& key);
     virtual DomainRecord getDomain(const Key& key) const;
     virtual DomainRecordList getAllDomains();
+
+    // functions for User Domain Records
+    virtual bool addUserDomain(const UserDomainRecord& rec);
+    virtual void eraseUserDomain(const Key& key);
+    virtual UserDomainRecord getUserDomain(const Key& key) const;
+    virtual UserDomainRecordList getAllUserDomains();
+
 
     // functions for Protocol Records
     virtual bool addProtocol(const ProtocolRecord& rec);
@@ -121,6 +134,7 @@ class RegDB{
     {
       UserTable=0,
       DomainTable,
+      UserDomainTable,
       ForwardTable,
       ProtocolTable,
       AuthorizationTable,
@@ -129,10 +143,10 @@ class RegDB{
       MaxTable  // This one MUST be last
     } Table;
 
-    const char tableName[MaxTable][20] = {"tuser", "tdomain", "tforward",
+    const char tableName[MaxTable][20] = {"tuser", "tdomain", "tuserdomain", "tforward",
       "tprotocol", "tauthorization", "tregistrar", "troute"};
 
-    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidforward",
+    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidud", "fidforward",
         "fidprotocol", "fidauth", "fidreg", "fidroute"};
 
     mutable MYSQL* mConn;
