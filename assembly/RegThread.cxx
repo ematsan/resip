@@ -380,7 +380,7 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
   unsigned int port = addr.uri().port();
   Data scheme = addr.uri().scheme();
 
-  unsigned int idp = findProtocol(scheme);
+  unsigned int idp = findProtocol(scheme, true);
   if (0 == idp)
   {
      ErrLog(<< "Not find Protocol");
@@ -394,19 +394,14 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
      return 0;
   }
 
-  unsigned int idf = findForward(idp, idd, port);
-  if (0 == idf)
-  {
-     return idf;
-  }
-
+  unsigned int idf = findForward(idp, idd, port, true);
   return idf;
 }
 
 int
 RegThread::findForward(const unsigned int& idp,
                 const unsigned int& idd,
-                const unsigned int& port = 0)
+                const unsigned int& port, bool upd)
 {
   unsigned int idf = 0;
   for (RegDB::ForwardRecord rec : flist)
@@ -420,7 +415,7 @@ RegThread::findForward(const unsigned int& idp,
      }
   }
   //add forward
-  if (0 == idf)
+  if ((0 == idf) && (upd))
   {
      RegDB::ForwardRecord rec;
      rec.mIdProtocolFk = idp;
@@ -430,13 +425,13 @@ RegThread::findForward(const unsigned int& idp,
      //reload
      flist.clear();
      flist = mBase->getAllForwards();
-     idf = flist.back().mIdForward;
+     idf = findForward(idp, idd, port, false);
   }
   return idf;
 }
 
 int
-RegThread::findProtocol(resip::Data& protocol)
+RegThread::findProtocol(resip::Data& protocol, bool upd)
 {
   unsigned int idp = 0;
   for (RegDB::ProtocolRecord rec : plist)
@@ -448,7 +443,7 @@ RegThread::findProtocol(resip::Data& protocol)
      }
   }
   //add protocol
-  if (0 == idp)
+  if ((0 == idp) && (upd))
   {
      RegDB::ProtocolRecord rec;
      rec.mProtocol = protocol;
@@ -456,7 +451,7 @@ RegThread::findProtocol(resip::Data& protocol)
      //reload
      plist.clear();
      plist = mBase->getAllProtocols();
-     idp = plist.back().mIdProtocol;
+     idp = findProtocol(protocol, false);
   }
   return idp;
 }
@@ -483,7 +478,6 @@ RegThread::findDomain(resip::Data& host, bool upd)
      dlist.clear();
      dlist = mBase->getAllDomains();
      idd = findDomain(host, false);
-     //dlist.back().mIdDomain;
   }
   return idd;
 }
@@ -508,9 +502,8 @@ RegThread::findUser(resip::Data& usr, bool upd)
      mBase->addUser(rec);
      //reload
      ulist.clear();
-     ulist = mBase->getAllDomains();
-     idu = findUser(host, false);
-     //dlist.back().mIdDomain;
+     ulist = mBase->getAllUsers();
+     idu = findUser(usr, false);
   }
   return idu;
 }
@@ -547,7 +540,6 @@ RegThread::findRegistrar(resip::SipMessage* sip)
 {
   NameAddr& to = sip->header(h_To);
   NameAddr& from = sip->header(h_From);
-
   Data& callid = sip->header(h_CallId).value();
 
   Data fuser = from.uri().user();
@@ -560,100 +552,25 @@ RegThread::findRegistrar(resip::SipMessage* sip)
   bool equal = false;
 
   if ((fuser == tuser) && (thost == fhost))
-  {
     equal = true;
-  }
   //find id domain
   fidd = findDomain(fhost, false);
   if (equal)
      tidd = fidd;
   else
      tidd = findDomain(thost, false);
-  /*for (RegDB::DomainRecord rec : dlist)
-  {
-      if (fhost == rec.mDomain)
-         fidd = rec.mIdDomain;
-      if (thost == rec.mDomain)
-          tidd = rec.mIdDomain;
-      if ((0 != tidd) && (0 != fidd))
-         break;
-  }*/
   //find id user
-  fidd = findUser(fuser, equal);
+  fidu = findUser(fuser, equal);
   if (equal)
      tidu = fidu;
   else
      tidu = findUser(tuser, equal);
-  /*for (RegDB::UserRecord rec : ulist)
-  {
-      if (fuser == rec.mName)
-          fidu = rec.mIdUser;
-      if (tuser == rec.mName)
-          tidu = rec.mIdUser;
-      if ((0 != tidu) && (0 != fidu))
-      {
-         break;
-       }
-  }*/
-  fidd = findUserDomain(fidu, fidd, equal);
+  //find id user-domain
+  fidud = findUserDomain(fidu, fidd, equal);
   if (equal)
-     tidu = fidu;
+     tidud = fidud;
   else
-     tidu = findUser(tidu, tidd, equal);
-/*  for (RegDB::UserDomainRecord rec : udlist)
-  {
-      if ((fidu == rec.mIdUserFk) && (rec.mIdDomainFk == fidd))
-      {
-         fidud = rec.mIdUD;
-       }
-      if ((tidu == rec.mIdUserFk) && (rec.mIdDomainFk == tidd))
-      {
-          tidud = rec.mIdUD;
-        }
-      if ((0 != tidud) && (0 != fidud))
-      {
-         break;
-       }
-  }*/
-
-  //if own registration
-/*  if (equal)
-  {
-     //if absend then add user
-     if (0 == tidu)
-     {
-       RegDB::UserRecord rec;
-       rec.mName = fuser;
-       mBase->addUser(rec);
-       //reload
-       ulist.clear();
-       ulist = mBase->getAllUsers();
-       tidu = ulist.back().mIdUser;
-       fidu = tidu;
-       InfoLog(<< "Add user");
-     }
-     //if absend then add user-domain
-     if (0 == tidud)
-     {
-       RegDB::UserDomainRecord rec;
-       rec.mIdUserFk = tidu;
-       rec.mIdDomainFk = tidd;
-       mBase->addUserDomain(rec);
-       //reload
-       udlist.clear();
-       udlist = mBase->getAllUserDomains();
-       tidud = udlist.back().mIdUD;
-       fidud = tidud;
-       InfoLog(<< "Add user-domain");
-     }
-  }*/
-  /*for (RegDB::UserRecord rec : ulist) {
-      if ((fuser == rec.mName) && (rec.mIdDomain == fidd))
-         fidu = rec.mIdUser;
-      if ((tuser == rec.mName) && (rec.mIdDomain == tidd))
-          tidu = rec.mIdUser;
-      if ((0 != tidu) && (0 != fidu))
-         break;  }*/
+     tidud = findUserDomain(tidu, tidd, equal);
 
   if ((0 == fidu) ||
       (0 == tidu) ||
@@ -665,11 +582,24 @@ RegThread::findRegistrar(resip::SipMessage* sip)
         return 0;
       }
   //find registrar
+  unsigned int idreg = findRegistrar(tidud, fidud, callid, equal);
+  if (0 == idreg)
+  {
+    ErrLog(<< "No registrat record");
+  }
+  return idreg;
+}
+
+int
+RegThread::findRegistrar(const unsigned int& to,
+                const unsigned int& from,
+                resip::Data& callid, bool upd)
+{
   unsigned int idreg = 0;
   for (RegDB::RegistrarRecord rec : reglist)
   {
-    if ((fidud == rec.mIdMainFk) &&
-        (tidud == rec.mIdUDFk))
+    if ((from == rec.mIdMainFk) &&
+        (to == rec.mIdUDFk))
         {
            if(callid != rec.mCallId)
            {
@@ -681,27 +611,21 @@ RegThread::findRegistrar(resip::SipMessage* sip)
       }
   }
   //add registrar
-  if ((idreg == 0) && (equal))
+  if ((idreg == 0) && (upd))
   {
       RegDB::RegistrarRecord rec;
-      rec.mIdUDFk = tidud;
-      rec.mIdMainFk = fidud;
+      rec.mIdUDFk = to;
+      rec.mIdMainFk = from;
       rec.mCallId = callid;
-      rec.mIdReg = 0;
       mBase->addRegistrar(rec);
       //reload
       reglist.clear();
       reglist = mBase->getAllRegistrars();
-      idreg = reglist.back().mIdReg;
+      idreg = findRegistrar(to, from, callid, false);
       InfoLog(<< "Add registrar");
-  }
-  if (0 == idreg)
-  {
-    ErrLog(<< "No registrat record\n\n\n\n\n");
   }
   return idreg;
 }
-
 
 /******************************************************************************/
 /*                         MESSAGES                                           */
