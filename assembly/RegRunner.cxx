@@ -72,20 +72,26 @@ RegRunner::run(int argc, char** argv)
 
     int udpPort = mRegConfig->getConfigInt("UDPPort", 5060);
     int tcpPort = mRegConfig->getConfigInt("TCPPort", 5060);
-    Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);
 
-    if (udpPort)
+    //Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);
+    std::vector<Data> ipAddresses;
+    mRegConfig->getConfigValue("IPAddresses", ipAddresses);
+    if (ipAddresses.empty())
     {
-        mSipStack->addTransport(UDP, udpPort, V4, StunDisabled, ipAddress);
-        /*if (mUseV6)
-          mSipStack->addTransport(UDP, udpPort, V6, StunDisabled, ipAddress);*/
-      }
-    if (tcpPort)
+      ipAddresses.push_back(Data::Empty);
+    }
+
+    for (Data ipAddress: ipAddresses)
     {
-        mSipStack->addTransport(TCP, tcpPort, V4, StunDisabled, ipAddress);
-        /*if (mUseV6)
-          mSipStack->addTransport(TCP, tcpPort, V6, StunDisabled, ipAddress);*/
+      if (udpPort)
+      {
+          mSipStack->addTransport(UDP, udpPort, V4, StunDisabled, ipAddress);
       }
+      if (tcpPort)
+      {
+          mSipStack->addTransport(TCP, tcpPort, V4, StunDisabled, ipAddress);
+      }
+    }
 
       /*  int tlsPort = mRegConfig->getConfigInt("TLSPort", 5061);
         int wsPort = mRegConfig->getConfigInt("WSPort", 80);

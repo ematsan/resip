@@ -24,6 +24,9 @@ main(int argc, char** argv)
   //https://ru.cppreference.com/w/cpp/utility/program/signal
   //initiate worker for signal
   Log::initialize(Log::Cout, Log::toLevel("debug"), argv[0]);
+  //Log::initialize(Log::Cout, Log::toLevel("err"), argv[0]);
+//"NONE", "EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG", "STACK", "CERR", ""
+   //Log::initialize(Log::Cout, Log::toLevel("info"), argv[0]);
 
   if ( signal( SIGINT, signalHandler ) == SIG_ERR )
   {

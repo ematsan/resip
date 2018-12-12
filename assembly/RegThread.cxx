@@ -89,6 +89,7 @@ RegThread::reloadDomain()
     if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
   }
 
+  //left only registrar names
   RegDB::DomainRecordList tlist = dlist;
   dlist.clear();
   for (Data domain: mConfigDomains)
