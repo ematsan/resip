@@ -42,8 +42,8 @@ void
 RegThread::reloadDomain()
 {
   //if (std::find(configDomains.begin(), configDomains.end(), realm) != configDomains.end())
-  /*bool reload = false;
-  for (RegDB::DomainRecord rec : dlist)
+  bool reload = false;
+  /*for (RegDB::DomainRecord rec : dlist)
   {
      bool kept = false;
      for (Data domain: mConfigDomains)
@@ -59,7 +59,7 @@ RegThread::reloadDomain()
          mBase->eraseDomain(Data(rec.mIdDomain));
          reload = true;
      }
-  }
+  }*/
 
   for (Data domain: mConfigDomains)
   {
@@ -80,6 +80,7 @@ RegThread::reloadDomain()
         reload = true;
     }
   }
+
   //if change list of domains - reload all domains
   if (!reload)
   {
@@ -87,7 +88,7 @@ RegThread::reloadDomain()
     dlist = mBase->getAllDomains();
     if (dlist.empty()) { ErrLog(<< "No element in table tDomain"); }
   }
-*/
+
   RegDB::DomainRecordList tlist = dlist;
   dlist.clear();
   for (Data domain: mConfigDomains)
@@ -386,7 +387,7 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
      return 0;
   }
 
-  unsigned int idd = findDomain(host);
+  unsigned int idd = findDomain(host, true);
   if (0 == idd)
   {
      ErrLog(<< "Not find Domain");
@@ -461,7 +462,7 @@ RegThread::findProtocol(resip::Data& protocol)
 }
 
 int
-RegThread::findDomain(resip::Data& host)
+RegThread::findDomain(resip::Data& host, bool upd)
 {
   unsigned int idd = 0;
   for (RegDB::DomainRecord rec : dlist)
@@ -473,7 +474,7 @@ RegThread::findDomain(resip::Data& host)
      }
   }
   //add domain
-  if (0 == idd)
+  if ((0 == idd) && (upd))
   {
      RegDB::DomainRecord rec;
      rec.mDomain = host;
@@ -481,9 +482,64 @@ RegThread::findDomain(resip::Data& host)
      //reload
      dlist.clear();
      dlist = mBase->getAllDomains();
-     idd = dlist.back().mIdDomain;
+     idd = findDomain(host, false);
+     //dlist.back().mIdDomain;
   }
   return idd;
+}
+
+int
+RegThread::findUser(resip::Data& usr, bool upd)
+{
+  unsigned int idu = 0;
+  for (RegDB::UserRecord rec : ulist)
+  {
+     if (usr == rec.mName)
+     {
+       idu = rec.mIdUser;
+       break;
+     }
+  }
+  //add domain
+  if ((0 == idu) && (upd))
+  {
+     RegDB::UserRecord rec;
+     rec.mName = usr;
+     mBase->addUser(rec);
+     //reload
+     ulist.clear();
+     ulist = mBase->getAllDomains();
+     idu = findUser(host, false);
+     //dlist.back().mIdDomain;
+  }
+  return idu;
+}
+
+int
+RegThread::findUserDomain(int usr, int dom, bool upd)
+{
+    int idud = 0;
+    for (RegDB::UserDomainRecord rec : udlist)
+    {
+        if ((usr == rec.mIdUserFk) && (rec.mIdDomainFk == dom))
+        {
+           idud = rec.mIdUD;
+           break;
+         }
+    }
+    //add userdomain
+    if ((0 == idud) && (upd))
+    {
+      RegDB::UserDomainRecord rec;
+      rec.mIdUserFk = usr;
+      rec.mIdDomainFk = dom;
+      mBase->addUserDomain(rec);
+      //reload
+      udlist.clear();
+      udlist = mBase->getAllUserDomains();
+      idud = findUserDomain(usr,dom,false);
+    }
+    return idud;
 }
 
 int
@@ -508,7 +564,12 @@ RegThread::findRegistrar(resip::SipMessage* sip)
     equal = true;
   }
   //find id domain
-  for (RegDB::DomainRecord rec : dlist)
+  fidd = findDomain(fhost, false);
+  if (equal)
+     tidd = fidd;
+  else
+     tidd = findDomain(thost, false);
+  /*for (RegDB::DomainRecord rec : dlist)
   {
       if (fhost == rec.mDomain)
          fidd = rec.mIdDomain;
@@ -516,9 +577,14 @@ RegThread::findRegistrar(resip::SipMessage* sip)
           tidd = rec.mIdDomain;
       if ((0 != tidd) && (0 != fidd))
          break;
-  }
+  }*/
   //find id user
-  for (RegDB::UserRecord rec : ulist)
+  fidd = findUser(fuser, equal);
+  if (equal)
+     tidu = fidu;
+  else
+     tidu = findUser(tuser, equal);
+  /*for (RegDB::UserRecord rec : ulist)
   {
       if (fuser == rec.mName)
           fidu = rec.mIdUser;
@@ -528,9 +594,13 @@ RegThread::findRegistrar(resip::SipMessage* sip)
       {
          break;
        }
-  }
-
-  for (RegDB::UserDomainRecord rec : udlist)
+  }*/
+  fidd = findUserDomain(fidu, fidd, equal);
+  if (equal)
+     tidu = fidu;
+  else
+     tidu = findUser(tidu, tidd, equal);
+/*  for (RegDB::UserDomainRecord rec : udlist)
   {
       if ((fidu == rec.mIdUserFk) && (rec.mIdDomainFk == fidd))
       {
@@ -544,22 +614,46 @@ RegThread::findRegistrar(resip::SipMessage* sip)
       {
          break;
        }
-  }
-  /*for (RegDB::UserRecord rec : ulist)
-  {
-      if ((fuser == rec.mName) && (rec.mIdDomain == fidd))
-      {
-         fidu = rec.mIdUser;
-       }
-      if ((tuser == rec.mName) && (rec.mIdDomain == tidd))
-      {
-          tidu = rec.mIdUser;
-        }
-      if ((0 != tidu) && (0 != fidu))
-      {
-         break;
-       }
   }*/
+
+  //if own registration
+/*  if (equal)
+  {
+     //if absend then add user
+     if (0 == tidu)
+     {
+       RegDB::UserRecord rec;
+       rec.mName = fuser;
+       mBase->addUser(rec);
+       //reload
+       ulist.clear();
+       ulist = mBase->getAllUsers();
+       tidu = ulist.back().mIdUser;
+       fidu = tidu;
+       InfoLog(<< "Add user");
+     }
+     //if absend then add user-domain
+     if (0 == tidud)
+     {
+       RegDB::UserDomainRecord rec;
+       rec.mIdUserFk = tidu;
+       rec.mIdDomainFk = tidd;
+       mBase->addUserDomain(rec);
+       //reload
+       udlist.clear();
+       udlist = mBase->getAllUserDomains();
+       tidud = udlist.back().mIdUD;
+       fidud = tidud;
+       InfoLog(<< "Add user-domain");
+     }
+  }*/
+  /*for (RegDB::UserRecord rec : ulist) {
+      if ((fuser == rec.mName) && (rec.mIdDomain == fidd))
+         fidu = rec.mIdUser;
+      if ((tuser == rec.mName) && (rec.mIdDomain == tidd))
+          tidu = rec.mIdUser;
+      if ((0 != tidu) && (0 != fidu))
+         break;  }*/
 
   if ((0 == fidu) ||
       (0 == tidu) ||

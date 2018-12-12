@@ -157,9 +157,9 @@ RegDB::addUserDomain(const UserDomainRecord& rec)
   {
      DataStream ds(command);
      ds << "INSERT INTO tuserdomain (fiduserfk, fiddomainfk)"
-        << " VALUES('"
+        << " VALUES("
         << rec.mIdUserFk << ","
-        << rec.mIdDomainFk<<"')";
+        << rec.mIdDomainFk<<")";
   }
   return query(command, 0) == 0;
 }

@@ -40,7 +40,9 @@ class RegThread : public resip::ThreadIf
       bool testAuthorization(resip::SipMessage* sip);
       int findRegistrar(resip::SipMessage* sip);
       int findForward(resip::NameAddr& addr, unsigned int reg);
-      int findDomain(resip::Data& host);
+      int findDomain(resip::Data& host, bool upd);
+      int findUser(resip::Data& usr, bool upd);
+      int findUserDomain(int usr, int dom, bool upd);
       int findProtocol(resip::Data& protocol);
       int findForward(const unsigned int& idp,
                       const unsigned int& idd,
@@ -55,7 +57,7 @@ class RegThread : public resip::ThreadIf
 
       void loadData();
       void clearData();
-      void reloadDomain(); 
+      void reloadDomain();
 
       RegDB::UserRecordList ulist;
       RegDB::DomainRecordList dlist;
