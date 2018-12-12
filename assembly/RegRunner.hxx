@@ -2,7 +2,8 @@
 #define REGRUNNER_HXX
 #include <map>
 #include <rutil/ConfigParse.hxx>
-
+#include "rutil/Logger.hxx"
+//use to run the sipstack
 namespace resip
 {
   class SipStack;
@@ -13,17 +14,18 @@ using namespace std;
 
 namespace registrar
 {
+#define RESIPROCATE_SUBSYSTEM resip::Subsystem::TEST
+
   class RegMySQL;
 
   class RegConfig : public resip::ConfigParse //not abstract class
   {
   public:
-     RegConfig(){ cout << "Regconfig constractor"<<endl;}
-     virtual ~RegConfig(){cout << "Regconfig destructor"<<endl;}
+     RegConfig(){ InfoLog(<< "Regconfig constractor");}
+     virtual ~RegConfig(){ InfoLog (<< "Regconfig destructor");}
 
-     virtual void printHelpText(int argc, char **argv){cout << "Regconfig help"<<endl;}
+     virtual void printHelpText(int argc, char **argv){InfoLog(<< "Regconfig help");}
   };
-
 
   class RegRunner
   {

@@ -6,15 +6,13 @@
 
 #include "RegDB.hxx"
 
-#define RESIPROCATE_SUBSYSTEM Subsystem::TEST
-
 namespace resip
 {
   class SipStack;
   class Data;
   class SipMessage;
 }
-
+//work with data
 namespace registrar
 {
 class RegMySQL;

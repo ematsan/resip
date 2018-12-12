@@ -25,7 +25,7 @@ RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase, const vec
    , mBase(mdatabase)
    , mConfigDomains(configDomains)
 {
-  cout<<"RegThread constructor"<<endl;
+  InfoLog(<<"RegThread constructor");
   //select all data
   loadData();
   reloadDomain();
@@ -34,28 +34,23 @@ RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase, const vec
 
 RegThread::~RegThread()
 {
-   cout<<"RegThread destructor"<<endl;
+   InfoLog(<<"RegThread destructor");
    clearData();
 }
 
 void
 RegThread::reloadDomain()
 {
-  //if (std::find(configDomains.begin(), configDomains.end(), realm) != configDomains.end())
   bool reload = false;
   /*for (RegDB::DomainRecord rec : dlist)
-  {
-     bool kept = false;
-     for (Data domain: mConfigDomains)
-     {
-        if (rec.mDomain == domain)
-        {
+  {   bool kept = false;
+     for (Data domain: mConfigDomains){
+        if (rec.mDomain == domain){
           kept = true;
           break;
         }
      }
-     if (!kept)
-     {
+     if (!kept){
          mBase->eraseDomain(Data(rec.mIdDomain));
          reload = true;
      }
@@ -98,14 +93,11 @@ RegThread::reloadDomain()
     {
        if (rec.mDomain == domain)
        {
-         //kept = true;
          dlist.push_back(rec);
          break;
        }
     }
   }
-
-
 }
 
 void
@@ -157,7 +149,6 @@ RegThread::thread()
      SipMessage* received = mStack.receive();
      if (received)
      {
-        //auto_ptr<SipMessage> forDel(received);
         MethodTypes meth = received->header(h_RequestLine).getMethod();
         InfoLog(<< "Server received: " << getMethodName(meth));
         if ( meth == REGISTER )
@@ -190,7 +181,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   if (!testAuthorization(sip))
   {
      send403(sip, "User not register");
-     //ErrLog(<< "User not register");
      return;
    }
   //test Registrar
@@ -198,7 +188,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
   if (0 == idreg)
   {
      send403(sip, "User not have access to add record");
-     //ErrLog(<< "No access to add record");
      return;
    }
 
@@ -285,13 +274,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                              //https://www.tutorialspoint.com/cplusplus/cpp_date_time.htm
                              tm *ltm = localtime(&now);
                              // print various components of tm structure.
-                             //http://mycpp.ru/cpp/scpp/cppd_datetime.htm
-                             /*cout << "Year:" << 1900 + ltm->tm_year<<endl;
-                             cout << "Month: "<< 1 + ltm->tm_mon<< endl;
-                             cout << "Day: "<<  ltm->tm_mday << endl;
-                             cout << "Time: "<< ltm->tm_hour << ":";
-                             cout << ltm->tm_min << ":";
-                             cout << ltm->tm_sec << endl;*/
+                             //http://mycpp.ru/cpp/scpp/cppd_datetime.html
                              rec.mTime = Data(1900 + ltm->tm_year) + "-" +
                                          Data(1 + ltm->tm_mon) + "-" +
                                          Data(ltm->tm_mday) + " "+
@@ -321,9 +304,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                             upd = true;
                         }
                       }
-                      //to.param(p_tag)
-                      //cout<<"\n\n\n\n\n"<<from.param(p_tag)<<"\n\n\n\n\n";
-                      //if remove then reload data
                       if (upd)
                       {
                         rlist.clear();
@@ -495,7 +475,7 @@ RegThread::findUser(resip::Data& usr, bool upd)
        break;
      }
   }
-  //add domain
+  //add user
   if ((0 == idu) && (upd))
   {
      RegDB::UserRecord rec;
@@ -648,7 +628,7 @@ RegThread::send400(SipMessage* sip){
 
 void
 RegThread::send401(SipMessage* sip){
-  auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*sip, mNameAddr/*"localhost"*/, true, false));
+  auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*sip, mNameAddr, true, false));
   ErrLog (<< "Sent 401(Unauthorized) to REGISTER");
   mStack.send(*msg401);
 }

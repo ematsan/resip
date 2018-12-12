@@ -16,12 +16,12 @@ class MySQLInitializer
    public:
       MySQLInitializer()
       {
-         cout<<"MySQLInitializer constructor"<<endl;
+         InfoLog(<<"MySQLInitializer constructor");
          ThreadIf::tlsKeyCreate(mThreadStorage, mysqlThreadEnd);
       }
       ~MySQLInitializer()
       {
-         cout<<"MySQLInitializer destructor"<<endl;
+         InfoLog(<<"MySQLInitializer destructor");
          ThreadIf::tlsKeyDelete(mThreadStorage);
       }
       void setInitialized()
@@ -52,7 +52,7 @@ RegMySQL::RegMySQL(const resip::Data& server,
     ,mDBPort(port)
     ,mConn(0)
     ,mConnected(false){
-      cout<<"RegMySQL constructor"<<endl;
+      InfoLog(<<"RegMySQL constructor");
       InfoLog( << "Using MySQL DB with server=" << server << ", user=" << user << ", dbName=" << databaseName << ", port=" << port);
 
       for (int i=0;i<MaxTable;i++)
@@ -70,9 +70,8 @@ RegMySQL::RegMySQL(const resip::Data& server,
 }
 
 RegMySQL::~RegMySQL(){
-    cout<<"RegMySQL destructor"<<endl;
+    InfoLog(<<"RegMySQL destructor");
     disconnectDB();
-    //mysql_library_end();
 }
 
 int

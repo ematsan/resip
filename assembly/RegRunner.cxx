@@ -19,19 +19,19 @@ RegRunner::RegRunner()
    , mStackThread(0)
    , mBase(0)
 {
-  cout<<"RegRunner constructor"<<endl;
+  InfoLog(<<"RegRunner constructor");
 }
 
 RegRunner::~RegRunner()
 {
-   cout<<"RegRunner destructor"<<endl;
+   InfoLog(<<"RegRunner destructor");
    if(mRunning) shutdown();
 }
 
 bool
 RegRunner::run(int argc, char** argv)
 {
-  cout<<"RegRunner run"<<endl;
+  InfoLog(<<"RegRunner run");
 
   // Parse command line and configuration file
   resip_assert(!mRegConfig);
@@ -43,7 +43,7 @@ RegRunner::run(int argc, char** argv)
   }
   catch(BaseException& ex)
   {
-     cerr << "Error parsing configuration: " << ex << std::endl;
+     ErrLog( << "Error parsing configuration: " << ex);
      return false;
   }
 
@@ -68,7 +68,7 @@ RegRunner::run(int argc, char** argv)
   try
   {
 
-    mSipStack = new SipStack();//0, dnsServers);//, mAsyncProcessHandler, false, 0, 0, mFdPollGrp);
+    mSipStack = new SipStack();
 
     int udpPort = mRegConfig->getConfigInt("UDPPort", 5060);
     int tcpPort = mRegConfig->getConfigInt("TCPPort", 5060);
@@ -93,14 +93,6 @@ RegRunner::run(int argc, char** argv)
       }
     }
 
-      /*  int tlsPort = mRegConfig->getConfigInt("TLSPort", 5061);
-        int wsPort = mRegConfig->getConfigInt("WSPort", 80);
-        int wssPort = mRegConfig->getConfigInt("WSSPort", 443);
-        int dtlsPort = mRegConfig->getConfigInt("DTLSPort", 0);
-        mSipStack->addTransport(DTLS, dtlsPort, V4, StunDisabled, ipAddress);
-        mSipStack->addTransport(TLS, tlsPort, V4, StunDisabled, ipAddress);
-        mSipStack->addTransport(WS, wsPort, V4, StunDisabled, ipAddress);
-        mSipStack->addTransport(WSS, wssPort, V4, StunDisabled, ipAddress);*/
     resip_assert(!mStackThread);
     //read contact
     Data realm = mRegConfig->getConfigData("Realm", "localhost");
@@ -110,8 +102,6 @@ RegRunner::run(int argc, char** argv)
     {
       configDomains.push_back("localhost");
       configDomains.push_back("127.0.0.1");
-    //configDomains.push_back("192.168.64.85");
-    //configDomains.push_back(realm);
     }
     /*if (std::find(configDomains.begin(), configDomains.end(), realm) == configDomains.end())
     {
@@ -125,7 +115,7 @@ RegRunner::run(int argc, char** argv)
   }
   catch(BaseException& ex)
   {
-     cerr << "Error creating SipStack: " << ex << endl;
+     ErrLog(<< "Error creating SipStack: " << ex);
      return false;
   }
 
@@ -136,7 +126,7 @@ RegRunner::run(int argc, char** argv)
 void
 RegRunner::shutdown()
 {
-  cout<<"RegRunner shutdown"<<endl;
+  InfoLog(<<"RegRunner shutdown");
   if(!mRunning) return;
   mStackThread->shutdown();
   // Wait for all threads to shutdown, and destroy objects

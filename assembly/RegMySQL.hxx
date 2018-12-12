@@ -7,8 +7,6 @@
 
 using namespace std;
 
-#define RESIPROCATE_SUBSYSTEM Subsystem::TEST
-
 namespace resip
 {
   class Data;
@@ -49,7 +47,6 @@ class RegMySQL: public RegDB
 
   // when multiple threads are in use with the same connection, you need to
   // mutex calls to mysql_query and mysql_store_result:
-  // http://dev.mysql.com/doc/refman/5.1/en/threaded-clients.html
     mutable resip::Mutex mMutex;
 };
 }

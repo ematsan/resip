@@ -9,7 +9,9 @@
 
 using namespace std;
 
+//work with query
 namespace registrar{
+#define RESIPROCATE_SUBSYSTEM Subsystem::TEST
 //create SQL query to DB
 class RegDB{
   public:
