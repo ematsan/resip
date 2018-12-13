@@ -3,6 +3,9 @@
 #include <map>
 #include <rutil/ConfigParse.hxx>
 #include "rutil/Logger.hxx"
+
+#define RESIPROCATE_SUBSYSTEM resip::Subsystem::TEST
+
 //use to run the sipstack
 namespace resip
 {
@@ -14,7 +17,6 @@ using namespace std;
 
 namespace registrar
 {
-#define RESIPROCATE_SUBSYSTEM resip::Subsystem::TEST
 
   class RegMySQL;
 
