@@ -5,8 +5,6 @@
 #include <mysql/mysql.h>
 #include <mysql/errmsg.h>
 
-using namespace std;
-
 namespace resip
 {
   class Data;

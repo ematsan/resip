@@ -9,8 +9,6 @@
 
 #define RESIPROCATE_SUBSYSTEM Subsystem::TEST
 
-using namespace std;
-
 //work with query
 namespace registrar{
 //create SQL query to DB
@@ -68,14 +66,14 @@ class RegDB{
     };
 
     typedef resip::Data Key;
-    typedef vector<UserRecord> UserRecordList;
-    typedef vector<DomainRecord> DomainRecordList;
-    typedef vector<UserDomainRecord> UserDomainRecordList;
-    typedef vector<ProtocolRecord> ProtocolRecordList;
-    typedef vector<AuthorizationRecord> AuthorizationRecordList;
-    typedef vector<ForwardRecord> ForwardRecordList;
-    typedef vector<RegistrarRecord> RegistrarRecordList;
-    typedef vector<RouteRecord> RouteRecordList;
+    typedef std::vector<UserRecord> UserRecordList;
+    typedef std::vector<DomainRecord> DomainRecordList;
+    typedef std::vector<UserDomainRecord> UserDomainRecordList;
+    typedef std::vector<ProtocolRecord> ProtocolRecordList;
+    typedef std::vector<AuthorizationRecord> AuthorizationRecordList;
+    typedef std::vector<ForwardRecord> ForwardRecordList;
+    typedef std::vector<RegistrarRecord> RegistrarRecordList;
+    typedef std::vector<RouteRecord> RouteRecordList;
 
     // functions for User Records
     virtual bool addUser(const UserRecord& rec);

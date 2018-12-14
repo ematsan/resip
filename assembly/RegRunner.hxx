@@ -13,8 +13,6 @@ namespace resip
   class ThreadIf;
 }
 
-using namespace std;
-
 namespace registrar
 {
 
