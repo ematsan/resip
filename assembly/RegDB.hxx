@@ -29,7 +29,7 @@ class RegDB{
     };
     struct UserDomainRecord
     {
-          unsigned int mIdUD;
+          unsigned int mIdUserDomain;
           unsigned int mIdDomainFk;
           unsigned int mIdUserFk;
     };
@@ -41,7 +41,7 @@ class RegDB{
     struct AuthorizationRecord
     {
           unsigned int mIdAuth;
-          unsigned int mIdUDFk;
+          unsigned int mIdUserDomainFk;
           resip::Data mPassword;
     };
     struct ForwardRecord
@@ -54,7 +54,7 @@ class RegDB{
     struct RegistrarRecord
     {
           unsigned int mIdReg;
-          unsigned int mIdUDFk;
+          unsigned int mIdUserDomainFk;
           unsigned int mIdMainFk;
           resip::Data mCallId;
     };
@@ -82,37 +82,42 @@ class RegDB{
     virtual void eraseUser(const Key& key);
     virtual UserRecord getUser(const Key& key) const;
     virtual UserRecordList getAllUsers();
+    virtual int findUser(UserRecord& rec);
 
     // functions for Domain Records
     virtual bool addDomain(const DomainRecord& rec);
     virtual void eraseDomain(const Key& key);
     virtual DomainRecord getDomain(const Key& key) const;
     virtual DomainRecordList getAllDomains();
+    virtual int findDomain(DomainRecord& rec);
 
     // functions for User Domain Records
     virtual bool addUserDomain(const UserDomainRecord& rec);
     virtual void eraseUserDomain(const Key& key);
     virtual UserDomainRecord getUserDomain(const Key& key) const;
     virtual UserDomainRecordList getAllUserDomains();
-
+    virtual int findUserDomain(UserDomainRecord& rec);
 
     // functions for Protocol Records
     virtual bool addProtocol(const ProtocolRecord& rec);
     virtual void eraseProtocol(const Key& key);
     virtual ProtocolRecord getProtocol(const Key& key) const;
     virtual ProtocolRecordList getAllProtocols();
+    virtual int findProtocol(ProtocolRecord& rec);
 
     // functions for Authorization Records
     virtual bool addAuthorization(const AuthorizationRecord& rec);
     virtual void eraseAuthorization(const Key& key);
     virtual AuthorizationRecord getAuthorization(const Key& key) const;
     virtual AuthorizationRecordList getAllAuthorizations();
+    virtual int findAuthorization(AuthorizationRecord& rec);
 
     // functions for Forward Records
     virtual bool addForward(const ForwardRecord& rec);
     virtual void eraseForward(const Key& key);
     virtual ForwardRecord getForward(const Key& key) const;
     virtual ForwardRecordList getAllForwards();
+    virtual int findForward(ForwardRecord& rec);
 
     // functions for Registrar Records
     virtual bool addRegistrar(const RegistrarRecord& rec);
@@ -120,6 +125,7 @@ class RegDB{
     virtual RegistrarRecord getRegistrar(const Key& key) const;
     virtual RegistrarRecordList getAllRegistrars();
     virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec);
+    virtual int findRegistrar(RegistrarRecord& rec);
 
     // functions for Route Records
     virtual bool addRoute(const RouteRecord& rec);
@@ -127,6 +133,7 @@ class RegDB{
     virtual RouteRecord getRoute(const Key& key) const;
     virtual RouteRecordList getAllRoutes();
     virtual bool updateRoute(const Key& key, const RouteRecord& rec);
+    virtual int findRoute(RouteRecord& rec);
 
   protected:
 

@@ -62,14 +62,14 @@ class RegThread : public resip::ThreadIf
       void clearData();
       void reloadDomain();
 
-      RegDB::UserRecordList ulist;
-      RegDB::DomainRecordList dlist;
-      RegDB::UserDomainRecordList udlist;
-      RegDB::ForwardRecordList flist;
-      RegDB::ProtocolRecordList plist;
-      RegDB::AuthorizationRecordList alist;
-      RegDB::RegistrarRecordList reglist;
-      RegDB::RouteRecordList rlist;
+      RegDB::UserRecordList userList;
+      RegDB::DomainRecordList domainList;
+      RegDB::UserDomainRecordList userDomeinList;
+      RegDB::ForwardRecordList forwardList;
+      RegDB::ProtocolRecordList protocolList;
+      RegDB::AuthorizationRecordList authList;
+      RegDB::RegistrarRecordList regList;
+      RegDB::RouteRecordList routeList;
 };
 }
 #endif

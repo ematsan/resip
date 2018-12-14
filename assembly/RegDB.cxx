@@ -74,6 +74,37 @@ RegDB::getAllUsers()
   }
   return records;
 }
+
+int
+RegDB::findUser(UserRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fiduser FROM tuser"
+        << " WHERE fname='" << rec.mName
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdUser  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdUser;
+}
 /*************************************************************************/
 /*                       DOMAIN                                          */
 /*************************************************************************/
@@ -145,6 +176,38 @@ RegDB::getAllDomains()
   }
   return records;
 }
+
+
+int
+RegDB::findDomain(DomainRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fiddomain FROM tdomain"
+        << " WHERE fdomain='" << rec.mDomain
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdDomain  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdDomain;
+}
 /*************************************************************************/
 /*                       USER DOMAIN                                     */
 /*************************************************************************/
@@ -195,7 +258,7 @@ RegDB::getUserDomain(const Key& key) const
   if(row)
    {
        int col = 0;
-       rec.mIdUD          = Data(key).convertInt();
+       rec.mIdUserDomain          = Data(key).convertInt();
        rec.mIdDomainFk       = Data(row[col++]).convertInt();
        rec.mIdUserFk          = Data(row[col++]).convertInt();
    }
@@ -215,6 +278,39 @@ RegDB::getAllUserDomains()
      key = dbKey(UserDomainTable, false);
   }
   return records;
+}
+
+
+int
+RegDB::findUserDomain(UserDomainRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidud FROM tuserdomain"
+        << " WHERE fiddomainfk = '" << rec.mIdDomainFk
+        << "' and fiduserfk = '" << rec.mIdUserFk
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdUserDomain  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdUserDomain;
 }
 /*************************************************************************/
 /*                        PROTOCOL                                       */
@@ -284,6 +380,37 @@ RegDB::getAllProtocols()
      key = dbKey(ProtocolTable, false);
   }
   return records;
+}
+
+int
+RegDB::findProtocol(ProtocolRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidprotocol FROM tprotocol"
+        << " WHERE fprotocol = '" << rec.mProtocol
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdProtocol  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdProtocol;
 }
 /*************************************************************************/
 /*                        FORWARD                                        */
@@ -358,6 +485,39 @@ RegDB::getAllForwards()
   }
   return records;
 }
+
+int
+RegDB::findForward(ForwardRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidforward FROM tforward"
+        << " WHERE fidforwardfk = '" << rec.mIdDomainFk
+        << "' and fidprotocol = '" << rec.mIdProtocolFk
+        << "' and fport = '" << rec.mPort
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdForward  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdForward;
+}
 /*************************************************************************/
 /*                        AUTHORIZATION                                  */
 /*************************************************************************/
@@ -369,7 +529,7 @@ RegDB::addAuthorization(const AuthorizationRecord& rec)
      DataStream ds(command);
      ds << "INSERT INTO tauthorization (fidudfk, fpassword)"
         << " VALUES("
-        << rec.mIdUDFk << ", '"
+        << rec.mIdUserDomainFk << ", '"
         << rec.mPassword << "')";
   }
   return query(command, 0) == 0;
@@ -409,7 +569,7 @@ RegDB::getAuthorization(const Key& key) const
    {
        int col = 0;
        rec.mIdAuth            = Data(key).convertInt();
-       rec.mIdUDFk            = Data(row[col++]).convertInt();
+       rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
        rec.mPassword          = Data(row[col++]);
    }
   mysql_free_result(result);
@@ -429,6 +589,39 @@ RegDB::getAllAuthorizations()
   }
   return records;
 }
+
+
+int
+RegDB::findAuthorization(AuthorizationRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidauth FROM tauthorization"
+        << " WHERE fidudfk = '" << rec.mIdUserDomainFk
+        << "' and fpassword = '" << rec.mPassword
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdAuth  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdAuth;
+}
 /*************************************************************************/
 /*                        REGISTRAR                                      */
 /*************************************************************************/
@@ -440,7 +633,7 @@ RegDB::addRegistrar(const RegistrarRecord& rec)
      DataStream ds(command);
      ds << "INSERT INTO tregistrar (fidudfk, fcallid, fidmainfk)"
         << " VALUES("
-        << rec.mIdUDFk << ", '"
+        << rec.mIdUserDomainFk << ", '"
         << rec.mCallId<<"', "
         << rec.mIdMainFk << ")";
   }
@@ -481,7 +674,7 @@ RegDB::getRegistrar(const Key& key) const
    {
        int col = 0;
        rec.mIdReg             = Data(key).convertInt();
-       rec.mIdUDFk            = Data(row[col++]).convertInt();
+       rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
        rec.mCallId            = Data(row[col++]);
        rec.mIdMainFk          = Data(row[col++]).convertInt();
    }
@@ -514,6 +707,40 @@ RegDB::updateRegistrar(const Key& key, const RegistrarRecord& rec)
         << "' WHERE fidreg = " << key;
   }
   return query(command, 0) == 0;
+}
+
+
+int
+RegDB::findRegistrar(RegistrarRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidreg FROM tregistrar"
+        << " WHERE fidudfk = '" << rec.mIdUserDomainFk
+        << "' and fidmainfk = '" << rec.mIdMainFk
+        << "' and fcallid = '" << rec.mCallId
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdReg  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdReg;
 }
 /*************************************************************************/
 /*                        ROUTE                                          */
@@ -605,6 +832,39 @@ RegDB::updateRoute(const Key& key, const RouteRecord& rec)
         << " WHERE fidroute = " << key;
   }
   return query(command, 0) == 0;
+}
+
+int
+RegDB::findRoute(RouteRecord& rec)
+{
+  Data command;
+  {
+     DataStream ds(command);
+     ds << "SELECT fidroute FROM troute"
+        << " WHERE fidregfk = '" << rec.mIdRegFk
+        << "' and fidforwardfk = '" << rec.mIdForwardFk
+        << "' and ftime = '" << rec.mTime
+        << "'";
+  }
+
+  MYSQL_RES* result = 0;
+  if(query(command, &result) != 0)
+  {
+     return -1;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
+     return 0;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       rec.mIdRoute  = Data(row[0]).convertInt();
+   }
+  mysql_free_result(result);
+  return rec.mIdRoute;
 }
 /*****************************************************************************/
 void
