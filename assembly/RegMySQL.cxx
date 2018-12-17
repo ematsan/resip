@@ -10,7 +10,11 @@ using namespace std;
 using namespace resip;
 using namespace registrar;
 
+extern "C"
+{
 void mysqlThreadEnd(void*){ mysql_thread_end();}
+}
+
 class MySQLInitializer
 {
    public:
