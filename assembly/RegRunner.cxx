@@ -4,7 +4,6 @@
 #include "RegMySQL.hxx"
 
 #include "resip/stack/SipStack.hxx"
-#include "resip/stack/EventStackThread.cxx"
 #include "rutil/FdPoll.hxx"
 #include "rutil/DnsUtil.hxx"
 
