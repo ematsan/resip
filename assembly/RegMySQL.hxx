@@ -32,16 +32,16 @@ class RegMySQL: public RegDB
     virtual resip::Data dbKey(const Table table, bool first = false);
     virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const;
 
-    virtual int query(const resip::Data& queryCommand, UserRecord& result, const Key& key) const;
-    virtual int query(const resip::Data& queryCommand, DomainRecord& result, const Key& key) const;
-    virtual int query(const resip::Data& queryCommand, UserDomainRecord& result, const Key& key) const;
-    virtual int query(const resip::Data& queryCommand, ProtocolRecord& result, const Key& key) const;
-    virtual int query(const resip::Data& queryCommand, AuthorizationRecord& result, const Key& key) const;
-    virtual int query(const resip::Data& queryCommand, ForwardRecord& result, const Key& key) const;
-    virtual int query(const resip::Data& queryCommand, RegistrarRecord& result, const Key& key) const;
-    virtual int query(const resip::Data& queryCommand, RouteRecord& result, const Key& key) const;
+    virtual int query(const resip::Data& queryCommand, UserRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, DomainRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, UserDomainRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, ProtocolRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, AuthorizationRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, ForwardRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, RegistrarRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, RouteRecord& result, const Key& key) const override;
 
-    virtual int query(const resip::Data& queryCommand) const;
+    virtual int query(const resip::Data& queryCommand) const override;
 
     resip::Data mDBServer;
     resip::Data mDBUser;
