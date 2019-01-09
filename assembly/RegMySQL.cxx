@@ -5,6 +5,7 @@
 #include "rutil/Logger.hxx"
 
 #include "RegMySQL.hxx"
+//#include "RegDB.hxx"
 
 using namespace std;
 using namespace resip;
@@ -266,4 +267,208 @@ int
 RegMySQL::query(const Data& queryCommand) const
 {
   return query(queryCommand, 0);
+}
+
+int
+RegMySQL::query(const resip::Data& queryCommand, UserRecord& rec, const Key& key) const
+{
+MYSQL_RES* result = 0;
+if(query(queryCommand, &result) != 0)
+{
+   return 0;
+}
+if (result == 0)
+{
+   ErrLog( << "Base store result failed");
+   return -1;
+}
+
+MYSQL_ROW row=mysql_fetch_row(result);
+if(row)
+ {
+     int col = 0;
+     rec.mIdUser          = Data(key).convertInt();
+     rec.mName            = Data(row[col++]);
+ }
+mysql_free_result(result);
+return 1;
+}
+
+int
+RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec, const Key& key) const
+{
+  MYSQL_RES* result = 0;
+  if(query(queryCommand, &result) != 0)
+  {
+     return 0;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "Base store result failed");
+     return -1;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdDomain          = Data(key).convertInt();
+       rec.mDomain          = Data(row[col++]);
+       rec.mIdRealm          = Data(row[col++]).convertInt();
+   }
+  mysql_free_result(result);
+  return 1;
+}
+int
+RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec, const Key& key) const
+{
+  MYSQL_RES* result = 0;
+    if(query(queryCommand, &result) != 0)
+    {
+       return 0;
+    }
+    if (result == 0)
+    {
+       ErrLog( << "Base store result failed");
+       return -1;
+    }
+
+    MYSQL_ROW row=mysql_fetch_row(result);
+    if(row)
+     {
+         int col = 0;
+         rec.mIdUserDomain          = Data(key).convertInt();
+         rec.mIdDomainFk       = Data(row[col++]).convertInt();
+         rec.mIdUserFk          = Data(row[col++]).convertInt();
+     }
+    mysql_free_result(result);
+    return 1;
+}
+int
+RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec, const Key& key) const
+{
+  MYSQL_RES* result = 0;
+    if(query(queryCommand, &result) != 0)
+    {
+       return 0;
+    }
+    if (result == 0)
+    {
+       ErrLog( << "Base store result failed");
+       return -1;
+    }
+
+    MYSQL_ROW row=mysql_fetch_row(result);
+    if(row)
+     {
+         int col = 0;
+         rec.mIdProtocol          = Data(key).convertInt();
+         rec.mProtocol            = Data(row[col++]);
+     }
+    mysql_free_result(result);
+    return 1;
+}
+int
+RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec, const Key& key) const
+{
+  MYSQL_RES* result = 0;
+  if(query(queryCommand, &result) != 0)
+  {
+     return 0;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "Base store result failed");
+     return -1;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdAuth            = Data(key).convertInt();
+       rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
+       rec.mPassword          = Data(row[col++]);
+   }
+  mysql_free_result(result);
+  return 1;
+}
+int
+RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec, const Key& key) const
+{
+  MYSQL_RES* result = 0;
+  if(query(queryCommand, &result) != 0)
+  {
+     return 0;
+  }
+  if (result == 0)
+  {
+     ErrLog( << "Base store result failed");
+     return -1;
+  }
+
+  MYSQL_ROW row=mysql_fetch_row(result);
+  if(row)
+   {
+       int col = 0;
+       rec.mIdForward            = Data(key).convertInt();
+       rec.mIdProtocolFk            = Data(row[col++]).convertInt();
+       rec.mIdDomainFk               = Data(row[col++]).convertInt();
+       rec.mPort                  = Data(row[col++]).convertInt();
+   }
+  mysql_free_result(result);
+  return 1;
+}
+int
+RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec, const Key& key) const
+{
+  MYSQL_RES* result = 0;
+    if(query(queryCommand, &result) != 0)
+    {
+       return 0;
+    }
+    if (result == 0)
+    {
+       ErrLog( << "Base store result failed");
+       return -1;
+    }
+
+    MYSQL_ROW row=mysql_fetch_row(result);
+    if(row)
+     {
+         int col = 0;
+         rec.mIdReg             = Data(key).convertInt();
+         rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
+         rec.mCallId            = Data(row[col++]);
+         rec.mIdMainFk          = Data(row[col++]).convertInt();
+     }
+    mysql_free_result(result);
+    return 1;
+}
+int
+RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec, const Key& key) const
+{
+  MYSQL_RES* result = 0;
+    if(query(queryCommand, &result) != 0)
+    {
+       return 0;
+    }
+    if (result == 0)
+    {
+       ErrLog( << "Base store result failed");
+       return -1;
+     }
+
+    MYSQL_ROW row=mysql_fetch_row(result);
+    if(row)
+     {
+         int col = 0;
+         rec.mIdRoute            = Data(key).convertInt();
+         rec.mIdRegFk              = Data(row[col++]).convertInt();
+         rec.mIdForwardFk          = Data(row[col++]).convertInt();
+         rec.mTime               = Data(row[col++]);
+         rec.mExpires            = Data(row[col++]).convertInt();
+     }
+    mysql_free_result(result);
+    return 1;
 }

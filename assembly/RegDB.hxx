@@ -154,7 +154,7 @@ class RegDB{
     const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidud", "fidforward",
         "fidprotocol", "fidauth", "fidreg", "fidroute"};
 
-    mutable MYSQL* mConn;
+    //mutable MYSQL* mConn;
     // Db manipulation routines
     // allows deleting records from a table
     virtual void dbEraseRecord(const Table table,
@@ -163,7 +163,16 @@ class RegDB{
     virtual resip::Data dbKey(const Table table,
                                bool first = false) = 0; // return empty if no more
 
-    virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const = 0;
+    //virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const = 0;
+    virtual int query(const resip::Data& queryCommand, UserRecord& result, const Key& key) const = 0;
+    virtual int query(const resip::Data& queryCommand, DomainRecord& result, const Key& key) const = 0;
+    virtual int query(const resip::Data& queryCommand, UserDomainRecord& result, const Key& key) const = 0;
+    virtual int query(const resip::Data& queryCommand, ProtocolRecord& result, const Key& key) const = 0;
+    virtual int query(const resip::Data& queryCommand, AuthorizationRecord& result, const Key& key) const = 0;
+    virtual int query(const resip::Data& queryCommand, ForwardRecord& result, const Key& key) const = 0;
+    virtual int query(const resip::Data& queryCommand, RegistrarRecord& result, const Key& key) const = 0;
+    virtual int query(const resip::Data& queryCommand, RouteRecord& result, const Key& key) const = 0;
+
     virtual int query(const resip::Data& queryCommand) const = 0;
 };
 }

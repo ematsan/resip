@@ -19,7 +19,8 @@ using namespace resip;
 using namespace std;
 using namespace registrar;
 
-RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase, const vector<Data>& configDomains)
+//RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase, const vector<Data>& configDomains)
+RegThread::RegThread(SipStack& stack, Data realm, RegDB* mdatabase, const vector<Data>& configDomains)
    : mStack(stack)
    , mNameAddr(realm)
    , mBase(mdatabase)

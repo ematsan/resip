@@ -2,6 +2,7 @@
 #include "RegRunner.hxx"
 #include "RegThread.hxx"
 #include "RegMySQL.hxx"
+#include "RegDB.hxx"
 
 #include "resip/stack/SipStack.hxx"
 #include "rutil/FdPoll.hxx"
