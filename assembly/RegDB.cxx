@@ -48,26 +48,6 @@ RegDB::getUser(const Key& key) const
      return rec;
   }
   return rec;
-  /*MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdUser          = Data(key).convertInt();
-       rec.mName            = Data(row[col++]);
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::UserRecordList
@@ -103,23 +83,6 @@ RegDB::findUser(UserRecord& rec)
      ErrLog( << "Base store result failed");
      return 0;
   }
-/*  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdUser  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);*/
   return rec.mIdUser;
 }
 /*************************************************************************/
@@ -166,28 +129,6 @@ RegDB::getDomain(const Key& key) const
      return rec;
   }
   return rec;
-/*
-  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdDomain          = Data(key).convertInt();
-       rec.mDomain          = Data(row[col++]);
-       rec.mIdRealm          = Data(row[col++]).convertInt();
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::DomainRecordList
@@ -224,23 +165,6 @@ RegDB::findDomain(DomainRecord& rec)
      ErrLog( << "Base store result failed");
      return 0;
   }
-/*  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdDomain  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);*/
   return rec.mIdDomain;
 }
 /*************************************************************************/
@@ -287,27 +211,6 @@ RegDB::getUserDomain(const Key& key) const
      return rec;
   }
   return rec;
-/*  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdUserDomain          = Data(key).convertInt();
-       rec.mIdDomainFk       = Data(row[col++]).convertInt();
-       rec.mIdUserFk          = Data(row[col++]).convertInt();
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::UserDomainRecordList
@@ -345,24 +248,6 @@ RegDB::findUserDomain(UserDomainRecord& rec)
      ErrLog( << "Base store result failed");
      return 0;
   }
-
-  /*MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdUserDomain  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);*/
   return rec.mIdUserDomain;
 }
 /*************************************************************************/
@@ -408,26 +293,6 @@ RegDB::getProtocol(const Key& key) const
      return rec;
   }
   return rec;
-/*  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdProtocol          = Data(key).convertInt();
-       rec.mProtocol            = Data(row[col++]);
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::ProtocolRecordList
@@ -463,23 +328,6 @@ RegDB::findProtocol(ProtocolRecord& rec)
      ErrLog( << "Base store result failed");
      return 0;
   }
-/*  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdProtocol  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);*/
   return rec.mIdProtocol;
 }
 /*************************************************************************/
@@ -527,28 +375,6 @@ RegDB::getForward(const Key& key) const
      return rec;
   }
   return rec;
-  /*MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdForward            = Data(key).convertInt();
-       rec.mIdProtocolFk            = Data(row[col++]).convertInt();
-       rec.mIdDomainFk               = Data(row[col++]).convertInt();
-       rec.mPort                  = Data(row[col++]).convertInt();
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::ForwardRecordList
@@ -586,23 +412,6 @@ RegDB::findForward(ForwardRecord& rec)
      ErrLog( << "Base store result failed");
      return 0;
   }
-  /*MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdForward  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);*/
   return rec.mIdForward;
 }
 /*************************************************************************/
@@ -649,28 +458,6 @@ RegDB::getAuthorization(const Key& key) const
      return rec;
   }
   return rec;
-/*
-  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdAuth            = Data(key).convertInt();
-       rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
-       rec.mPassword          = Data(row[col++]);
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::AuthorizationRecordList
@@ -708,23 +495,6 @@ RegDB::findAuthorization(AuthorizationRecord& rec)
      ErrLog( << "Base store result failed");
      return 0;
   }
-  /*MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdAuth  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);*/
   return rec.mIdAuth;
 }
 /*************************************************************************/
@@ -772,28 +542,6 @@ RegDB::getRegistrar(const Key& key) const
      return rec;
   }
   return rec;
-/*  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdReg             = Data(key).convertInt();
-       rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
-       rec.mCallId            = Data(row[col++]);
-       rec.mIdMainFk          = Data(row[col++]).convertInt();
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::RegistrarRecordList
@@ -847,25 +595,7 @@ RegDB::findRegistrar(RegistrarRecord& rec)
      return 0;
   }
   return rec.mIdReg;
-  /*MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
   }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdReg  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);
-  return rec.mIdReg;*/
-}
 /*************************************************************************/
 /*                        ROUTE                                          */
 /*************************************************************************/
@@ -913,29 +643,6 @@ RegDB::getRoute(const Key& key) const
      return rec;
   }
   return rec;
-/*  MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return rec;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return rec;
-   }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       int col = 0;
-       rec.mIdRoute            = Data(key).convertInt();
-       rec.mIdRegFk              = Data(row[col++]).convertInt();
-       rec.mIdForwardFk          = Data(row[col++]).convertInt();
-       rec.mTime               = Data(row[col++]);
-       rec.mExpires            = Data(row[col++]).convertInt();
-   }
-  mysql_free_result(result);
-  return rec;*/
 }
 
 RegDB::RouteRecordList
@@ -981,24 +688,6 @@ RegDB::findRoute(RouteRecord& rec)
         << "'";
   }
 
-  /*MYSQL_RES* result = 0;
-  if(query(command, &result) != 0)
-  {
-     return -1;
-  }
-  if (result == 0)
-  {
-     ErrLog( << "Base store result failed");
-     return 0;
-  }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
-  if(row)
-   {
-       rec.mIdRoute  = Data(row[0]).convertInt();
-   }
-  mysql_free_result(result);
-  return rec.mIdRoute;*/
   if(query(command, rec, 0) != 0)
   {
      return -1;

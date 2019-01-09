@@ -275,7 +275,7 @@ RegMySQL::query(const resip::Data& queryCommand, UserRecord& rec, const Key& key
 MYSQL_RES* result = 0;
 if(query(queryCommand, &result) != 0)
 {
-   return 0;
+   return -2;
 }
 if (result == 0)
 {
@@ -291,7 +291,7 @@ if(row)
      rec.mName            = Data(row[col++]);
  }
 mysql_free_result(result);
-return 1;
+return 0;
 }
 
 int
@@ -300,7 +300,7 @@ RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec, const Key& k
   MYSQL_RES* result = 0;
   if(query(queryCommand, &result) != 0)
   {
-     return 0;
+     return -2;
   }
   if (result == 0)
   {
@@ -317,7 +317,7 @@ RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec, const Key& k
        rec.mIdRealm          = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
-  return 1;
+  return 0;
 }
 int
 RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec, const Key& key) const
@@ -325,7 +325,7 @@ RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec, const Ke
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
     {
-       return 0;
+       return -2;
     }
     if (result == 0)
     {
@@ -342,7 +342,7 @@ RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec, const Ke
          rec.mIdUserFk          = Data(row[col++]).convertInt();
      }
     mysql_free_result(result);
-    return 1;
+    return 0;
 }
 int
 RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec, const Key& key) const
@@ -350,7 +350,7 @@ RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec, const Key&
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
     {
-       return 0;
+       return -2;
     }
     if (result == 0)
     {
@@ -366,7 +366,7 @@ RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec, const Key&
          rec.mProtocol            = Data(row[col++]);
      }
     mysql_free_result(result);
-    return 1;
+    return 0;
 }
 int
 RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec, const Key& key) const
@@ -374,7 +374,7 @@ RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec, const
   MYSQL_RES* result = 0;
   if(query(queryCommand, &result) != 0)
   {
-     return 0;
+     return -2;
   }
   if (result == 0)
   {
@@ -391,7 +391,7 @@ RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec, const
        rec.mPassword          = Data(row[col++]);
    }
   mysql_free_result(result);
-  return 1;
+  return 0;
 }
 int
 RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec, const Key& key) const
@@ -399,7 +399,7 @@ RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec, const Key& 
   MYSQL_RES* result = 0;
   if(query(queryCommand, &result) != 0)
   {
-     return 0;
+     return -2;
   }
   if (result == 0)
   {
@@ -417,7 +417,7 @@ RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec, const Key& 
        rec.mPort                  = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
-  return 1;
+  return 0;
 }
 int
 RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec, const Key& key) const
@@ -425,7 +425,7 @@ RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec, const Key
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
     {
-       return 0;
+       return -2;
     }
     if (result == 0)
     {
@@ -443,7 +443,7 @@ RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec, const Key
          rec.mIdMainFk          = Data(row[col++]).convertInt();
      }
     mysql_free_result(result);
-    return 1;
+    return 0;
 }
 int
 RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec, const Key& key) const
@@ -451,7 +451,7 @@ RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec, const Key& ke
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
     {
-       return 0;
+       return -2;
     }
     if (result == 0)
     {
@@ -470,5 +470,5 @@ RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec, const Key& ke
          rec.mExpires            = Data(row[col++]).convertInt();
      }
     mysql_free_result(result);
-    return 1;
+    return 0;
 }
