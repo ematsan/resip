@@ -8,5 +8,5 @@ password - test, realm - test.server.ua).
 2) *.hxx and *.cxx - The final version of the registrar. Included Makefile to compiling.
 Used "reg.config" file to the configuration. The directory includes the example
 of the config file.
-For the compiling these programs needed to install all resiprocate's dependencies
-and libraries.
+For the compiling these programs needed to install all resiprocate's 1_10 dependencies
+and libraries : https://www.resiprocate.org

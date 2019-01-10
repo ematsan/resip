@@ -11,6 +11,9 @@ namespace registrar{
 
 class RegDB{
   public:
+
+    virtual ~RegDB() = default;
+
     //table of users
     struct UserRecord
     {
@@ -140,6 +143,11 @@ class RegDB{
     virtual RouteRecordList getAllRoutes();
     virtual bool updateRoute(const Key& key, const RouteRecord& rec);
     virtual int findRouteId(RouteRecord& rec);
+
+
+    virtual int connectDB() const = 0;
+    virtual void disconnectDB() const = 0;
+    virtual void shutdown() = 0;
 
   protected:
 
