@@ -12,7 +12,6 @@ namespace resip
 
 namespace registrar
 {
-//connection with db, make query to db
 class RegMySQL: public RegDB
 {
   public:

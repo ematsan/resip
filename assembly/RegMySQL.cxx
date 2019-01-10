@@ -5,7 +5,6 @@
 #include "rutil/Logger.hxx"
 
 #include "RegMySQL.hxx"
-//#include "RegDB.hxx"
 
 using namespace std;
 using namespace resip;

@@ -16,7 +16,6 @@ namespace resip
 namespace registrar
 {
 
-  //class RegMySQL;
   class RegDB;
 
   class RegConfig : public resip::ConfigParse //not abstract class
@@ -41,8 +40,7 @@ namespace registrar
      RegConfig* mRegConfig; //read config file
      resip::SipStack* mSipStack; //sip stack
      resip::ThreadIf* mStackThread; //sip thread
-     //RegMySQL* mBase; //mySQL db
-     RegDB* mBase; //mySQL db
+     RegDB* mBase;
    };
 }
 #endif

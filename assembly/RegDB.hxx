@@ -1,68 +1,76 @@
 #if !defined(REGDB_HXX)
 #define REGDB_HXX
 
-#include <mysql/mysql.h>
-#include <mysql/errmsg.h>
 #include <vector>
 
 #include "rutil/Data.hxx"
 
 #define RESIPROCATE_SUBSYSTEM Subsystem::TEST
 
-//work with query
 namespace registrar{
-//create SQL query to DB
+
 class RegDB{
   public:
+    //table of users
     struct UserRecord
     {
-          unsigned int mIdUser;
-          resip::Data mName;
+          unsigned int mIdUser; //user id
+          resip::Data mName; //user name
     };
+    //all domains
     struct DomainRecord
     {
-          unsigned int mIdDomain;
-          resip::Data mDomain;
-          unsigned int mIdRealm;
+          unsigned int mIdDomain; //domain id
+          resip::Data mDomain; //domain name
+          unsigned int mIdRealm;//domain realm
     };
+    //connection users and domains
     struct UserDomainRecord
     {
           unsigned int mIdUserDomain;
-          unsigned int mIdDomainFk;
-          unsigned int mIdUserFk;
+          unsigned int mIdDomainFk; //domain id
+          unsigned int mIdUserFk;  //user id
     };
+    //table of protocols
     struct ProtocolRecord
     {
           unsigned int mIdProtocol;
-          resip::Data mProtocol;
+          resip::Data mProtocol; //protocol name
     };
+
+    //tables of authorization
     struct AuthorizationRecord
     {
           unsigned int mIdAuth;
-          unsigned int mIdUserDomainFk;
-          resip::Data mPassword;
+          unsigned int mIdUserDomainFk; // who and where have authorization
+          resip::Data mPassword; //md5 password
     };
+
+    //curent user position
     struct ForwardRecord
     {
           unsigned int mIdForward;
-          unsigned int mIdProtocolFk;
-          unsigned int mIdDomainFk;
-          unsigned int mPort;
+          unsigned int mIdProtocolFk; //protocol
+          unsigned int mIdDomainFk; //domain
+          unsigned int mPort; //port
     };
+     //tables of registrators
     struct RegistrarRecord
     {
           unsigned int mIdReg;
-          unsigned int mIdUserDomainFk;
-          unsigned int mIdMainFk;
-          resip::Data mCallId;
+          unsigned int mIdUserDomainFk;//whome register
+          unsigned int mIdMainFk;//who register
+          resip::Data mCallId; //calid
     };
+
+    //table of routes
     struct RouteRecord
     {
           unsigned int mIdRoute;
-          unsigned int mIdRegFk;
-          unsigned int mIdForwardFk;
-          resip::Data mTime;
-          unsigned int mExpires;
+          unsigned int mIdRegFk; //register record (who-whom)
+          unsigned int mIdForwardFk; //route record (where)
+          resip::Data mTime; //registration time
+          unsigned int mExpires; // expires time
     };
 
     typedef resip::Data Key;
@@ -80,42 +88,42 @@ class RegDB{
     virtual void eraseUser(const Key& key);
     virtual UserRecord getUser(const Key& key) const;
     virtual UserRecordList getAllUsers();
-    virtual int findUser(UserRecord& rec);
+    virtual int findUserId(UserRecord& rec);
 
     // functions for Domain Records
     virtual bool addDomain(const DomainRecord& rec);
     virtual void eraseDomain(const Key& key);
     virtual DomainRecord getDomain(const Key& key) const;
     virtual DomainRecordList getAllDomains();
-    virtual int findDomain(DomainRecord& rec);
+    virtual int findDomainId(DomainRecord& rec);
 
     // functions for User Domain Records
     virtual bool addUserDomain(const UserDomainRecord& rec);
     virtual void eraseUserDomain(const Key& key);
     virtual UserDomainRecord getUserDomain(const Key& key) const;
     virtual UserDomainRecordList getAllUserDomains();
-    virtual int findUserDomain(UserDomainRecord& rec);
+    virtual int findUserDomainId(UserDomainRecord& rec);
 
     // functions for Protocol Records
     virtual bool addProtocol(const ProtocolRecord& rec);
     virtual void eraseProtocol(const Key& key);
     virtual ProtocolRecord getProtocol(const Key& key) const;
     virtual ProtocolRecordList getAllProtocols();
-    virtual int findProtocol(ProtocolRecord& rec);
+    virtual int findProtocolId(ProtocolRecord& rec);
 
     // functions for Authorization Records
     virtual bool addAuthorization(const AuthorizationRecord& rec);
     virtual void eraseAuthorization(const Key& key);
     virtual AuthorizationRecord getAuthorization(const Key& key) const;
     virtual AuthorizationRecordList getAllAuthorizations();
-    virtual int findAuthorization(AuthorizationRecord& rec);
+    virtual int findAuthorizationId(AuthorizationRecord& rec);
 
     // functions for Forward Records
     virtual bool addForward(const ForwardRecord& rec);
     virtual void eraseForward(const Key& key);
     virtual ForwardRecord getForward(const Key& key) const;
     virtual ForwardRecordList getAllForwards();
-    virtual int findForward(ForwardRecord& rec);
+    virtual int findForwardId(ForwardRecord& rec);
 
     // functions for Registrar Records
     virtual bool addRegistrar(const RegistrarRecord& rec);
@@ -123,7 +131,7 @@ class RegDB{
     virtual RegistrarRecord getRegistrar(const Key& key) const;
     virtual RegistrarRecordList getAllRegistrars();
     virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec);
-    virtual int findRegistrar(RegistrarRecord& rec);
+    virtual int findRegistrarId(RegistrarRecord& rec);
 
     // functions for Route Records
     virtual bool addRoute(const RouteRecord& rec);
@@ -131,7 +139,7 @@ class RegDB{
     virtual RouteRecord getRoute(const Key& key) const;
     virtual RouteRecordList getAllRoutes();
     virtual bool updateRoute(const Key& key, const RouteRecord& rec);
-    virtual int findRoute(RouteRecord& rec);
+    virtual int findRouteId(RouteRecord& rec);
 
   protected:
 

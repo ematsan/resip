@@ -4,13 +4,9 @@
 #include "RegMySQL.hxx"
 #include "RegDB.hxx"
 
-//!!!!!!!!!!!!!!!!!!!!!! - read example using messages
 #include "resip/stack/Helper.hxx"
-//!!!!!!!!!!!!!!!!!!!!!! - read example using header
 #include "resip/stack/SipMessage.hxx"
-//!!!!!!!!!!!! resip/stack/NameAddr.hxx - read example using parametrs address
 #include "resip/stack/Uri.hxx"
-//!!!!!!!!!!!!read example using parametrs auth
 #include "resip/stack/Auth.hxx"
 #include "resip/stack/SipStack.hxx"
 #include "rutil/Logger.hxx"
@@ -19,7 +15,6 @@ using namespace resip;
 using namespace std;
 using namespace registrar;
 
-//RegThread::RegThread(SipStack& stack, Data realm, RegMySQL* mdatabase, const vector<Data>& configDomains)
 RegThread::RegThread(SipStack& stack, Data realm, RegDB* mdatabase, const vector<Data>& configDomains)
    : mStack(stack)
    , mNameAddr(realm)
@@ -58,7 +53,7 @@ RegThread::reloadDomain()
         RegDB::DomainRecord n;
         n.mDomain = domain;
         mBase->addDomain(n);
-        n.mIdDomain = mBase->findDomain(n);
+        n.mIdDomain = mBase->findDomainId(n);
         if (n.mIdDomain >= 0)
            domainList.push_back(n);
     }
@@ -254,10 +249,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                           {
                              rec.mExpires = expires;
                              time_t now = time(0);
-                             //https://www.tutorialspoint.com/cplusplus/cpp_date_time.htm
                              tm *ltm = localtime(&now);
-                             // print various components of tm structure.
-                             //http://mycpp.ru/cpp/scpp/cppd_datetime.html
                              rec.mTime = Data(1900 + ltm->tm_year) + "-" +
                                          Data(1 + ltm->tm_mon) + "-" +
                                          Data(ltm->tm_mday) + " "+
@@ -284,7 +276,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                                         Data(ltm->tm_min) + ":" +
                                         Data(ltm->tm_sec);
                             mBase->addRoute(rec);
-                            rec.mIdRoute = mBase->findRoute(rec);
+                            rec.mIdRoute = mBase->findRouteId(rec);
                             if (rec.mIdRoute >= 0)
                             {
                               routeList.push_back(rec);
@@ -299,7 +291,6 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       send200(sip, *i);
                    }
         }
-        else ;//no contacts - do nothing
 }
 
 void
@@ -383,6 +374,16 @@ RegThread::findForward(const unsigned int& idProtocol,
        break;
      }
   }
+  if (0 == idForward)
+  {
+    RegDB::ForwardRecord rec;
+    rec.mIdProtocolFk = idProtocol;
+    rec.mPort = port;
+    rec.mIdDomainFk = idDomain;
+    idForward = mBase->findForwardId(rec);
+    if (idForward >= 0)
+         forwardList.push_back(rec);
+  }
   return idForward;
 }
 
@@ -396,8 +397,8 @@ RegThread::addForward(const unsigned int& idProtocol,
   rec.mIdDomainFk = idDomain;
   rec.mPort = port;
   mBase->addForward(rec);
-  rec.mIdForward = mBase->findForward(rec);
-  if (rec.mIdForward >= 0)
+  rec.mIdForward = mBase->findForwardId(rec);
+  if (rec.mIdForward > 0)
        forwardList.push_back(rec);
   return rec.mIdForward;
 }
@@ -414,6 +415,14 @@ RegThread::findProtocol(resip::Data& protocol)
        break;
      }
   }
+  if (0 == idProtocol)
+  {
+    RegDB::ProtocolRecord rec;
+    rec.mProtocol = protocol;
+    idProtocol = mBase->findProtocolId(rec);
+    if (idProtocol > 0)
+         protocolList.push_back(rec);
+  }
   return idProtocol;
 }
 
@@ -423,8 +432,8 @@ RegThread::addProtocol(resip::Data& protocol)
   RegDB::ProtocolRecord rec;
   rec.mProtocol = protocol;
   mBase->addProtocol(rec);
-  rec.mIdProtocol = mBase->findProtocol(rec);
-  if (rec.mIdProtocol >= 0)
+  rec.mIdProtocol = mBase->findProtocolId(rec);
+  if (rec.mIdProtocol > 0)
        protocolList.push_back(rec);
   return rec.mIdProtocol;
 }
@@ -441,6 +450,14 @@ RegThread::findDomain(resip::Data& host)
        break;
      }
   }
+  if (0 == idDomain)
+  {
+    RegDB::DomainRecord rec;
+    rec.mDomain = host;
+    idDomain = mBase->findDomainId(rec);
+    if (idDomain > 0)
+         domainList.push_back(rec);
+  }
   return idDomain;
 }
 
@@ -450,8 +467,8 @@ RegThread::addDomain(resip::Data& host)
      RegDB::DomainRecord rec;
      rec.mDomain = host;
      mBase->addDomain(rec);
-     rec.mIdDomain = mBase->findDomain(rec);
-     if (rec.mIdDomain >= 0)
+     rec.mIdDomain = mBase->findDomainId(rec);
+     if (rec.mIdDomain > 0)
           domainList.push_back(rec);
      return rec.mIdDomain;
 }
@@ -468,6 +485,14 @@ RegThread::findUser(resip::Data& usr)
        break;
      }
   }
+  if (0 == idu)
+  {
+    RegDB::UserRecord rec;
+    rec.mName = usr;
+    idu = mBase->findUserId(rec);
+    if (idu > 0)
+         userList.push_back(rec);
+  }
   return idu;
 }
 
@@ -477,8 +502,8 @@ RegThread::addUser(resip::Data& usr)
   RegDB::UserRecord rec;
   rec.mName = usr;
   mBase->addUser(rec);
-  rec.mIdUser = mBase->findUser(rec);
-  if (rec.mIdUser >= 0)
+  rec.mIdUser = mBase->findUserId(rec);
+  if (rec.mIdUser > 0)
        userList.push_back(rec);
   return rec.mIdUser;
 }
@@ -495,6 +520,15 @@ RegThread::findUserDomain(int usr, int dom)
            break;
          }
     }
+    if (0 == idud)
+    {
+      RegDB::UserDomainRecord rec;
+      rec.mIdUserFk = usr;
+      rec.mIdDomainFk = dom;
+      idud = mBase->findUserDomainId(rec);
+      if (idud > 0)
+           userDomeinList.push_back(rec);
+    }
     return idud;
 }
 
@@ -505,8 +539,8 @@ RegThread::addUserDomain(int usr, int dom)
   rec.mIdUserFk = usr;
   rec.mIdDomainFk = dom;
   mBase->addUserDomain(rec);
-  rec.mIdUserDomain = mBase->findUserDomain(rec);
-  if (rec.mIdUserDomain >= 0)
+  rec.mIdUserDomain = mBase->findUserDomainId(rec);
+  if (rec.mIdUserDomain > 0)
        userDomeinList.push_back(rec);
   return rec.mIdUserDomain;
 }
@@ -603,6 +637,16 @@ RegThread::findRegistrar(const unsigned int& to,
            break;
       }
   }
+  if (0 == idreg)
+  {
+    RegDB::RegistrarRecord rec;
+    rec.mIdMainFk = from;
+    rec.mIdUserDomainFk = to;
+    rec.mCallId = callid;
+    idreg = mBase->findRegistrarId(rec);
+    if (idreg > 0)
+         regList.push_back(rec);
+  }
   return idreg;
 }
 
@@ -616,8 +660,8 @@ RegThread::addRegistrar(const unsigned int& to,
   rec.mIdMainFk = from;
   rec.mCallId = callid;
   mBase->addRegistrar(rec);
-  rec.mIdReg = mBase->findRegistrar(rec);
-  if (rec.mIdReg >= 0)
+  rec.mIdReg = mBase->findRegistrarId(rec);
+  if (rec.mIdReg > 0)
        regList.push_back(rec);
   return rec.mIdReg;
 }
@@ -661,7 +705,6 @@ RegThread::send405(SipMessage* sip, Data meth)
 void
 RegThread::send403(SipMessage* sip, Data mes)
 {
-  //auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403, mes));
   auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
   mStack.send(*msg403);
   ErrLog(<< "Sent 403(Forbidded) to REGISTER :" + mes);

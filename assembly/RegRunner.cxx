@@ -56,6 +56,8 @@ RegRunner::run(int argc, char** argv)
     unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
 
     mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
+    delete mBase;
+    mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
   }
   catch(BaseException& ex)
   {
@@ -73,7 +75,6 @@ RegRunner::run(int argc, char** argv)
     int udpPort = mRegConfig->getConfigInt("UDPPort", 5060);
     int tcpPort = mRegConfig->getConfigInt("TCPPort", 5060);
 
-    //Data ipAddress = mRegConfig->getConfigData("IPAddress", Data::Empty, true);
     std::vector<Data> ipAddresses;
     mRegConfig->getConfigValue("IPAddresses", ipAddresses);
     if (ipAddresses.empty())
@@ -103,10 +104,6 @@ RegRunner::run(int argc, char** argv)
       configDomains.push_back("localhost");
       configDomains.push_back("127.0.0.1");
     }
-    /*if (std::find(configDomains.begin(), configDomains.end(), realm) == configDomains.end())
-    {
-      configDomains.push_back(realm);
-    }*/
 
     mStackThread = new RegThread (*mSipStack, realm, mBase, configDomains);
 
@@ -129,7 +126,6 @@ RegRunner::shutdown()
   InfoLog(<<"RegRunner shutdown");
   if(!mRunning) return;
   mStackThread->shutdown();
-  // Wait for all threads to shutdown, and destroy objects
   mSipStack->shutdownAndJoinThreads();
   mStackThread->join();
 

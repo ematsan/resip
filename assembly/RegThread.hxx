@@ -22,7 +22,6 @@ class RegThread : public resip::ThreadIf
     public:
       RegThread(resip::SipStack& stack,
                  resip::Data realm,
-                 //RegMySQL* mdatabase,
                  RegDB* mdatabase,
                  const std::vector<resip::Data>& configDomains);
       ~RegThread();
@@ -31,7 +30,6 @@ class RegThread : public resip::ThreadIf
    private:
       resip::SipStack& mStack;
       resip::Data mNameAddr;
-      //RegMySQL* mBase;
       RegDB* mBase;
       std::vector<resip::Data> mConfigDomains;
 

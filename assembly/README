@@ -1,0 +1,12 @@
+Simple registrar server.
+
+Repository includes :
+1) *.sql - The dump of mysql database. The registrar saves routes in this database.
+ - Registrar_test.sql - the test database (for authorization in registrar used : user - test,
+password - test, realm - test.server.ua).
+ - Registrar_new.sql - the clear database (only db scheme and empty tables).
+2) *.hxx and *.cxx - The final version of the registrar. Included Makefile to compiling.
+Used "reg.config" file to the configuration. The directory includes the example
+of the config file.
+For the compiling these programs needed to install all resiprocate's dependencies
+and libraries.

@@ -65,7 +65,7 @@ RegDB::getAllUsers()
 }
 
 int
-RegDB::findUser(UserRecord& rec)
+RegDB::findUserId(UserRecord& rec)
 {
   Data command;
   {
@@ -147,7 +147,7 @@ RegDB::getAllDomains()
 
 
 int
-RegDB::findDomain(DomainRecord& rec)
+RegDB::findDomainId(DomainRecord& rec)
 {
   Data command;
   {
@@ -229,7 +229,7 @@ RegDB::getAllUserDomains()
 
 
 int
-RegDB::findUserDomain(UserDomainRecord& rec)
+RegDB::findUserDomainId(UserDomainRecord& rec)
 {
   Data command;
   {
@@ -310,7 +310,7 @@ RegDB::getAllProtocols()
 }
 
 int
-RegDB::findProtocol(ProtocolRecord& rec)
+RegDB::findProtocolId(ProtocolRecord& rec)
 {
   Data command;
   {
@@ -392,7 +392,7 @@ RegDB::getAllForwards()
 }
 
 int
-RegDB::findForward(ForwardRecord& rec)
+RegDB::findForwardId(ForwardRecord& rec)
 {
   Data command;
   {
@@ -476,7 +476,7 @@ RegDB::getAllAuthorizations()
 
 
 int
-RegDB::findAuthorization(AuthorizationRecord& rec)
+RegDB::findAuthorizationId(AuthorizationRecord& rec)
 {
   Data command;
   {
@@ -573,7 +573,7 @@ RegDB::updateRegistrar(const Key& key, const RegistrarRecord& rec)
 
 
 int
-RegDB::findRegistrar(RegistrarRecord& rec)
+RegDB::findRegistrarId(RegistrarRecord& rec)
 {
   Data command;
   {
@@ -676,7 +676,7 @@ RegDB::updateRoute(const Key& key, const RouteRecord& rec)
 }
 
 int
-RegDB::findRoute(RouteRecord& rec)
+RegDB::findRouteId(RouteRecord& rec)
 {
   Data command;
   {
