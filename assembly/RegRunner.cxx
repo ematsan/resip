@@ -56,8 +56,6 @@ RegRunner::run(int argc, char** argv)
     unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
 
     mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
-    delete mBase;
-    mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
   }
   catch(BaseException& ex)
   {
@@ -128,6 +126,7 @@ RegRunner::shutdown()
   mStackThread->shutdown();
   mSipStack->shutdownAndJoinThreads();
   mStackThread->join();
+  mBase->shutdown();
 
   delete mStackThread; mStackThread = 0;
   delete mSipStack; mSipStack = 0;

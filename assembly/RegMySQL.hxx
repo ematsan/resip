@@ -23,9 +23,9 @@ class RegMySQL: public RegDB
             unsigned int port);
     ~RegMySQL();
 
-    int connectDB() const;
-    void disconnectDB() const;
-    void initialize() const;
+    virtual int connectDB() const override;
+    virtual void disconnectDB() const override;
+    virtual void shutdown() override;
 
   private:
     virtual resip::Data dbKey(const Table table, bool first = false);
@@ -52,9 +52,6 @@ class RegMySQL: public RegDB
     mutable MYSQL* mConn;
     mutable MYSQL_RES* mResult[MaxTable];
 
-  // when multiple threads are in use with the same connection, you need to
-  // mutex calls to mysql_query and mysql_store_result:
-    mutable resip::Mutex mMutex;
 };
 }
 #endif
