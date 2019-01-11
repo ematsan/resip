@@ -114,7 +114,7 @@ RegThread::thread()
 {
   InfoLog(<<"This is the Server");
   while (!isShutdown())
-  {
+  {     
      SipMessage* received = mStack.receive();
      if (received)
      {

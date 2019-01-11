@@ -7,8 +7,10 @@ RPATH=-Wl,-rpath=../lib
 # -I.. - main dir
 OPTION=-w -g -I..
 
-all: db mysql thread runner server
+all: command db mysql thread runner server
 
+command: Command.cxx
+		g++ -c $(OPTION) Command.cxx -o command.o
 db: RegDB.cxx
 	g++ -c $(OPTION) $(RPATH)  RegDB.cxx -o regdb.o $(LIB)
 mysql: RegMySQL.cxx
@@ -18,4 +20,4 @@ runner: RegRunner.cxx
 thread: RegThread.cxx
 	g++ -c $(OPTION) $(RPATH)  RegThread.cxx -o regthread.o $(LIB)
 server: registrar.cxx
-	g++ $(OPTION) $(RPATH) registrar.cxx regrunner.o regthread.o regmysql.o regdb.o -o reg $(LIB)
+	g++ $(OPTION) $(RPATH) registrar.cxx regrunner.o regthread.o regmysql.o regdb.o command.o -o reg $(LIB)
