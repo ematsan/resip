@@ -25,7 +25,6 @@ RegThread::RegThread(SipStack& stack, Data realm, RegDB* mdatabase, const vector
   //select all data
   loadData();
   reloadDomain();
-
 }
 
 RegThread::~RegThread()
@@ -116,11 +115,6 @@ RegThread::thread()
   InfoLog(<<"This is the Server");
   while (!isShutdown())
   {
-     FdSet fdset;
-     mStack.buildFdSet(fdset);
-     int err = fdset.selectMilliSeconds(0);
-     assert (err != -1);
-     mStack.process(fdset);
      SipMessage* received = mStack.receive();
      if (received)
      {

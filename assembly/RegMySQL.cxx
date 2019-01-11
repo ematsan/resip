@@ -37,7 +37,7 @@ RegMySQL::~RegMySQL(){
     InfoLog(<<"RegMySQL destructor");
     try
     {
-        disconnectDB();
+      if(mConn) disconnectDB();
     }
     catch(std::exception const& a)
     {
@@ -90,7 +90,7 @@ RegMySQL::connectDB() const{
 void
 RegMySQL::shutdown()
 {
-  disconnectDB();
+  if(mConn) disconnectDB();
 }
 
 void
