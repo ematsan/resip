@@ -1,6 +1,13 @@
 #if !defined(REGISTRAR_HXX)
 #define REGISTRAR_HXX
 
+#include <vector>
+#include <thread>
+#include <atomic>
+#include <queue>
+#include <mutex>
+#include <functional>
+
 #include "rutil/ThreadIf.hxx"
 #include "resip/stack/NameAddr.hxx"
 
@@ -17,6 +24,95 @@ namespace registrar
 {
 class RegMySQL;
 
+class join_threads
+{
+  std::vector<std::thread>& threads;
+public:
+  explicit join_threads(std::vector<std::thread>& threads_): threads(threads_){}
+  ~join_threads()
+  {
+    for(unsigned long i = 0; i < threads.size(); ++i)
+    {
+      if (threads[i].joinable())
+         threads[i].join();
+    }
+  }
+};
+
+template<typename T>
+class thread_safe_queue
+{
+  mutable std::mutex mut;
+  std::queue<T> data_queue;
+public:
+  thread_safe_queue(){}
+
+  void push(T new_value)
+  {
+    std::lock_guard<std::mutex> lk(mut);
+    data_queue.push(std::move(new_value));
+  }
+
+  bool try_pop(T& value)
+  {
+    std::lock_guard<std::mutex> lk(mut);
+    if (data_queue.empty())
+        return false;
+    value = std::move(data_queue.front());
+    data_queue.pop();
+    return true;
+  }
+};
+
+class thread_pool
+{
+  std::atomic_bool done;
+  thread_safe_queue<std::function<void()> >work_queue;
+  std::vector<std::thread> threads;
+  join_threads joiner;
+
+  void work_thread()
+  {
+    while(!done)
+    {
+      std::function<void()> task;
+      if (work_queue.try_pop(task))
+      {
+        task();
+      }
+      else
+      {
+        std::this_thread::yield();
+      }
+    }
+  }
+public:
+  thread_pool():done(false), joiner(threads)
+  {
+     unsigned const thread_count = std::thread::hardware_concurrency();
+     try
+     {
+       for (unsigned i = 0; i<thread_count; ++i)
+         threads.push_back(std::thread(&thread_pool::work_thread, this));
+     }
+     catch (...)
+     {
+       done = true;
+       throw;
+     }
+  }
+
+  ~thread_pool() { done = true; }
+
+  template<typename FunctionType>
+  void submit(FunctionType f)
+  {
+    work_queue.push(std::function<void()>(f));
+  }
+};
+
+
+
 class Registrar : public resip::ThreadIf
 {
     public:
@@ -32,6 +128,7 @@ class Registrar : public resip::ThreadIf
       resip::Data mNameAddr;
       RegDB* mBase;
       std::vector<resip::Data> mConfigDomains;
+      thread_pool mThreads;
 
       //void analisysRequest(resip::SipMessage* sip);
       void analisysRequest(resip::SipMessage sip);
@@ -80,6 +177,7 @@ class Registrar : public resip::ThreadIf
       RegDB::AuthorizationRecordList authList;
       RegDB::RegistrarRecordList regList;
       RegDB::RouteRecordList routeList;
+      //std::vector<std::future<void>> results(4);
 };
 }
 #endif

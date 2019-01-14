@@ -21,6 +21,7 @@ Registrar::Registrar(SipStack& stack, Data realm, RegDB* mdatabase, const vector
    , mNameAddr(realm)
    , mBase(mdatabase)
    , mConfigDomains(configDomains)
+   , mThreads()
 {
   InfoLog(<<"Registrar constructor");
   //select all data
@@ -127,14 +128,15 @@ Registrar::thread()
           //ExpiresCategory& expires = received->header(h_Expires);
           if (received->exists(h_Authorizations))
            {
-             try{
-              std::async(std::launch::async, &Registrar::analisysRequest, this, *received);
+             /*try{
+              std::future<void> fut =std::async(std::launch::async, &Registrar::analisysRequest, this, *received);
              }
              catch(std::exception const& a)
              {
                 ErrLog(<<"Async function exeption: " << a.what());
                 send500(received);
-             }
+             }*/
+             mThreads.submit(std::bind(&Registrar::analisysRequest, this, *received));
           }
           else
           {
