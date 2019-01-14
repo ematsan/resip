@@ -129,6 +129,7 @@ class Registrar : public resip::ThreadIf
       RegDB* mBase;
       std::vector<resip::Data> mConfigDomains;
       thread_pool mThreads;
+      std::mutex mut;
 
       //void analisysRequest(resip::SipMessage* sip);
       void analisysRequest(resip::SipMessage sip);

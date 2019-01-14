@@ -136,7 +136,14 @@ Registrar::thread()
                 ErrLog(<<"Async function exeption: " << a.what());
                 send500(received);
              }*/
-             mThreads.submit(std::bind(&Registrar::analisysRequest, this, *received));
+             //mThreads.submit(std::bind(&Registrar::analisysRequest, this, *received));
+             try{
+                mThreads.submit(std::bind(&Registrar::analisysRequest, this, *received));
+             }
+            catch(...)
+             {
+                send500(received);
+             }
           }
           else
           {
@@ -678,14 +685,16 @@ void
 Registrar::send200(SipMessage* sip, NameAddr add)
 {
   auto_ptr<SipMessage> msg200(Helper::makeResponse(*sip, 200, add));
-  mStack.send(*msg200);
   InfoLog(<< "Sent 200 to REGISTER");
+  std::lock_guard<std::mutex> lk(mut);
+  mStack.send(*msg200);
 }
 
 void
 Registrar::send400(SipMessage* sip){
   auto_ptr<SipMessage> msg400(Helper::makeResponse(*sip, 400));
   ErrLog (<< "Sent 400(Bad Request) to REGISTER");
+  std::lock_guard<std::mutex> lk(mut);
   mStack.send(*msg400);
 }
 
@@ -693,6 +702,7 @@ void
 Registrar::send401(SipMessage* sip){
   auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*sip, mNameAddr, true, false));
   ErrLog (<< "Sent 401(Unauthorized) to REGISTER");
+  std::lock_guard<std::mutex> lk(mut);
   mStack.send(*msg401);
 }
 
@@ -702,8 +712,9 @@ Registrar::send405(SipMessage* sip, Data meth)
   int IMMethodList[] = {(int) REGISTER };
   const int IMMethodListSize = sizeof(IMMethodList) / sizeof(*IMMethodList);
   auto_ptr<SipMessage> msg405(Helper::make405(*sip, IMMethodList, IMMethodListSize));
-  mStack.send(*msg405);
   ErrLog(<< "Sent 405(Method Not Allowed) to "<< meth);
+  std::lock_guard<std::mutex> lk(mut);
+  mStack.send(*msg405);
 }
 
 
@@ -711,13 +722,15 @@ void
 Registrar::send403(SipMessage* sip, Data mes)
 {
   auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
-  mStack.send(*msg403);
   ErrLog(<< "Sent 403(Forbidded) to REGISTER :" + mes);
+  std::lock_guard<std::mutex> lk(mut);
+  mStack.send(*msg403);
 }
 
 void
 Registrar::send500(SipMessage* sip){
   auto_ptr<SipMessage> msg500(Helper::makeResponse(*sip, 500));
   ErrLog (<< "Sent 500(Server Internal Error) to REGISTER");
+  std::lock_guard<std::mutex> lk(mut);
   mStack.send(*msg500);
 }
