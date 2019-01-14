@@ -1,5 +1,5 @@
-#if !defined(REGTHREAD_HXX)
-#define REGTHREAD_HXX
+#if !defined(REGISTRAR_HXX)
+#define REGISTRAR_HXX
 
 #include "rutil/ThreadIf.hxx"
 #include "resip/stack/NameAddr.hxx"
@@ -17,14 +17,14 @@ namespace registrar
 {
 class RegMySQL;
 
-class RegThread : public resip::ThreadIf
+class Registrar : public resip::ThreadIf
 {
     public:
-      RegThread(resip::SipStack& stack,
+      Registrar(resip::SipStack& stack,
                  resip::Data realm,
                  RegDB* mdatabase,
                  const std::vector<resip::Data>& configDomains);
-      ~RegThread();
+      ~Registrar();
 
       void thread();
    private:
@@ -33,7 +33,8 @@ class RegThread : public resip::ThreadIf
       RegDB* mBase;
       std::vector<resip::Data> mConfigDomains;
 
-      void analisysRequest(resip::SipMessage* sip);
+      //void analisysRequest(resip::SipMessage* sip);
+      void analisysRequest(resip::SipMessage sip);
       void removeAllContacts(resip::SipMessage* sip);
       bool testAuthorization(resip::SipMessage* sip);
 

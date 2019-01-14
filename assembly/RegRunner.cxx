@@ -1,6 +1,6 @@
 #include <iostream>
 #include "RegRunner.hxx"
-#include "RegThread.hxx"
+#include "Registrar.hxx"
 #include "RegMySQL.hxx"
 #include "RegDB.hxx"
 
@@ -103,7 +103,7 @@ RegRunner::run(int argc, char** argv)
       configDomains.push_back("127.0.0.1");
     }
 
-    mStackThread = new RegThread (*mSipStack, realm, mBase, configDomains);
+    mStackThread = new Registrar (*mSipStack, realm, mBase, configDomains);
 
     mSipStack->run();
     mStackThread->run();

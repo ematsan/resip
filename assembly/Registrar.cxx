@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
-#include "RegThread.hxx"
+#include <future>
+#include "Registrar.hxx"
 #include "RegMySQL.hxx"
 #include "RegDB.hxx"
 
@@ -15,26 +16,26 @@ using namespace resip;
 using namespace std;
 using namespace registrar;
 
-RegThread::RegThread(SipStack& stack, Data realm, RegDB* mdatabase, const vector<Data>& configDomains)
+Registrar::Registrar(SipStack& stack, Data realm, RegDB* mdatabase, const vector<Data>& configDomains)
    : mStack(stack)
    , mNameAddr(realm)
    , mBase(mdatabase)
    , mConfigDomains(configDomains)
 {
-  InfoLog(<<"RegThread constructor");
+  InfoLog(<<"Registrar constructor");
   //select all data
   loadData();
   reloadDomain();
 }
 
-RegThread::~RegThread()
+Registrar::~Registrar()
 {
-   InfoLog(<<"RegThread destructor");
+   InfoLog(<<"Registrar destructor");
    clearData();
 }
 
 void
-RegThread::reloadDomain()
+Registrar::reloadDomain()
 {
   for (Data domain: mConfigDomains)
   {
@@ -75,7 +76,7 @@ RegThread::reloadDomain()
 }
 
 void
-RegThread::clearData()
+Registrar::clearData()
 {
   userList.clear();
   domainList.clear();
@@ -88,7 +89,7 @@ RegThread::clearData()
 }
 
 void
-RegThread::loadData()
+Registrar::loadData()
 {
   clearData();
   userList = mBase->getAllUsers();
@@ -110,11 +111,11 @@ RegThread::loadData()
 }
 
 void
-RegThread::thread()
+Registrar::thread()
 {
   InfoLog(<<"This is the Server");
   while (!isShutdown())
-  {     
+  {
      SipMessage* received = mStack.receive();
      if (received)
      {
@@ -126,7 +127,14 @@ RegThread::thread()
           //ExpiresCategory& expires = received->header(h_Expires);
           if (received->exists(h_Authorizations))
            {
-              analisysRequest(received);
+             try{
+              std::async(std::launch::async, &Registrar::analisysRequest, this, *received);
+             }
+             catch(std::exception const& a)
+             {
+                ErrLog(<<"Async function exeption: " << a.what());
+                send500(received);
+             }
           }
           else
           {
@@ -143,28 +151,29 @@ RegThread::thread()
 }
 
 void
-RegThread::analisysRequest(resip::SipMessage* sip)
+//Registrar::analisysRequest(resip::SipMessage* sip)
+Registrar::analisysRequest(resip::SipMessage sip)
 {
-  Auths& auth =  sip->header(h_Authorizations);
+  Auths& auth =  sip.header(h_Authorizations);
   //test Authorization
-  if (!testAuthorization(sip))
+  if (!testAuthorization(&sip))
   {
-     send403(sip, "User not register");
+     send403(&sip, "User not register");
      return;
    }
   //test Registrar
-  unsigned int idreg = findRegistrar(sip);
+  unsigned int idreg = findRegistrar(&sip);
   if (0 == idreg)
   {
-     send403(sip, "User not have access to add record");
+     send403(&sip, "User not have access to add record");
      return;
    }
 
-  if(sip->exists(h_Contacts))
+  if(sip.exists(h_Contacts))
         {
-           NameAddr& to = sip->header(h_To);
-           NameAddr& from = sip->header(h_From);
-           CallId& callid = sip->header(h_CallId);
+           NameAddr& to = sip.header(h_To);
+           NameAddr& from = sip.header(h_From);
+           CallId& callid = sip.header(h_CallId);
 
            Data fromUserName = from.uri().user();
            Data fromUserHost = from.uri().host();
@@ -172,23 +181,23 @@ RegThread::analisysRequest(resip::SipMessage* sip)
            Data toUserHost = to.uri().host();
            //registration time
            unsigned int expires = 0;
-           if (sip->exists(h_Expires))
+           if (sip.exists(h_Expires))
            {
-             expires = sip->header(h_Expires).value();
+             expires = sip.header(h_Expires).value();
            }
            else
            {
              expires = 3600;
            }
            //parse all contacts
-           ParserContainer<NameAddr>& contacts = sip->header(h_Contacts);
+           ParserContainer<NameAddr>& contacts = sip.header(h_Contacts);
 
            for (ParserContainer<NameAddr>::iterator i = contacts.begin(); i != contacts.end(); i++)
                    {
                      //test format
                      if (!i->isWellFormed())
                      {
-                       send400(sip);
+                       send400(&sip);
                        ErrLog(<< "Not well formed");
                        return;
                      }
@@ -197,12 +206,12 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       {
                         if (contacts.size() > 1 || expires != 0)
                           {
-                              send400(sip);
+                              send400(&sip);
                               ErrLog(<< "Error us Contact:*");
                               return;
                            }
                         //remove users contacts
-                        removeAllContacts(sip);
+                        removeAllContacts(&sip);
                         return;
                       }
 
@@ -214,7 +223,7 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                       unsigned int idForward = findForward(addr, expires);
                       if (0 == idForward)
                       {
-                         send500(sip);
+                         send500(&sip);
                          ErrLog(<< "Not find Forward");
                          return;
                        }
@@ -277,18 +286,18 @@ RegThread::analisysRequest(resip::SipMessage* sip)
                             }
                             else
                             {
-                              send500(sip);
+                              send500(&sip);
                             }
                             //upd = true;
                         }
                       }
-                      send200(sip, *i);
+                      send200(&sip, *i);
                    }
         }
 }
 
 void
-RegThread::removeAllContacts(resip::SipMessage* sip)
+Registrar::removeAllContacts(resip::SipMessage* sip)
 {
   //remove user contacts
   //find registrar information
@@ -309,7 +318,7 @@ RegThread::removeAllContacts(resip::SipMessage* sip)
 }
 
 bool
-RegThread::testAuthorization(resip::SipMessage* sip)
+Registrar::testAuthorization(resip::SipMessage* sip)
 {
   for (RegDB::AuthorizationRecord auth : authList)
   {
@@ -320,7 +329,7 @@ RegThread::testAuthorization(resip::SipMessage* sip)
 }
 
 int
-RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
+Registrar::findForward(resip::NameAddr& addr, unsigned int reg)
 {
   unsigned int expires = reg;
   Data user = addr.uri().user();
@@ -353,7 +362,7 @@ RegThread::findForward(resip::NameAddr& addr, unsigned int reg)
 }
 
 int
-RegThread::findForward(const unsigned int& idProtocol,
+Registrar::findForward(const unsigned int& idProtocol,
                 const unsigned int& idDomain,
                 const unsigned int& port)
 {
@@ -382,7 +391,7 @@ RegThread::findForward(const unsigned int& idProtocol,
 }
 
 int
-RegThread::addForward(const unsigned int& idProtocol,
+Registrar::addForward(const unsigned int& idProtocol,
                 const unsigned int& idDomain,
                 const unsigned int& port)
 {
@@ -398,7 +407,7 @@ RegThread::addForward(const unsigned int& idProtocol,
 }
 
 int
-RegThread::findProtocol(resip::Data& protocol)
+Registrar::findProtocol(resip::Data& protocol)
 {
   unsigned int idProtocol = 0;
   for (RegDB::ProtocolRecord rec : protocolList)
@@ -421,7 +430,7 @@ RegThread::findProtocol(resip::Data& protocol)
 }
 
 int
-RegThread::addProtocol(resip::Data& protocol)
+Registrar::addProtocol(resip::Data& protocol)
 {
   RegDB::ProtocolRecord rec;
   rec.mProtocol = protocol;
@@ -433,7 +442,7 @@ RegThread::addProtocol(resip::Data& protocol)
 }
 
 int
-RegThread::findDomain(resip::Data& host)
+Registrar::findDomain(resip::Data& host)
 {
   unsigned int idDomain = 0;
   for (RegDB::DomainRecord rec : domainList)
@@ -456,7 +465,7 @@ RegThread::findDomain(resip::Data& host)
 }
 
 int
-RegThread::addDomain(resip::Data& host)
+Registrar::addDomain(resip::Data& host)
 {
      RegDB::DomainRecord rec;
      rec.mDomain = host;
@@ -468,7 +477,7 @@ RegThread::addDomain(resip::Data& host)
 }
 
 int
-RegThread::findUser(resip::Data& usr)
+Registrar::findUser(resip::Data& usr)
 {
   unsigned int idu = 0;
   for (RegDB::UserRecord rec : userList)
@@ -491,7 +500,7 @@ RegThread::findUser(resip::Data& usr)
 }
 
 int
-RegThread::addUser(resip::Data& usr)
+Registrar::addUser(resip::Data& usr)
 {
   RegDB::UserRecord rec;
   rec.mName = usr;
@@ -503,7 +512,7 @@ RegThread::addUser(resip::Data& usr)
 }
 
 int
-RegThread::findUserDomain(int usr, int dom)
+Registrar::findUserDomain(int usr, int dom)
 {
     int idud = 0;
     for (RegDB::UserDomainRecord rec : userDomeinList)
@@ -527,7 +536,7 @@ RegThread::findUserDomain(int usr, int dom)
 }
 
 int
-RegThread::addUserDomain(int usr, int dom)
+Registrar::addUserDomain(int usr, int dom)
 {
   RegDB::UserDomainRecord rec;
   rec.mIdUserFk = usr;
@@ -540,7 +549,7 @@ RegThread::addUserDomain(int usr, int dom)
 }
 
 int
-RegThread::findRegistrar(resip::SipMessage* sip)
+Registrar::findRegistrar(resip::SipMessage* sip)
 {
   NameAddr& to = sip->header(h_To);
   NameAddr& from = sip->header(h_From);
@@ -612,7 +621,7 @@ RegThread::findRegistrar(resip::SipMessage* sip)
 }
 
 int
-RegThread::findRegistrar(const unsigned int& to,
+Registrar::findRegistrar(const unsigned int& to,
                 const unsigned int& from,
                 resip::Data& callid)
 {
@@ -645,7 +654,7 @@ RegThread::findRegistrar(const unsigned int& to,
 }
 
 int
-RegThread::addRegistrar(const unsigned int& to,
+Registrar::addRegistrar(const unsigned int& to,
                 const unsigned int& from,
                 resip::Data& callid)
 {
@@ -664,7 +673,7 @@ RegThread::addRegistrar(const unsigned int& to,
 /*                         MESSAGES                                           */
 /******************************************************************************/
 void
-RegThread::send200(SipMessage* sip, NameAddr add)
+Registrar::send200(SipMessage* sip, NameAddr add)
 {
   auto_ptr<SipMessage> msg200(Helper::makeResponse(*sip, 200, add));
   mStack.send(*msg200);
@@ -672,21 +681,21 @@ RegThread::send200(SipMessage* sip, NameAddr add)
 }
 
 void
-RegThread::send400(SipMessage* sip){
+Registrar::send400(SipMessage* sip){
   auto_ptr<SipMessage> msg400(Helper::makeResponse(*sip, 400));
   ErrLog (<< "Sent 400(Bad Request) to REGISTER");
   mStack.send(*msg400);
 }
 
 void
-RegThread::send401(SipMessage* sip){
+Registrar::send401(SipMessage* sip){
   auto_ptr<SipMessage> msg401(Helper::makeWWWChallenge(*sip, mNameAddr, true, false));
   ErrLog (<< "Sent 401(Unauthorized) to REGISTER");
   mStack.send(*msg401);
 }
 
 void
-RegThread::send405(SipMessage* sip, Data meth)
+Registrar::send405(SipMessage* sip, Data meth)
 {
   int IMMethodList[] = {(int) REGISTER };
   const int IMMethodListSize = sizeof(IMMethodList) / sizeof(*IMMethodList);
@@ -697,7 +706,7 @@ RegThread::send405(SipMessage* sip, Data meth)
 
 
 void
-RegThread::send403(SipMessage* sip, Data mes)
+Registrar::send403(SipMessage* sip, Data mes)
 {
   auto_ptr<SipMessage> msg403(Helper::makeResponse(*sip, 403));
   mStack.send(*msg403);
@@ -705,7 +714,7 @@ RegThread::send403(SipMessage* sip, Data mes)
 }
 
 void
-RegThread::send500(SipMessage* sip){
+Registrar::send500(SipMessage* sip){
   auto_ptr<SipMessage> msg500(Helper::makeResponse(*sip, 500));
   ErrLog (<< "Sent 500(Server Internal Error) to REGISTER");
   mStack.send(*msg500);
