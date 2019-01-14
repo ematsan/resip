@@ -7,7 +7,7 @@ RPATH=-Wl,-rpath=../lib
 # -I.. - main dir
 OPTION=-w -g -I..
 
-all: command db mysql thread runner server
+all: db mysql thread runner server
 
 command: Command.cxx
 		g++ -c $(OPTION) Command.cxx -o command.o
