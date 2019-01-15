@@ -46,6 +46,8 @@ class thread_safe_queue
   std::queue<T> data_queue;
 public:
   thread_safe_queue(){}
+  thread_safe_queue(const thread_safe_queue&) = delete;
+  thread_safe_queue& operator = (const thread_safe_queue&) = delete;
 
   void push(T new_value)
   {
@@ -89,7 +91,10 @@ class thread_pool
 public:
   thread_pool():done(false), joiner(threads)
   {
-     unsigned const thread_count = std::thread::hardware_concurrency();
+     //- SipSteck thread and Registrar thread
+     unsigned thread_count = std::thread::hardware_concurrency() - 2;
+     const unsigned max_thread_count = 10;
+     if (0 >= thread_count) thread_count = max_thread_count;
      try
      {
        for (unsigned i = 0; i<thread_count; ++i)
