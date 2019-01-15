@@ -91,8 +91,8 @@ class thread_pool
 public:
   thread_pool():done(false), joiner(threads)
   {
-     //- SipSteck thread and Registrar thread
-     unsigned thread_count = std::thread::hardware_concurrency() - 2;
+     //- main, SipSteck thread and Registrar thread
+     unsigned thread_count = std::thread::hardware_concurrency() - 3;
      const unsigned max_thread_count = 10;
      if (0 >= thread_count) thread_count = max_thread_count;
      try
