@@ -145,14 +145,14 @@ class Registrar : public resip::ThreadIf
       int addUserDomain(int usr, int dom);
       int findProtocol(resip::Data& protocol);
       int addProtocol(resip::Data& protocol);
-      int findForward(resip::NameAddr& addr, unsigned int reg);
+      int findOrAddForward(resip::NameAddr& addr, unsigned int reg);
       int findForward(const unsigned int& idp,
                       const unsigned int& idd,
                       const unsigned int& port);
       int addForward(const unsigned int& idp,
                       const unsigned int& idd,
                       const unsigned int& port);
-      int findRegistrar(resip::SipMessage* sip);
+      int findOrAddRegistrar(resip::SipMessage* sip);
       int findRegistrar(const unsigned int& to,
                       const unsigned int& from,
                       resip::Data& callid);

@@ -171,7 +171,7 @@ Registrar::analisysRequest(resip::SipMessage sip)
      return;
    }
   //test Registrar
-  unsigned int idreg = findRegistrar(&sip);
+  unsigned int idreg = findOrAddRegistrar(&sip);
   if (0 == idreg)
   {
      send403(&sip, "User not have access to add record");
@@ -229,7 +229,7 @@ Registrar::analisysRequest(resip::SipMessage sip)
                       if (addr.exists(p_expires))
                          expires = addr.param(p_expires);
 
-                      unsigned int idForward = findForward(addr, expires);
+                      unsigned int idForward = findOrAddForward(addr, expires);
                       if (0 == idForward)
                       {
                          send500(&sip);
@@ -310,7 +310,7 @@ Registrar::removeAllContacts(resip::SipMessage* sip)
 {
   //remove user contacts
   //find registrar information
-   unsigned int idreg = findRegistrar(sip);
+   unsigned int idreg = findOrAddRegistrar(sip);
    if (0 != idreg)
     {
         int i = 0;
@@ -338,7 +338,7 @@ Registrar::testAuthorization(resip::SipMessage* sip)
 }
 
 int
-Registrar::findForward(resip::NameAddr& addr, unsigned int reg)
+Registrar::findOrAddForward(resip::NameAddr& addr, unsigned int reg)
 {
   unsigned int expires = reg;
   Data user = addr.uri().user();
@@ -558,7 +558,7 @@ Registrar::addUserDomain(int usr, int dom)
 }
 
 int
-Registrar::findRegistrar(resip::SipMessage* sip)
+Registrar::findOrAddRegistrar(resip::SipMessage* sip)
 {
   NameAddr& to = sip->header(h_To);
   NameAddr& from = sip->header(h_From);
