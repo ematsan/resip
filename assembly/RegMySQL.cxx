@@ -30,7 +30,14 @@ RegMySQL::RegMySQL(const resip::Data& server,
          mResult[i]=0;
       }
       mysql_library_init(0, 0, 0);
-      connectDB();
+
+      if(!mysql_thread_safe()){
+         ErrLog( << "Registrar uses MySQL from multiple threads - you MUST link with a thread safe version of the mySQL client library!");
+      }
+      else{
+         connectDB();
+      }
+      //connectDB();
 }
 
 RegMySQL::~RegMySQL(){
@@ -387,6 +394,7 @@ RegMySQL::query(const Data& queryCommand, MYSQL_RES** result) const
 {
    int rc = 0;
    DebugLog( << "RegMySQL::query: executing query: " << queryCommand);
+   std::lock_guard<std::mutex> lk(mMutex);
    if(mConn == 0 || !mConnected)    rc = connectDB();
    if(rc == 0)
    {

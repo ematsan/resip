@@ -4,6 +4,7 @@
 
 #include <mysql/mysql.h>
 #include <mysql/errmsg.h>
+#include <mutex>
 
 namespace resip
 {
@@ -51,6 +52,10 @@ class RegMySQL: public RegDB
     mutable bool mConnected;
     mutable MYSQL* mConn;
     mutable MYSQL_RES* mResult[MaxTable];
+
+  // when multiple threads are in use with the same connection, you need to
+  // mutex calls to mysql_query and mysql_store_result:
+    mutable std::mutex mMutex;
 
 };
 }

@@ -14,7 +14,7 @@ command: Command.cxx
 db: RegDB.cxx
 	g++ -c $(OPTION) $(RPATH)  RegDB.cxx -o regdb.o $(LIB)
 mysql: RegMySQL.cxx
-	g++ -c $(OPTION) $(RPATH)  RegMySQL.cxx -o regmysql.o $(LIB) -lmysqlclient
+	g++ -c $(OPTION) $(RPATH)  RegMySQL.cxx -o regmysql.o $(LIB) -lmysqlclient -lpthread
 runner: RegRunner.cxx
 	g++ -c $(OPTION) $(RPATH)  RegRunner.cxx -o regrunner.o $(LIB)
 thread: Registrar.cxx
