@@ -1,4 +1,4 @@
-LIB=-L../lib -lrutil -lrepro -lresip
+LIB=-L../lib -lrutil -lresip
 RPATH=-Wl,-rpath=../lib
 
 all: client server
@@ -6,6 +6,6 @@ all: client server
 lib: testServerReg.cxx
 	g++ -c -g -I.. $(RPATH)  testServerReg.cxx -o regrunner.o $(LIB)
 server: testServerReg.cxx
-	g++ -g -I.. $(RPATH)  testServerReg.cxx -o server $(LIB)
+	g++ -w -g -I.. $(RPATH)  testServerReg.cxx -o server $(LIB)
 client: testClientReg.cxx
-	g++ -g -I.. $(RPATH)  testClientReg.cxx -o client $(LIB)
+	g++ -w -g -I.. $(RPATH)  testClientReg.cxx -o client $(LIB)
