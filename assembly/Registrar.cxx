@@ -94,21 +94,38 @@ void
 Registrar::loadData()
 {
   clearData();
-  userList = mBase->getAllUsers();
+  auto users = async(&RegDB::getAllUsers, mBase);
+  auto domains = async(&RegDB::getAllDomains, mBase);
+  auto userDomains = async(&RegDB::getAllUserDomains, mBase);
+  auto forwards  = async(&RegDB::getAllForwards, mBase);
+  auto protocols  = async(&RegDB::getAllProtocols, mBase);
+  auto auths  = async(&RegDB::getAllAuthorizations, mBase);
+  auto regs  = async(&RegDB::getAllRegistrars, mBase);
+  auto routes  = async(&RegDB::getAllRoutes, mBase);
+
+  //userList = mBase->getAllUsers();
+  userList = users.get();
   if (userList.empty()){ ErrLog(<< "No element in table toUserName"); }
-  domainList = mBase->getAllDomains();
+  //domainList = mBase->getAllDomains();
+  domainList = domains.get();
   if (domainList.empty()) { ErrLog(<< "No element in table tDomain"); }
-  userDomeinList = mBase->getAllUserDomains();
+  //userDomeinList = mBase->getAllUserDomains();
+  userDomeinList = userDomains.get();
   if (userDomeinList.empty()) { ErrLog(<< "No element in table toUserNameDomain"); }
-  forwardList = mBase->getAllForwards();
+  //forwardList = mBase->getAllForwards();
+  forwardList = forwards.get();
   if (forwardList.empty()){ ErrLog(<< "No element in table tForward"); }
-  protocolList = mBase->getAllProtocols();
+  //protocolList = mBase->getAllProtocols();
+  protocolList = protocols.get();
   if (protocolList.empty())  { ErrLog(<< "No element in table tProtocol"); }
-  authList = mBase->getAllAuthorizations();
+  //authList = mBase->getAllAuthorizations();
+  authList = auths.get();
   if (authList.empty()) { ErrLog(<< "No element in table tAuthorization");}
-  regList = mBase->getAllRegistrars();
+  //regList = mBase->getAllRegistrars();
+  regList = regs.get();
   if (regList.empty()) { ErrLog(<< "No element in table tRegistrar"); }
-  routeList = mBase->getAllRoutes();
+  //routeList = mBase->getAllRoutes();
+  routeList = routes.get();
   if (routeList.empty()) { ErrLog(<< "No element in table tRoute"); }
 }
 
@@ -125,19 +142,8 @@ Registrar::thread()
         InfoLog(<< "Server received: " << getMethodName(meth));
         if ( meth == REGISTER )
         {
-          //NameAddrs& contacts = received->header(h_Contacts);
-          //ExpiresCategory& expires = received->header(h_Expires);
           if (received->exists(h_Authorizations))
            {
-             /*try{
-              std::future<void> fut =std::async(std::launch::async, &Registrar::analisysRequest, this, *received);
-             }
-             catch(std::exception const& a)
-             {
-                ErrLog(<<"Async function exeption: " << a.what());
-                send500(received);
-             }*/
-             //mThreads.submit(std::bind(&Registrar::analisysRequest, this, *received));
              try{
                 mThreads.submit(std::bind(&Registrar::analisysRequest, this, *received));
              }

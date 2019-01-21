@@ -94,7 +94,7 @@ class RegDB{
     virtual void eraseUser(const Key& key) const;
     virtual UserRecord getUser(const Key& key) const;
     virtual int query(const resip::Data& queryCommand, UserRecord& result) const = 0;
-    virtual UserRecordList getAllUsers() const = 0;
+    virtual UserRecordList getAllUsers() const = 0;    
     virtual int findUserId(UserRecord& rec) const;
 
     // functions for Domain Records
