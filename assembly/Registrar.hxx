@@ -80,7 +80,10 @@ class thread_pool
       std::function<void()> task;
       if (work_queue.try_pop(task))
       {
-        task();
+        try { task(); }
+        catch(std::exception const& a){
+              std::cerr<<"Throw Exeption: " << a.what()<<std::endl;
+        }
       }
       else
       {
@@ -91,7 +94,7 @@ class thread_pool
 public:
   thread_pool():done(false), joiner(threads)
   {
-     //- main, SipSteck thread and Registrar thread
+     //3 - main, SipSteck thread and Registrar thread
      unsigned thread_count = std::thread::hardware_concurrency() - 3;
      const unsigned max_thread_count = 10;
      if (0 >= thread_count) thread_count = max_thread_count;
@@ -136,7 +139,6 @@ class Registrar : public resip::ThreadIf
       thread_pool mThreads;
       std::mutex mut;
 
-      //void analisysRequest(resip::SipMessage* sip);
       void analisysRequest(resip::SipMessage sip);
       void removeAllContacts(resip::SipMessage* sip);
       bool testAuthorization(resip::SipMessage* sip);
@@ -183,7 +185,6 @@ class Registrar : public resip::ThreadIf
       RegDB::AuthorizationRecordList authList;
       RegDB::RegistrarRecordList regList;
       RegDB::RouteRecordList routeList;
-      //std::vector<std::future<void>> results(4);
 };
 }
 #endif

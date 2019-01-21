@@ -29,17 +29,24 @@ class RegMySQL: public RegDB
     virtual void shutdown() override;
 
   private:
-    virtual resip::Data dbKey(const Table table, bool first = false);
     virtual int query(const resip::Data& queryCommand, MYSQL_RES** result) const;
 
-    virtual int query(const resip::Data& queryCommand, UserRecord& result, const Key& key) const override;
-    virtual int query(const resip::Data& queryCommand, DomainRecord& result, const Key& key) const override;
-    virtual int query(const resip::Data& queryCommand, UserDomainRecord& result, const Key& key) const override;
-    virtual int query(const resip::Data& queryCommand, ProtocolRecord& result, const Key& key) const override;
-    virtual int query(const resip::Data& queryCommand, AuthorizationRecord& result, const Key& key) const override;
-    virtual int query(const resip::Data& queryCommand, ForwardRecord& result, const Key& key) const override;
-    virtual int query(const resip::Data& queryCommand, RegistrarRecord& result, const Key& key) const override;
-    virtual int query(const resip::Data& queryCommand, RouteRecord& result, const Key& key) const override;
+    virtual int query(const resip::Data& queryCommand, UserRecord& result) const override;
+    virtual UserRecordList getAllUsers() const override;
+    virtual int query(const resip::Data& queryCommand, DomainRecord& result) const override;
+    virtual DomainRecordList getAllDomains() const override;
+    virtual int query(const resip::Data& queryCommand, UserDomainRecord& result) const override;
+    virtual UserDomainRecordList getAllUserDomains() const override;
+    virtual int query(const resip::Data& queryCommand, ProtocolRecord& result) const override;
+    virtual ProtocolRecordList getAllProtocols() const override;
+    virtual int query(const resip::Data& queryCommand, AuthorizationRecord& result) const override;
+    virtual AuthorizationRecordList getAllAuthorizations() const override;
+    virtual int query(const resip::Data& queryCommand, ForwardRecord& result) const override;
+    virtual ForwardRecordList getAllForwards() const override;
+    virtual int query(const resip::Data& queryCommand, RegistrarRecord& result) const override;
+    virtual RegistrarRecordList getAllRegistrars() const override;
+    virtual int query(const resip::Data& queryCommand, RouteRecord& result) const override;
+    virtual RouteRecordList getAllRoutes() const override;
 
     virtual int query(const resip::Data& queryCommand) const override;
 
@@ -51,7 +58,6 @@ class RegMySQL: public RegDB
 
     mutable bool mConnected;
     mutable MYSQL* mConn;
-    mutable MYSQL_RES* mResult[MaxTable];
 
   // when multiple threads are in use with the same connection, you need to
   // mutex calls to mysql_query and mysql_store_result:

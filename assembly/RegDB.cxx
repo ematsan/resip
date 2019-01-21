@@ -2,6 +2,7 @@
 #include "rutil/Data.hxx"
 #include "rutil/Logger.hxx"
 
+
 using namespace registrar;
 using namespace resip;
 
@@ -9,7 +10,7 @@ using namespace resip;
 /*                        USER                                           */
 /*************************************************************************/
 bool
-RegDB::addUser(const UserRecord& rec)
+RegDB::addUser(const UserRecord& rec) const
 {
   Data command;
   {
@@ -22,9 +23,16 @@ RegDB::addUser(const UserRecord& rec)
 }
 
 void
-RegDB::eraseUser(const Key& key)
+RegDB::eraseUser(const Key& key) const
 {
-  dbEraseRecord(UserTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM tuser";
+     ds << " WHERE fiduser = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::UserRecord
@@ -34,11 +42,12 @@ RegDB::getUser(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fname FROM tuser"
+     ds << "SELECT fiduser, fname FROM tuser"
         << " WHERE fiduser='" << key
         << "'";
   }
-  if(query(command, rec, key) != 0)
+
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -50,22 +59,8 @@ RegDB::getUser(const Key& key) const
   return rec;
 }
 
-RegDB::UserRecordList
-RegDB::getAllUsers()
-{
-  UserRecordList records;
-  Key key = dbKey(UserTable, true);
-  while ( !key.empty() )
-  {
-     UserRecord rec = getUser(key);
-     records.push_back(rec);
-     key = dbKey(UserTable, false);
-  }
-  return records;
-}
-
 int
-RegDB::findUserId(UserRecord& rec)
+RegDB::findUserId(UserRecord& rec) const
 {
   Data command;
   {
@@ -74,7 +69,7 @@ RegDB::findUserId(UserRecord& rec)
         << " WHERE fname='" << rec.mName
         << "'";
   }
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -89,7 +84,7 @@ RegDB::findUserId(UserRecord& rec)
 /*                       DOMAIN                                          */
 /*************************************************************************/
 bool
-RegDB::addDomain(const DomainRecord& rec)
+RegDB::addDomain(const DomainRecord& rec) const
 {
   Data command;
   {
@@ -103,9 +98,16 @@ RegDB::addDomain(const DomainRecord& rec)
 }
 
 void
-RegDB::eraseDomain(const Key& key)
+RegDB::eraseDomain(const Key& key) const
 {
-  dbEraseRecord(DomainTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM tdomain";
+     ds << " WHERE fiddomain = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::DomainRecord
@@ -115,11 +117,11 @@ RegDB::getDomain(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fdomain, fidrealm FROM tdomain"
+     ds << "SELECT fiddomain, fdomain, fidrealm FROM tdomain"
         << " WHERE fiddomain='" << key
         << "'";
   }
-  if(query(command, rec, key) != 0)
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -131,23 +133,8 @@ RegDB::getDomain(const Key& key) const
   return rec;
 }
 
-RegDB::DomainRecordList
-RegDB::getAllDomains()
-{
-  DomainRecordList records;
-  Key key = dbKey(DomainTable, true);
-  while ( !key.empty() )
-  {
-     DomainRecord rec = getDomain(key);
-     records.push_back(rec);
-     key = dbKey(DomainTable, false);
-  }
-  return records;
-}
-
-
 int
-RegDB::findDomainId(DomainRecord& rec)
+RegDB::findDomainId(DomainRecord& rec) const
 {
   Data command;
   {
@@ -156,7 +143,7 @@ RegDB::findDomainId(DomainRecord& rec)
         << " WHERE fdomain='" << rec.mDomain
         << "'";
   }
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -171,7 +158,7 @@ RegDB::findDomainId(DomainRecord& rec)
 /*                       USER DOMAIN                                     */
 /*************************************************************************/
 bool
-RegDB::addUserDomain(const UserDomainRecord& rec)
+RegDB::addUserDomain(const UserDomainRecord& rec) const
 {
   Data command;
   {
@@ -185,9 +172,16 @@ RegDB::addUserDomain(const UserDomainRecord& rec)
 }
 
 void
-RegDB::eraseUserDomain(const Key& key)
+RegDB::eraseUserDomain(const Key& key) const
 {
-  dbEraseRecord(UserDomainTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM tuserdomain";
+     ds << " WHERE fidud = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::UserDomainRecord
@@ -197,11 +191,11 @@ RegDB::getUserDomain(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiddomainfk, fiduserfk FROM tuserdomain"
+     ds << "SELECT fidud, fiddomainfk, fiduserfk FROM tuserdomain"
         << " WHERE fidud='" << key
         << "'";
   }
-  if(query(command, rec, key) != 0)
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -213,23 +207,8 @@ RegDB::getUserDomain(const Key& key) const
   return rec;
 }
 
-RegDB::UserDomainRecordList
-RegDB::getAllUserDomains()
-{
-  UserDomainRecordList records;
-  Key key = dbKey(UserDomainTable, true);
-  while ( !key.empty() )
-  {
-     UserDomainRecord rec = getUserDomain(key);
-     records.push_back(rec);
-     key = dbKey(UserDomainTable, false);
-  }
-  return records;
-}
-
-
 int
-RegDB::findUserDomainId(UserDomainRecord& rec)
+RegDB::findUserDomainId(UserDomainRecord& rec) const
 {
   Data command;
   {
@@ -239,7 +218,7 @@ RegDB::findUserDomainId(UserDomainRecord& rec)
         << "' and fiduserfk = '" << rec.mIdUserFk
         << "'";
   }
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -254,7 +233,7 @@ RegDB::findUserDomainId(UserDomainRecord& rec)
 /*                        PROTOCOL                                       */
 /*************************************************************************/
 bool
-RegDB::addProtocol(const ProtocolRecord& rec)
+RegDB::addProtocol(const ProtocolRecord& rec) const
 {
   Data command;
   {
@@ -267,9 +246,16 @@ RegDB::addProtocol(const ProtocolRecord& rec)
 }
 
 void
-RegDB::eraseProtocol(const Key& key)
+RegDB::eraseProtocol(const Key& key) const
 {
-  dbEraseRecord(ProtocolTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM tprotocol";
+     ds << " WHERE fidprotocol = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::ProtocolRecord
@@ -279,11 +265,11 @@ RegDB::getProtocol(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fprotocol FROM tprotocol"
+     ds << "SELECT fidprotocol, fprotocol FROM tprotocol"
         << " WHERE fidprotocol='" << key
         << "'";
   }
-  if(query(command, rec, key) != 0)
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -295,22 +281,9 @@ RegDB::getProtocol(const Key& key) const
   return rec;
 }
 
-RegDB::ProtocolRecordList
-RegDB::getAllProtocols()
-{
-  ProtocolRecordList records;
-  Key key = dbKey(ProtocolTable, true);
-  while ( !key.empty() )
-  {
-     ProtocolRecord rec = getProtocol(key);
-     records.push_back(rec);
-     key = dbKey(ProtocolTable, false);
-  }
-  return records;
-}
 
 int
-RegDB::findProtocolId(ProtocolRecord& rec)
+RegDB::findProtocolId(ProtocolRecord& rec) const
 {
   Data command;
   {
@@ -319,7 +292,7 @@ RegDB::findProtocolId(ProtocolRecord& rec)
         << " WHERE fprotocol = '" << rec.mProtocol
         << "'";
   }
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -334,7 +307,7 @@ RegDB::findProtocolId(ProtocolRecord& rec)
 /*                        FORWARD                                        */
 /*************************************************************************/
 bool
-RegDB::addForward(const ForwardRecord& rec)
+RegDB::addForward(const ForwardRecord& rec) const
 {
   Data command;
   {
@@ -349,9 +322,16 @@ RegDB::addForward(const ForwardRecord& rec)
 }
 
 void
-RegDB::eraseForward(const Key& key)
+RegDB::eraseForward(const Key& key) const
 {
-  dbEraseRecord(ForwardTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM tforward";
+     ds << " WHERE fidforward = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::ForwardRecord
@@ -361,11 +341,11 @@ RegDB::getForward(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidprotocolfk, fiddomainfk, fport FROM tforward"
+     ds << "SELECT fidforward, fidprotocolfk, fiddomainfk, fport FROM tforward"
         << " WHERE fidforward='" << key
         << "'";
   }
-  if(query(command, rec, key) != 0)
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -377,22 +357,8 @@ RegDB::getForward(const Key& key) const
   return rec;
 }
 
-RegDB::ForwardRecordList
-RegDB::getAllForwards()
-{
-  ForwardRecordList records;
-  Key key = dbKey(ForwardTable, true);
-  while ( !key.empty() )
-  {
-     ForwardRecord rec = getForward(key);
-     records.push_back(rec);
-     key = dbKey(ForwardTable, false);
-  }
-  return records;
-}
-
 int
-RegDB::findForwardId(ForwardRecord& rec)
+RegDB::findForwardId(ForwardRecord& rec) const
 {
   Data command;
   {
@@ -403,7 +369,7 @@ RegDB::findForwardId(ForwardRecord& rec)
         << "' and fport = '" << rec.mPort
         << "'";
   }
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -418,7 +384,7 @@ RegDB::findForwardId(ForwardRecord& rec)
 /*                        AUTHORIZATION                                  */
 /*************************************************************************/
 bool
-RegDB::addAuthorization(const AuthorizationRecord& rec)
+RegDB::addAuthorization(const AuthorizationRecord& rec) const
 {
   Data command;
   {
@@ -432,9 +398,16 @@ RegDB::addAuthorization(const AuthorizationRecord& rec)
 }
 
 void
-RegDB::eraseAuthorization(const Key& key)
+RegDB::eraseAuthorization(const Key& key) const
 {
-    dbEraseRecord(AuthorizationTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM tauthorization";
+     ds << " WHERE fidauth = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::AuthorizationRecord
@@ -444,11 +417,11 @@ RegDB::getAuthorization(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidudfk, fpassword FROM tauthorization"
+     ds << "SELECT fidauth, fidudfk, fpassword FROM tauthorization"
         << " WHERE fidauth='" << key
         << "'";
   }
-  if(query(command, rec, key) != 0)
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -460,23 +433,8 @@ RegDB::getAuthorization(const Key& key) const
   return rec;
 }
 
-RegDB::AuthorizationRecordList
-RegDB::getAllAuthorizations()
-{
-  AuthorizationRecordList records;
-  Key key = dbKey(AuthorizationTable, true);
-  while ( !key.empty() )
-  {
-     AuthorizationRecord rec = getAuthorization(key);
-     records.push_back(rec);
-     key = dbKey(AuthorizationTable, false);
-  }
-  return records;
-}
-
-
 int
-RegDB::findAuthorizationId(AuthorizationRecord& rec)
+RegDB::findAuthorizationId(AuthorizationRecord& rec) const
 {
   Data command;
   {
@@ -486,7 +444,7 @@ RegDB::findAuthorizationId(AuthorizationRecord& rec)
         << "' and fpassword = '" << rec.mPassword
         << "'";
   }
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -501,7 +459,7 @@ RegDB::findAuthorizationId(AuthorizationRecord& rec)
 /*                        REGISTRAR                                      */
 /*************************************************************************/
 bool
-RegDB::addRegistrar(const RegistrarRecord& rec)
+RegDB::addRegistrar(const RegistrarRecord& rec) const
 {
   Data command;
   {
@@ -516,9 +474,16 @@ RegDB::addRegistrar(const RegistrarRecord& rec)
 }
 
 void
-RegDB::eraseRegistrar(const Key& key)
+RegDB::eraseRegistrar(const Key& key) const
 {
-  dbEraseRecord(RegistrarTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM tregistrar";
+     ds << " WHERE fidreg = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::RegistrarRecord
@@ -528,11 +493,11 @@ RegDB::getRegistrar(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidudfk, fcallid, fidmainfk FROM tregistrar"
+     ds << "SELECT fidreg, fidudfk, fcallid, fidmainfk FROM tregistrar"
         << " WHERE fidreg='" << key
         << "'";
   }
-  if(query(command, rec, key) != 0)
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -544,22 +509,8 @@ RegDB::getRegistrar(const Key& key) const
   return rec;
 }
 
-RegDB::RegistrarRecordList
-RegDB::getAllRegistrars()
-{
-  RegistrarRecordList records;
-  Key key = dbKey(RegistrarTable, true);
-  while ( !key.empty() )
-  {
-     RegistrarRecord rec = getRegistrar(key);
-     records.push_back(rec);
-     key = dbKey(RegistrarTable, false);
-  }
-  return records;
-}
-
 bool
-RegDB::updateRegistrar(const Key& key, const RegistrarRecord& rec)
+RegDB::updateRegistrar(const Key& key, const RegistrarRecord& rec) const
 {
   Data command;
   {
@@ -571,9 +522,8 @@ RegDB::updateRegistrar(const Key& key, const RegistrarRecord& rec)
   return query(command) == 0;
 }
 
-
 int
-RegDB::findRegistrarId(RegistrarRecord& rec)
+RegDB::findRegistrarId(RegistrarRecord& rec) const
 {
   Data command;
   {
@@ -585,7 +535,7 @@ RegDB::findRegistrarId(RegistrarRecord& rec)
         << "'";
   }
 
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -600,7 +550,7 @@ RegDB::findRegistrarId(RegistrarRecord& rec)
 /*                        ROUTE                                          */
 /*************************************************************************/
 bool
-RegDB::addRoute(const RouteRecord& rec)
+RegDB::addRoute(const RouteRecord& rec) const
 {
   Data command;
   {
@@ -616,9 +566,16 @@ RegDB::addRoute(const RouteRecord& rec)
 }
 
 void
-RegDB::eraseRoute(const Key& key)
+RegDB::eraseRoute(const Key& key) const
 {
-  dbEraseRecord(RouteTable, key);
+  Data command;
+  {
+     DataStream ds(command);
+     Data escapedKey;
+     ds << "DELETE FROM troute";
+     ds << " WHERE fidroute = '" << key << "'";
+  }
+  query(command);
 }
 
 RegDB::RouteRecord
@@ -628,12 +585,12 @@ RegDB::getRoute(const Key& key) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidregfk, fidforwardfk, ftime, fexpires FROM troute"
+     ds << "SELECT fidroute, fidregfk, fidforwardfk, ftime, fexpires FROM troute"
         << " WHERE fidroute='" << key
         << "'";
   }
 
-  if(query(command, rec, key) != 0)
+  if(query(command, rec) != 0)
   {
      return rec;
   }
@@ -645,22 +602,8 @@ RegDB::getRoute(const Key& key) const
   return rec;
 }
 
-RegDB::RouteRecordList
-RegDB::getAllRoutes()
-{
-  RouteRecordList records;
-  Key key = dbKey(RouteTable, true);
-  while ( !key.empty() )
-  {
-     RouteRecord rec = getRoute(key);
-     records.push_back(rec);
-     key = dbKey(RouteTable, false);
-  }
-  return records;
-}
-
 bool
-RegDB::updateRoute(const Key& key, const RouteRecord& rec)
+RegDB::updateRoute(const Key& key, const RouteRecord& rec) const
 {
   Data command;
   {
@@ -676,7 +619,7 @@ RegDB::updateRoute(const Key& key, const RouteRecord& rec)
 }
 
 int
-RegDB::findRouteId(RouteRecord& rec)
+RegDB::findRouteId(RouteRecord& rec) const
 {
   Data command;
   {
@@ -684,11 +627,11 @@ RegDB::findRouteId(RouteRecord& rec)
      ds << "SELECT fidroute FROM troute"
         << " WHERE fidregfk = '" << rec.mIdRegFk
         << "' and fidforwardfk = '" << rec.mIdForwardFk
-        << "' and ftime = '" << rec.mTime
+      //  << "' and ftime = '" << rec.mTime
         << "'";
   }
 
-  if(query(command, rec, 0) != 0)
+  if(query(command, rec) != 0)
   {
      return -1;
   }
@@ -698,18 +641,4 @@ RegDB::findRouteId(RouteRecord& rec)
      return 0;
   }
   return rec.mIdRoute;
-}
-/*****************************************************************************/
-void
-RegDB::dbEraseRecord(const Table table,
-                        const Data& key)
-{
-  Data command;
-  {
-     DataStream ds(command);
-     Data escapedKey;
-     ds << "DELETE FROM " << tableName[table];
-     ds << " WHERE "<< keyName[table]<<" = '" << key << "'";
-  }
-  query(command);
 }

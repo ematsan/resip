@@ -16,6 +16,7 @@ using namespace resip;
 using namespace std;
 using namespace registrar;
 
+
 Registrar::Registrar(SipStack& stack, Data realm, RegDB* mdatabase, const vector<Data>& configDomains)
    : mStack(stack)
    , mNameAddr(realm)

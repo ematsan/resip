@@ -5,6 +5,9 @@
 
 #include "rutil/Data.hxx"
 
+//#include <mysql/mysql.h>
+//#include <mysql/errmsg.h>
+
 #define RESIPROCATE_SUBSYSTEM Subsystem::TEST
 
 namespace registrar{
@@ -87,105 +90,75 @@ class RegDB{
     typedef std::vector<RouteRecord> RouteRecordList;
 
     // functions for User Records
-    virtual bool addUser(const UserRecord& rec);
-    virtual void eraseUser(const Key& key);
+    virtual bool addUser(const UserRecord& rec) const;
+    virtual void eraseUser(const Key& key) const;
     virtual UserRecord getUser(const Key& key) const;
-    virtual UserRecordList getAllUsers();
-    virtual int findUserId(UserRecord& rec);
+    virtual int query(const resip::Data& queryCommand, UserRecord& result) const = 0;
+    virtual UserRecordList getAllUsers() const = 0;
+    virtual int findUserId(UserRecord& rec) const;
 
     // functions for Domain Records
-    virtual bool addDomain(const DomainRecord& rec);
-    virtual void eraseDomain(const Key& key);
+    virtual bool addDomain(const DomainRecord& rec) const;
+    virtual void eraseDomain(const Key& key) const;
     virtual DomainRecord getDomain(const Key& key) const;
-    virtual DomainRecordList getAllDomains();
-    virtual int findDomainId(DomainRecord& rec);
+    virtual int query(const resip::Data& queryCommand, DomainRecord& result) const = 0;
+    virtual DomainRecordList getAllDomains() const = 0;
+    virtual int findDomainId(DomainRecord& rec) const;
 
     // functions for User Domain Records
-    virtual bool addUserDomain(const UserDomainRecord& rec);
-    virtual void eraseUserDomain(const Key& key);
+    virtual bool addUserDomain(const UserDomainRecord& rec) const;
+    virtual void eraseUserDomain(const Key& key) const;
     virtual UserDomainRecord getUserDomain(const Key& key) const;
-    virtual UserDomainRecordList getAllUserDomains();
-    virtual int findUserDomainId(UserDomainRecord& rec);
+    virtual int query(const resip::Data& queryCommand, UserDomainRecord& result) const = 0;
+    virtual UserDomainRecordList getAllUserDomains()  const = 0;
+    virtual int findUserDomainId(UserDomainRecord& rec) const;
 
     // functions for Protocol Records
-    virtual bool addProtocol(const ProtocolRecord& rec);
-    virtual void eraseProtocol(const Key& key);
+    virtual bool addProtocol(const ProtocolRecord& rec) const;
+    virtual void eraseProtocol(const Key& key) const;
     virtual ProtocolRecord getProtocol(const Key& key) const;
-    virtual ProtocolRecordList getAllProtocols();
-    virtual int findProtocolId(ProtocolRecord& rec);
+    virtual int query(const resip::Data& queryCommand, ProtocolRecord& result) const = 0;
+    virtual ProtocolRecordList getAllProtocols()  const = 0;
+    virtual int findProtocolId(ProtocolRecord& rec) const;
 
     // functions for Authorization Records
-    virtual bool addAuthorization(const AuthorizationRecord& rec);
-    virtual void eraseAuthorization(const Key& key);
+    virtual bool addAuthorization(const AuthorizationRecord& rec) const;
+    virtual void eraseAuthorization(const Key& key) const;
     virtual AuthorizationRecord getAuthorization(const Key& key) const;
-    virtual AuthorizationRecordList getAllAuthorizations();
-    virtual int findAuthorizationId(AuthorizationRecord& rec);
+    virtual int query(const resip::Data& queryCommand, AuthorizationRecord& result) const = 0;
+    virtual AuthorizationRecordList getAllAuthorizations() const = 0;
+    virtual int findAuthorizationId(AuthorizationRecord& rec) const;
 
     // functions for Forward Records
-    virtual bool addForward(const ForwardRecord& rec);
-    virtual void eraseForward(const Key& key);
+    virtual bool addForward(const ForwardRecord& rec) const;
+    virtual void eraseForward(const Key& key) const;
     virtual ForwardRecord getForward(const Key& key) const;
-    virtual ForwardRecordList getAllForwards();
-    virtual int findForwardId(ForwardRecord& rec);
+    virtual int query(const resip::Data& queryCommand, ForwardRecord& result) const = 0;
+    virtual ForwardRecordList getAllForwards() const = 0;
+    virtual int findForwardId(ForwardRecord& rec) const;
 
     // functions for Registrar Records
-    virtual bool addRegistrar(const RegistrarRecord& rec);
-    virtual void eraseRegistrar(const Key& key);
+    virtual bool addRegistrar(const RegistrarRecord& rec) const;
+    virtual void eraseRegistrar(const Key& key) const;
     virtual RegistrarRecord getRegistrar(const Key& key) const;
-    virtual RegistrarRecordList getAllRegistrars();
-    virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec);
-    virtual int findRegistrarId(RegistrarRecord& rec);
+    virtual int query(const resip::Data& queryCommand, RegistrarRecord& result) const = 0;
+    virtual RegistrarRecordList getAllRegistrars() const = 0;
+    virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec) const;
+    virtual int findRegistrarId(RegistrarRecord& rec) const;
 
     // functions for Route Records
-    virtual bool addRoute(const RouteRecord& rec);
-    virtual void eraseRoute(const Key& key);
+    virtual bool addRoute(const RouteRecord& rec) const;
+    virtual void eraseRoute(const Key& key) const;
     virtual RouteRecord getRoute(const Key& key) const;
-    virtual RouteRecordList getAllRoutes();
-    virtual bool updateRoute(const Key& key, const RouteRecord& rec);
-    virtual int findRouteId(RouteRecord& rec);
+    virtual int query(const resip::Data& queryCommand, RouteRecord& result) const = 0;
+    virtual RouteRecordList getAllRoutes()  const = 0;
+    virtual bool updateRoute(const Key& key, const RouteRecord& rec) const;
+    virtual int findRouteId(RouteRecord& rec) const;
 
 
     virtual int connectDB() const = 0;
     virtual void disconnectDB() const = 0;
     virtual void shutdown() = 0;
-
-  protected:
-
-    typedef enum
-    {
-      UserTable=0,
-      DomainTable,
-      UserDomainTable,
-      ForwardTable,
-      ProtocolTable,
-      AuthorizationTable,
-      RegistrarTable,
-      RouteTable,
-      MaxTable  // This one MUST be last
-    } Table;
-
-    const char tableName[MaxTable][20] = {"tuser", "tdomain", "tuserdomain", "tforward",
-      "tprotocol", "tauthorization", "tregistrar", "troute"};
-
-    const char keyName[MaxTable][20] = {"fiduser", "fiddomain", "fidud", "fidforward",
-        "fidprotocol", "fidauth", "fidreg", "fidroute"};
-
-    // Db manipulation routines
-    // allows deleting records from a table
-    virtual void dbEraseRecord(const Table table,
-                               const resip::Data& key);
-
-    virtual resip::Data dbKey(const Table table,
-                               bool first = false) = 0; // return empty if no more
-
-    virtual int query(const resip::Data& queryCommand, UserRecord& result, const Key& key) const = 0;
-    virtual int query(const resip::Data& queryCommand, DomainRecord& result, const Key& key) const = 0;
-    virtual int query(const resip::Data& queryCommand, UserDomainRecord& result, const Key& key) const = 0;
-    virtual int query(const resip::Data& queryCommand, ProtocolRecord& result, const Key& key) const = 0;
-    virtual int query(const resip::Data& queryCommand, AuthorizationRecord& result, const Key& key) const = 0;
-    virtual int query(const resip::Data& queryCommand, ForwardRecord& result, const Key& key) const = 0;
-    virtual int query(const resip::Data& queryCommand, RegistrarRecord& result, const Key& key) const = 0;
-    virtual int query(const resip::Data& queryCommand, RouteRecord& result, const Key& key) const = 0;
 
     virtual int query(const resip::Data& queryCommand) const = 0;
 };

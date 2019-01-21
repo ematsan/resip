@@ -25,10 +25,6 @@ RegMySQL::RegMySQL(const resip::Data& server,
       InfoLog(<<"RegMySQL constructor");
       InfoLog( << "Using MySQL DB with server=" << server << ", user=" << user << ", dbName=" << databaseName << ", port=" << port);
 
-      for (int i=0;i<MaxTable;i++)
-      {
-         mResult[i]=0;
-      }
       mysql_library_init(0, 0, 0);
 
       if(!mysql_thread_safe()){
@@ -53,7 +49,7 @@ RegMySQL::~RegMySQL(){
 }
 
 int
-RegMySQL::connectDB() const{
+RegMySQL::connectDB() const {
   // Disconnect from database first (if required)
   disconnectDB();
 
@@ -101,17 +97,10 @@ RegMySQL::shutdown()
 }
 
 void
-RegMySQL::disconnectDB() const{
+RegMySQL::disconnectDB() const
+{
   if(mConn)
   {
-     for (int i=0; i < MaxTable; i++)
-     {
-        if (mResult[i])
-        {
-           mysql_free_result(mResult[i]);
-           mResult[i]=0;
-        }
-     }
      mysql_close(mConn);
      mConn = 0;
      mConnected = false;
@@ -119,68 +108,281 @@ RegMySQL::disconnectDB() const{
 }
 
 /*************************************************************************/
-/*                        db work                                        */
+/*                        getAll                                          */
 /*************************************************************************/
-// Db manipulation
-// find keys
-// return empty if no more
-resip::Data
-RegMySQL::dbKey(const Table table,
-                bool first)
+
+RegDB::UserRecordList
+RegMySQL::getAllUsers() const
 {
-  //if first select
-  if(first)
+  UserRecordList records;
+
+  MYSQL_RES* result;
+  Data command("SELECT fiduser, fname FROM tuser");
+
+  if(query(command, &result) != 0)
   {
-     // free memory from previous search
-     if (mResult[table])
-     {
-        mysql_free_result(mResult[table]);
-        mResult[table] = 0;
-     }
-
-     Data command;
-     {
-        DataStream ds(command);
-        ds << "SELECT "<<keyName[table] <<" FROM " << tableName[table];
-     }
-
-     if(query(command, &mResult[table]) != 0)
-     {
-        return Data::Empty;
-     }
-
-     if (mResult[table] == 0)
-     {
-        ErrLog( << "MySQL store result failed: error=" << mysql_errno(mConn) << ": " << mysql_error(mConn));
-        return Data::Empty;
-     }
+     return records;
   }
-  else
+  if (result == nullptr)
   {
-     //if we have no more result
-     if (mResult[table] == 0)
-     {
-        return Data::Empty;
-     }
-  }
-  //select next resalt
-  MYSQL_ROW row = mysql_fetch_row(mResult[table]);
-  //if empty
-  if (!row)
-  {
-     mysql_free_result(mResult[table]);
-     mResult[table] = 0;
-     return Data::Empty;
+     ErrLog( << "Base store result failed");
+     return records;
   }
 
-  return Data(row[0]);
+  MYSQL_ROW row;
+  UserRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdUser          = Data(row[col++]).convertInt();
+       rec.mName            = Data(row[col++]);
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+  return records;
 }
 
+RegDB::DomainRecordList
+RegMySQL::getAllDomains() const
+{
+  DomainRecordList records;
+  MYSQL_RES* result;
+  Data command("SELECT fiddomain, fdomain, fidrealm FROM tdomain");
+
+  if(query(command, &result) != 0)
+  {
+     return records;
+  }
+  if (result == nullptr)
+  {
+     ErrLog( << "Base store result failed");
+     return records;
+  }
+
+  MYSQL_ROW row;
+  DomainRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdDomain          = Data(row[col++]).convertInt();
+       rec.mDomain            = Data(row[col++]);
+       rec.mIdRealm          = Data(row[col++]).convertInt();
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+  return records;
+}
+
+RegDB::UserDomainRecordList
+RegMySQL::getAllUserDomains() const
+{
+  UserDomainRecordList records;
+  MYSQL_RES* result;
+  Data command("SELECT fidud, fiddomainfk, fiduserfk FROM tuserdomain");
+
+  if(query(command, &result) != 0)
+  {
+     return records;
+  }
+  if (result == nullptr)
+  {
+     ErrLog( << "Base store result failed");
+     return records;
+  }
+
+  MYSQL_ROW row;
+  UserDomainRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdUserDomain          = Data(row[col++]).convertInt();
+       rec.mIdDomainFk          = Data(row[col++]).convertInt();
+       rec.mIdUserFk          = Data(row[col++]).convertInt();
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+  return records;
+}
+
+RegDB::ProtocolRecordList
+RegMySQL::getAllProtocols() const
+{
+  ProtocolRecordList records;
+  MYSQL_RES* result;
+  Data command("SELECT fidprotocol, fprotocol FROM tprotocol");
+
+  if(query(command, &result) != 0)
+  {
+     return records;
+  }
+  if (result == nullptr)
+  {
+     ErrLog( << "Base store result failed");
+     return records;
+  }
+
+  MYSQL_ROW row;
+  ProtocolRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdProtocol          = Data(row[col++]).convertInt();
+       rec.mProtocol          = Data(row[col++]);
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+  return records;
+}
+
+RegDB::ForwardRecordList
+RegMySQL::getAllForwards() const
+{
+  ForwardRecordList records;
+  MYSQL_RES* result;
+  Data command("SELECT fidforward, fidprotocolfk, fiddomainfk, fport FROM tforward");
+
+  if(query(command, &result) != 0)
+  {
+     return records;
+  }
+  if (result == nullptr)
+  {
+     ErrLog( << "Base store result failed");
+     return records;
+  }
+
+  MYSQL_ROW row;
+  ForwardRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdForward          = Data(row[col++]).convertInt();
+       rec.mIdProtocolFk       = Data(row[col++]).convertInt();
+       rec.mIdDomainFk         = Data(row[col++]).convertInt();
+       rec.mPort          = Data(row[col++]).convertInt();
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+
+  return records;
+}
+
+RegDB::AuthorizationRecordList
+RegMySQL::getAllAuthorizations() const
+{
+  AuthorizationRecordList records;
+  MYSQL_RES* result;
+  Data command("SELECT fidauth, fidudfk, fpassword FROM tauthorization");
+
+  if(query(command, &result) != 0)
+  {
+     return records;
+  }
+  if (result == nullptr)
+  {
+     ErrLog( << "Base store result failed");
+     return records;
+  }
+
+  MYSQL_ROW row;
+  AuthorizationRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdAuth          = Data(row[col++]).convertInt();
+       rec.mIdUserDomainFk  = Data(row[col++]).convertInt();
+       rec.mPassword        = Data(row[col++]);
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+  return records;
+}
+
+RegDB::RegistrarRecordList
+RegMySQL::getAllRegistrars() const
+{
+  RegistrarRecordList records;
+  MYSQL_RES* result;
+  Data command("SELECT fidreg, fidudfk, fcallid, fidmainfk FROM tregistrar");
+
+  if(query(command, &result) != 0)
+  {
+     return records;
+  }
+  if (result == nullptr)
+  {
+     ErrLog( << "Base store result failed");
+     return records;
+  }
+
+  MYSQL_ROW row;
+  RegistrarRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdReg          = Data(row[col++]).convertInt();
+       rec.mIdUserDomainFk  = Data(row[col++]).convertInt();
+       rec.mCallId        = Data(row[col++]);
+       rec.mIdMainFk  = Data(row[col++]).convertInt();
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+  return records;
+}
+
+RegDB::RouteRecordList
+RegMySQL::getAllRoutes() const
+{
+  RouteRecordList records;
+  MYSQL_RES* result;
+  Data command("SELECT fidroute, fidregfk, fidforwardfk, ftime, fexpires FROM troute");
+
+  if(query(command, &result) != 0)
+  {
+     return records;
+  }
+  if (result == nullptr)
+  {
+     ErrLog( << "Base store result failed");
+     return records;
+  }
+
+  MYSQL_ROW row;
+  RouteRecord rec;
+  int col;
+  while(row = mysql_fetch_row(result))
+   {
+       col = 0;
+       rec.mIdRoute          = Data(row[col++]).convertInt();
+       rec.mIdRegFk  = Data(row[col++]).convertInt();
+       rec.mIdForwardFk  = Data(row[col++]).convertInt();
+       rec.mTime        = Data(row[col++]);
+       rec.mExpires  = Data(row[col++]).convertInt();
+       records.push_back(rec);
+   }
+  mysql_free_result(result);
+
+  return records;
+}
 /*************************************************************************/
 /*                        query                                          */
 /*************************************************************************/
 int
-RegMySQL::query(const resip::Data& queryCommand, UserRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, UserRecord& rec) const
 {
 MYSQL_RES* result = 0;
 if(query(queryCommand, &result) != 0)
@@ -197,7 +399,7 @@ MYSQL_ROW row=mysql_fetch_row(result);
 if(row)
  {
      int col = 0;
-     rec.mIdUser          = Data(key).convertInt();
+     rec.mIdUser          = Data(row[col++]).convertInt();
      rec.mName            = Data(row[col++]);
  }
 mysql_free_result(result);
@@ -205,7 +407,7 @@ return 0;
 }
 
 int
-RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec) const
 {
   MYSQL_RES* result = 0;
   if(query(queryCommand, &result) != 0)
@@ -222,7 +424,7 @@ RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec, const Key& k
   if(row)
    {
        int col = 0;
-       rec.mIdDomain          = Data(key).convertInt();
+       rec.mIdDomain          = Data(row[col++]).convertInt();
        rec.mDomain          = Data(row[col++]);
        rec.mIdRealm          = Data(row[col++]).convertInt();
    }
@@ -231,7 +433,7 @@ RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec, const Key& k
 }
 
 int
-RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec) const
 {
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
@@ -248,7 +450,7 @@ RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec, const Ke
     if(row)
      {
          int col = 0;
-         rec.mIdUserDomain          = Data(key).convertInt();
+         rec.mIdUserDomain          = Data(row[col++]).convertInt();
          rec.mIdDomainFk       = Data(row[col++]).convertInt();
          rec.mIdUserFk          = Data(row[col++]).convertInt();
      }
@@ -257,7 +459,7 @@ RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec, const Ke
 }
 
 int
-RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec) const
 {
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
@@ -274,7 +476,7 @@ RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec, const Key&
     if(row)
      {
          int col = 0;
-         rec.mIdProtocol          = Data(key).convertInt();
+         rec.mIdProtocol          = Data(row[col++]).convertInt();
          rec.mProtocol            = Data(row[col++]);
      }
     mysql_free_result(result);
@@ -282,7 +484,7 @@ RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec, const Key&
 }
 
 int
-RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec) const
 {
   MYSQL_RES* result = 0;
   if(query(queryCommand, &result) != 0)
@@ -299,7 +501,7 @@ RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec, const
   if(row)
    {
        int col = 0;
-       rec.mIdAuth            = Data(key).convertInt();
+       rec.mIdAuth            = Data(row[col++]).convertInt();
        rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
        rec.mPassword          = Data(row[col++]);
    }
@@ -308,7 +510,7 @@ RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec, const
 }
 
 int
-RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec) const
 {
   MYSQL_RES* result = 0;
   if(query(queryCommand, &result) != 0)
@@ -325,7 +527,7 @@ RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec, const Key& 
   if(row)
    {
        int col = 0;
-       rec.mIdForward            = Data(key).convertInt();
+       rec.mIdForward            = Data(row[col++]).convertInt();
        rec.mIdProtocolFk            = Data(row[col++]).convertInt();
        rec.mIdDomainFk               = Data(row[col++]).convertInt();
        rec.mPort                  = Data(row[col++]).convertInt();
@@ -335,7 +537,7 @@ RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec, const Key& 
 }
 
 int
-RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec) const
 {
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
@@ -352,7 +554,7 @@ RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec, const Key
     if(row)
      {
          int col = 0;
-         rec.mIdReg             = Data(key).convertInt();
+         rec.mIdReg             = Data(row[col++]).convertInt();
          rec.mIdUserDomainFk    = Data(row[col++]).convertInt();
          rec.mCallId            = Data(row[col++]);
          rec.mIdMainFk          = Data(row[col++]).convertInt();
@@ -362,7 +564,7 @@ RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec, const Key
 }
 
 int
-RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec, const Key& key) const
+RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec) const
 {
   MYSQL_RES* result = 0;
     if(query(queryCommand, &result) != 0)
@@ -379,7 +581,7 @@ RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec, const Key& ke
     if(row)
      {
          int col = 0;
-         rec.mIdRoute            = Data(key).convertInt();
+         rec.mIdRoute            = Data(row[col++]).convertInt();
          rec.mIdRegFk              = Data(row[col++]).convertInt();
          rec.mIdForwardFk          = Data(row[col++]).convertInt();
          rec.mTime               = Data(row[col++]);
