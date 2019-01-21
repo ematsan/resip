@@ -1,7 +1,7 @@
 #Comma separated list of SIP transports addresses
 #If left blank repro will bind to all adapters.
 #IPAddresses =
-IPAddresses = 192.168.64.85, 127.0.0.1, 192.168.1.1
+IPAddresses = 127.0.0.1
 
 # Comma separated list of Domains servers, overrides default OS detected list (leave blank
 # for default : localhost, 127.0.0.1)
@@ -24,7 +24,7 @@ TCPPort = 5060
 Realm = test.server.ua
 #DB Parameter
 DBServer = localhost
-DBUser = registrar
-DBPassword = password
+DBUser = user
+DBPassword = registrar
 DBName = registrar
 DBPort = 3306

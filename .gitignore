@@ -1,0 +1,12 @@
+repro
+*.so
+*.o
+reg
+*.config
+client
+server
+*.swp
+mysql
+*.save
+result
+md5/md5
