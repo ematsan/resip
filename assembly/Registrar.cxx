@@ -109,6 +109,7 @@ Registrar::loadData()
   {
     ErrLog(<< "No element in table toUserName");
   }
+
   domainList = domains.get();
   if (domainList.empty())
   {

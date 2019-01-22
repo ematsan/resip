@@ -133,14 +133,9 @@ RegMySQL::getAllUsers() const
   }
 
   MYSQL_ROW row;
-  UserRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdUser          = Data(row[col++]).convertInt();
-       rec.mName            = Data(row[col++]);
-       records.push_back(rec);
+       records.emplace_back(UserRecord(Data(row[0]).convertInt(), Data(row[1])));
    }
   mysql_free_result(result);
 
@@ -165,15 +160,9 @@ RegMySQL::getAllDomains() const
   }
 
   MYSQL_ROW row;
-  DomainRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdDomain          = Data(row[col++]).convertInt();
-       rec.mDomain            = Data(row[col++]);
-       rec.mIdRealm          = Data(row[col++]).convertInt();
-       records.push_back(rec);
+       records.emplace_back(DomainRecord(Data(row[0]).convertInt(), Data(row[1]), Data(row[2]).convertInt()));
    }
   mysql_free_result(result);
 
@@ -198,15 +187,9 @@ RegMySQL::getAllUserDomains() const
   }
 
   MYSQL_ROW row;
-  UserDomainRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdUserDomain          = Data(row[col++]).convertInt();
-       rec.mIdDomainFk          = Data(row[col++]).convertInt();
-       rec.mIdUserFk          = Data(row[col++]).convertInt();
-       records.push_back(rec);
+    records.emplace_back(UserDomainRecord(Data(row[0]).convertInt(), Data(row[1]).convertInt(), Data(row[2]).convertInt()));
    }
   mysql_free_result(result);
 
@@ -231,14 +214,9 @@ RegMySQL::getAllProtocols() const
   }
 
   MYSQL_ROW row;
-  ProtocolRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdProtocol          = Data(row[col++]).convertInt();
-       rec.mProtocol          = Data(row[col++]);
-       records.push_back(rec);
+       records.emplace_back(ProtocolRecord(Data(row[0]).convertInt(), Data(row[1])));
    }
   mysql_free_result(result);
 
@@ -263,16 +241,10 @@ RegMySQL::getAllForwards() const
   }
 
   MYSQL_ROW row;
-  ForwardRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdForward          = Data(row[col++]).convertInt();
-       rec.mIdProtocolFk       = Data(row[col++]).convertInt();
-       rec.mIdDomainFk         = Data(row[col++]).convertInt();
-       rec.mPort          = Data(row[col++]).convertInt();
-       records.push_back(rec);
+    records.emplace_back(ForwardRecord(Data(row[0]).convertInt(), Data(row[1]).convertInt(),
+                         Data(row[2]).convertInt(), Data(row[3]).convertInt()));
    }
   mysql_free_result(result);
 
@@ -298,15 +270,10 @@ RegMySQL::getAllAuthorizations() const
   }
 
   MYSQL_ROW row;
-  AuthorizationRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdAuth          = Data(row[col++]).convertInt();
-       rec.mIdUserDomainFk  = Data(row[col++]).convertInt();
-       rec.mPassword        = Data(row[col++]);
-       records.push_back(rec);
+       records.emplace_back(AuthorizationRecord(Data(row[0]).convertInt(), Data(row[1]).convertInt(),
+                            Data(row[2])));
    }
   mysql_free_result(result);
 
@@ -318,7 +285,7 @@ RegMySQL::getAllRegistrars() const
 {
   RegistrarRecordList records;
   MYSQL_RES* result;
-  Data command("SELECT fidreg, fidudfk, fcallid, fidmainfk FROM tregistrar");
+  Data command("SELECT fidreg, fidudfk, fidmainfk, fcallid FROM tregistrar");
 
   if(query(command, &result) != 0)
   {
@@ -331,16 +298,10 @@ RegMySQL::getAllRegistrars() const
   }
 
   MYSQL_ROW row;
-  RegistrarRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdReg          = Data(row[col++]).convertInt();
-       rec.mIdUserDomainFk  = Data(row[col++]).convertInt();
-       rec.mCallId        = Data(row[col++]);
-       rec.mIdMainFk  = Data(row[col++]).convertInt();
-       records.push_back(rec);
+       records.emplace_back(RegistrarRecord(Data(row[0]).convertInt(), Data(row[1]).convertInt(),
+                            Data(row[2]).convertInt(), Data(row[3])));
    }
   mysql_free_result(result);
 
@@ -365,17 +326,11 @@ RegMySQL::getAllRoutes() const
   }
 
   MYSQL_ROW row;
-  RouteRecord rec;
-  int col;
   while(row = mysql_fetch_row(result))
    {
-       col = 0;
-       rec.mIdRoute          = Data(row[col++]).convertInt();
-       rec.mIdRegFk  = Data(row[col++]).convertInt();
-       rec.mIdForwardFk  = Data(row[col++]).convertInt();
-       rec.mTime        = Data(row[col++]);
-       rec.mExpires  = Data(row[col++]).convertInt();
-       records.push_back(rec);
+       records.emplace_back(RouteRecord(Data(row[0]).convertInt(), Data(row[1]).convertInt(),
+                            Data(row[2]).convertInt(), Data(row[3]),
+                            Data(row[4]).convertInt()));
    }
   mysql_free_result(result);
 

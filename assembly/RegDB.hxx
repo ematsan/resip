@@ -17,6 +17,16 @@ class RegDB{
     {
           unsigned int mIdUser; //user id
           resip::Data mName; //user name
+
+          UserRecord(unsigned int _mIdUser,
+                     resip::Data _mName):
+                     mIdUser(_mIdUser),
+                     mName(_mName)
+                     {}
+          UserRecord():
+                     mIdUser(0),
+                     mName("")
+                     {}
     };
     //all domains
     struct DomainRecord
@@ -24,6 +34,19 @@ class RegDB{
           unsigned int mIdDomain; //domain id
           resip::Data mDomain; //domain name
           unsigned int mIdRealm;//domain realm
+
+          DomainRecord(unsigned int _mIdDomain,
+                      resip::Data _mDomain,
+                      unsigned int _mIdRealm):
+                      mIdDomain(_mIdDomain),
+                      mDomain(_mDomain),
+                      mIdRealm(_mIdRealm)
+                      {}
+          DomainRecord():
+                      mIdDomain(0),
+                      mDomain(""),
+                      mIdRealm(0)
+                      {}
     };
     //connection users and domains
     struct UserDomainRecord
@@ -31,12 +54,35 @@ class RegDB{
           unsigned int mIdUserDomain;
           unsigned int mIdDomainFk; //domain id
           unsigned int mIdUserFk;  //user id
+
+          UserDomainRecord(unsigned int _mIdUserDomain,
+                      unsigned int _mIdDomainFk,
+                      unsigned int _mIdUserFk):
+                      mIdUserDomain(_mIdUserDomain),
+                      mIdDomainFk(_mIdDomainFk),
+                      mIdUserFk(_mIdUserFk)
+                      {}
+          UserDomainRecord():
+                      mIdUserDomain(0),
+                      mIdDomainFk(0),
+                      mIdUserFk(0)
+                      {}
     };
     //table of protocols
     struct ProtocolRecord
     {
           unsigned int mIdProtocol;
           resip::Data mProtocol; //protocol name
+
+          ProtocolRecord(unsigned int _mIdProtocol,
+                     resip::Data _mProtocol):
+                     mIdProtocol(_mIdProtocol),
+                     mProtocol(_mProtocol)
+                     {}
+          ProtocolRecord():
+                     mIdProtocol(0),
+                     mProtocol("")
+                     {}
     };
 
     //tables of authorization
@@ -45,6 +91,19 @@ class RegDB{
           unsigned int mIdAuth;
           unsigned int mIdUserDomainFk; // who and where have authorization
           resip::Data mPassword; //md5 password
+
+          AuthorizationRecord(unsigned int _mIdAuth,
+                      unsigned int _mIdUserDomainFk,
+                      resip::Data _mPassword):
+                      mIdAuth(_mIdAuth),
+                      mIdUserDomainFk(_mIdUserDomainFk),
+                      mPassword(_mPassword)
+                      {}
+          AuthorizationRecord():
+                      mIdAuth(0),
+                      mIdUserDomainFk(0),
+                      mPassword("")
+                      {}
     };
 
     //curent user position
@@ -54,6 +113,22 @@ class RegDB{
           unsigned int mIdProtocolFk; //protocol
           unsigned int mIdDomainFk; //domain
           unsigned int mPort; //port
+
+          ForwardRecord(unsigned int _mIdForward,
+                      unsigned int _mIdProtocolFk,
+                      unsigned int _mIdDomainFk,
+                      unsigned int _mPort):
+                      mIdForward(_mIdForward),
+                      mIdProtocolFk(_mIdProtocolFk),
+                      mIdDomainFk(_mIdDomainFk),
+                      mPort(_mPort)
+                      {}
+          ForwardRecord():
+                      mIdForward(0),
+                      mIdProtocolFk(0),
+                      mIdDomainFk(0),
+                      mPort(0)
+                      {}
     };
      //tables of registrators
     struct RegistrarRecord
@@ -62,6 +137,22 @@ class RegDB{
           unsigned int mIdUserDomainFk;//whome register
           unsigned int mIdMainFk;//who register
           resip::Data mCallId; //calid
+
+          RegistrarRecord(unsigned int _mIdReg,
+                      unsigned int _mIdUserDomainFk,
+                      unsigned int _mIdMainFk,
+                      resip::Data _mCallId):
+                      mIdReg(_mIdReg),
+                      mIdUserDomainFk(_mIdUserDomainFk),
+                      mIdMainFk(_mIdMainFk),
+                      mCallId(_mCallId)
+                      {}
+          RegistrarRecord():
+                      mIdReg(0),
+                      mIdUserDomainFk(0),
+                      mIdMainFk(0),
+                      mCallId(0)
+                      {}
     };
 
     //table of routes
@@ -72,6 +163,25 @@ class RegDB{
           unsigned int mIdForwardFk; //route record (where)
           resip::Data mTime; //registration time
           unsigned int mExpires; // expires time
+
+          RouteRecord(unsigned int _mIdRoute,
+                      unsigned int _mIdRegFk,
+                      unsigned int _mIdForwardFk,
+                      resip::Data  _mTime,
+                      unsigned int _mExpires):
+                      mIdRoute(_mIdRoute),
+                      mIdRegFk(_mIdRegFk),
+                      mIdForwardFk(_mIdForwardFk),
+                      mTime(_mTime),
+                      mExpires(_mExpires)
+                      {}
+          RouteRecord():
+                      mIdRoute(0),
+                      mIdRegFk(0),
+                      mIdForwardFk(0),
+                      mTime(""),
+                      mExpires(0)
+                      {}
     };
 
     typedef resip::Data Key;

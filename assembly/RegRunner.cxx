@@ -64,7 +64,10 @@ RegRunner::run(int argc, char** argv)
 
   // Parse command line and configuration file
   if (mRegConfig != nullptr)
+  {
+     cerr << "RegConfig not null" << endl;
      return false;
+   }
   Data defaultConfigFilename("reg.config");
   try
   {
@@ -98,8 +101,12 @@ RegRunner::run(int argc, char** argv)
   }
 
   // Create SipStack and associated objects
-  if (mSipStack != nullptr);
+  if (mSipStack != nullptr)
+  {
+    cerr << "SipStack not null" << endl;
     return false;
+  }
+
   try
   {
 
@@ -128,7 +135,10 @@ RegRunner::run(int argc, char** argv)
     }
 
     if (mStackThread != nullptr)
+    {
+        cerr << "StackThread not null" << endl;
         return false;
+      }
     //read contact
     Data realm = mRegConfig->getConfigData("Realm", "localhost");
     std::vector<Data> configDomains;
