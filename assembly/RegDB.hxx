@@ -1,6 +1,4 @@
-#if !defined(REGDB_HXX)
-#define REGDB_HXX
-
+#pragma once
 #include <vector>
 #include "rutil/Data.hxx"
 
@@ -162,4 +160,3 @@ class RegDB{
     mutable bool mConnected;
 };
 }
-#endif

@@ -1,6 +1,4 @@
-#if !defined(REGISTRAR_HXX)
-#define REGISTRAR_HXX
-
+#pragma once
 #include <vector>
 #include <thread>
 #include <atomic>
@@ -182,4 +180,3 @@ class Registrar : public resip::ThreadIf
       RegDB::RouteRecordList routeList;
 };
 }
-#endif

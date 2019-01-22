@@ -1,5 +1,4 @@
-#if !defined(REGMYSQL_HXX)
-#define REGMYSQL_HXX
+#pragma once
 #include "RegDB.hxx"
 
 #include <mysql/mysql.h>
@@ -22,7 +21,7 @@ class RegMySQL: public RegDB
             const resip::Data& password,
             const resip::Data& databaseName,
             unsigned int port);
-    ~RegMySQL();
+    virtual ~RegMySQL();
 
     virtual int connectDB() const override;
     virtual void disconnectDB() const override;
@@ -60,4 +59,3 @@ class RegMySQL: public RegDB
     mutable std::mutex mMutex;
 };
 }
-#endif

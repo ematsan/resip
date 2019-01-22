@@ -1,5 +1,4 @@
-#if !defined(REGRUNNER_HXX)
-#define REGRUNNER_HXX
+#pragma once
 #include <map>
 #include <rutil/ConfigParse.hxx>
 #include "rutil/Logger.hxx"
@@ -21,10 +20,9 @@ namespace registrar
   class RegConfig : public resip::ConfigParse //not abstract class
   {
   public:
-     RegConfig(){ InfoLog(<< "Regconfig constractor");}
-     virtual ~RegConfig(){ InfoLog (<< "Regconfig destructor");}
-
-     virtual void printHelpText(int argc, char **argv){InfoLog(<< "Regconfig help");}
+     RegConfig() = default;
+     virtual ~RegConfig() = default;
+     virtual void printHelpText(int argc, char **argv){}
   };
 
   class RegRunner
@@ -43,4 +41,3 @@ namespace registrar
      RegDB* mBase;
    };
 }
-#endif
