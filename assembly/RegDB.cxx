@@ -2,7 +2,6 @@
 #include "rutil/Data.hxx"
 #include "rutil/Logger.hxx"
 
-
 using namespace registrar;
 using namespace resip;
 
@@ -53,7 +52,7 @@ RegDB::getUser(const Key& key) const
   }
   if (rec.mIdUser == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getUser result failed");
      return rec;
   }
   return rec;
@@ -75,7 +74,7 @@ RegDB::findUserId(UserRecord& rec) const
   }
   if (rec.mIdUser == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findUserId result failed");
      return 0;
   }
   return rec.mIdUser;
@@ -127,7 +126,7 @@ RegDB::getDomain(const Key& key) const
   }
   if (rec.mIdDomain == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getDomain result failed");
      return rec;
   }
   return rec;
@@ -149,7 +148,7 @@ RegDB::findDomainId(DomainRecord& rec) const
   }
   if (rec.mIdDomain == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findDomainId result failed");
      return 0;
   }
   return rec.mIdDomain;
@@ -201,7 +200,7 @@ RegDB::getUserDomain(const Key& key) const
   }
   if (rec.mIdUserDomain == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getUserDomain result failed");
      return rec;
   }
   return rec;
@@ -224,7 +223,7 @@ RegDB::findUserDomainId(UserDomainRecord& rec) const
   }
   if (rec.mIdUserDomain == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findUserDomainId result failed");
      return 0;
   }
   return rec.mIdUserDomain;
@@ -275,7 +274,7 @@ RegDB::getProtocol(const Key& key) const
   }
   if (rec.mIdProtocol == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getProtocol result failed");
      return rec;
   }
   return rec;
@@ -298,7 +297,7 @@ RegDB::findProtocolId(ProtocolRecord& rec) const
   }
   if (rec.mIdProtocol == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findProtocolId result failed");
      return 0;
   }
   return rec.mIdProtocol;
@@ -351,7 +350,7 @@ RegDB::getForward(const Key& key) const
   }
   if (rec.mIdForward == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getForward result failed");
      return rec;
   }
   return rec;
@@ -375,7 +374,7 @@ RegDB::findForwardId(ForwardRecord& rec) const
   }
   if (rec.mIdForward == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findForwardId result failed");
      return 0;
   }
   return rec.mIdForward;
@@ -427,7 +426,7 @@ RegDB::getAuthorization(const Key& key) const
   }
   if (rec.mIdAuth == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getAuthorization result failed");
      return rec;
   }
   return rec;
@@ -450,7 +449,7 @@ RegDB::findAuthorizationId(AuthorizationRecord& rec) const
   }
   if (rec.mIdAuth == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findAuthorizationId result failed");
      return 0;
   }
   return rec.mIdAuth;
@@ -503,7 +502,7 @@ RegDB::getRegistrar(const Key& key) const
   }
   if (rec.mIdReg == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getRegistrar result failed");
      return rec;
   }
   return rec;
@@ -541,7 +540,7 @@ RegDB::findRegistrarId(RegistrarRecord& rec) const
   }
   if (rec.mIdReg == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findRegistrarId result failed");
      return 0;
   }
   return rec.mIdReg;
@@ -596,7 +595,7 @@ RegDB::getRoute(const Key& key) const
   }
   if (rec.mIdRoute == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "getRoute result failed");
      return rec;
   }
   return rec;
@@ -637,7 +636,7 @@ RegDB::findRouteId(RouteRecord& rec) const
   }
   if (rec.mIdRoute == 0)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "findRouteId result failed");
      return 0;
   }
   return rec.mIdRoute;

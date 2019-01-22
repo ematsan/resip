@@ -14,10 +14,10 @@ using namespace registrar;
 
 RegRunner::RegRunner()
    : mRunning(false)
-   , mRegConfig(0)
-   , mSipStack(0)
-   , mStackThread(0)
-   , mBase(0)
+   , mRegConfig(nullptr)
+   , mSipStack(nullptr)
+   , mStackThread(nullptr)
+   , mBase(nullptr)
 {
   InfoLog(<<"RegRunner constructor");
 }
@@ -25,7 +25,36 @@ RegRunner::RegRunner()
 RegRunner::~RegRunner()
 {
    InfoLog(<<"RegRunner destructor");
-   if(mRunning) shutdown();
+   if (mStackThread != nullptr)
+   {
+      mStackThread->shutdown();
+    }
+
+   if (mSipStack != nullptr)
+   {
+     mSipStack->shutdownAndJoinThreads();
+     delete mSipStack;
+     mSipStack = nullptr;
+   }
+   if (mStackThread != nullptr)
+   {
+     mStackThread->join();
+     delete mStackThread;
+     mStackThread = nullptr;
+   }
+
+   if (mBase != nullptr)
+   {
+     mBase->shutdown();
+     delete mBase;
+     mBase = nullptr;
+   }
+
+   if (mRegConfig != nullptr)
+   {
+     delete mRegConfig;
+     mRegConfig = nullptr;
+   }
 }
 
 bool
@@ -34,7 +63,8 @@ RegRunner::run(int argc, char** argv)
   InfoLog(<<"RegRunner run");
 
   // Parse command line and configuration file
-  resip_assert(!mRegConfig);
+  if (mRegConfig != nullptr)
+     return false;
   Data defaultConfigFilename("reg.config");
   try
   {
@@ -47,6 +77,8 @@ RegRunner::run(int argc, char** argv)
      return false;
   }
 
+  if(mBase != nullptr)
+    return false;
   //connection with bd
   try{
     Data dbserver = mRegConfig->getConfigData("DBServer", "localhost");
@@ -56,15 +88,18 @@ RegRunner::run(int argc, char** argv)
     unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
 
     mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
+    if (!mBase->mConnected)
+       return false;
   }
-  catch(BaseException& ex)
+  catch(std::exception const& ex)
   {
-       cerr << "Error connection with mysql: " << ex << endl;
+       cerr << "Error connection with mysql: " << ex.what() << endl;
        return false;
   }
 
   // Create SipStack and associated objects
-  resip_assert(!mSipStack);
+  if (mSipStack != nullptr);
+    return false;
   try
   {
 
@@ -92,7 +127,8 @@ RegRunner::run(int argc, char** argv)
       }
     }
 
-    resip_assert(!mStackThread);
+    if (mStackThread != nullptr)
+        return false;
     //read contact
     Data realm = mRegConfig->getConfigData("Realm", "localhost");
     std::vector<Data> configDomains;
@@ -122,16 +158,21 @@ void
 RegRunner::shutdown()
 {
   InfoLog(<<"RegRunner shutdown");
-  if(!mRunning) return;
+  if(!mRunning)
+      return;
   mStackThread->shutdown();
   mSipStack->shutdownAndJoinThreads();
   mStackThread->join();
   mBase->shutdown();
 
-  delete mStackThread; mStackThread = 0;
-  delete mSipStack; mSipStack = 0;
-  delete mRegConfig; mRegConfig = 0;
-  delete mBase; mBase = 0;
+  delete mStackThread;
+  mStackThread = nullptr;
+  delete mSipStack;
+  mSipStack = nullptr;
+  delete mRegConfig;
+  mRegConfig = nullptr;
+  delete mBase;
+  mBase = nullptr;
 
   mRunning = false;
 }

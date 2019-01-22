@@ -24,21 +24,6 @@ namespace registrar
 {
 class RegMySQL;
 
-class join_threads
-{
-  std::vector<std::thread>& threads;
-public:
-  explicit join_threads(std::vector<std::thread>& threads_): threads(threads_){}
-  ~join_threads()
-  {
-    for(unsigned long i = 0; i < threads.size(); ++i)
-    {
-      if (threads[i].joinable())
-         threads[i].join();
-    }
-  }
-};
-
 template<typename T>
 class thread_safe_queue
 {
@@ -71,7 +56,6 @@ class thread_pool
   std::atomic_bool done;
   thread_safe_queue<std::function<void()> >work_queue;
   std::vector<std::thread> threads;
-  join_threads joiner;
 
   void work_thread()
   {
@@ -80,9 +64,12 @@ class thread_pool
       std::function<void()> task;
       if (work_queue.try_pop(task))
       {
-        try { task(); }
-        catch(std::exception const& a){
-              std::cerr<<"Throw Exeption: " << a.what()<<std::endl;
+        try {
+          task();
+        }
+        catch(std::exception const& a)
+        {
+          std::cerr<<"Throw Exeption: " << a.what()<<std::endl;
         }
       }
       else
@@ -92,7 +79,7 @@ class thread_pool
     }
   }
 public:
-  thread_pool():done(false), joiner(threads)
+  thread_pool():done(false)
   {
      //3 - main, SipSteck thread and Registrar thread
      unsigned thread_count = std::thread::hardware_concurrency() - 3;
@@ -110,7 +97,15 @@ public:
      }
   }
 
-  ~thread_pool() { done = true; }
+  ~thread_pool()
+  {
+    done = true;
+    for(unsigned long i = 0; i < threads.size(); ++i)
+    {
+      if (threads[i].joinable())
+         threads[i].join();
+    }
+  }
 
   template<typename FunctionType>
   void submit(FunctionType f)

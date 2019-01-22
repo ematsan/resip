@@ -39,14 +39,14 @@ main(int argc, char** argv)
    if(!registrar.run(argc, argv))
    {
       ErrLog(<< "Failed to start registrar, exiting...");
-      exit(-1);
+      return -1;
    }
    // Main program thread, just waits here for a signal to shutdown
    string s;
    while (!finished)
    {
       //sleepMs(1000);
-      InfoLog(<<"Enter commands: exit or restart");    
+      InfoLog(<<"Enter commands: exit or restart");
       cin>>s;
       if (s == "exit")
         finished = true;

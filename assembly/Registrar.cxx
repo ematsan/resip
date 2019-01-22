@@ -9,6 +9,7 @@
 #include "resip/stack/SipMessage.hxx"
 #include "resip/stack/Uri.hxx"
 #include "resip/stack/Auth.hxx"
+
 #include "resip/stack/SipStack.hxx"
 #include "rutil/Logger.hxx"
 
@@ -103,30 +104,46 @@ Registrar::loadData()
   auto regs  = async(&RegDB::getAllRegistrars, mBase);
   auto routes  = async(&RegDB::getAllRoutes, mBase);
 
-  //userList = mBase->getAllUsers();
   userList = users.get();
-  if (userList.empty()){ ErrLog(<< "No element in table toUserName"); }
-  //domainList = mBase->getAllDomains();
+  if (userList.empty())
+  {
+    ErrLog(<< "No element in table toUserName");
+  }
   domainList = domains.get();
-  if (domainList.empty()) { ErrLog(<< "No element in table tDomain"); }
-  //userDomeinList = mBase->getAllUserDomains();
+  if (domainList.empty())
+  {
+    ErrLog(<< "No element in table tDomain");
+  }
   userDomeinList = userDomains.get();
-  if (userDomeinList.empty()) { ErrLog(<< "No element in table toUserNameDomain"); }
-  //forwardList = mBase->getAllForwards();
+  if (userDomeinList.empty())
+  {
+    ErrLog(<< "No element in table toUserNameDomain");
+  }
   forwardList = forwards.get();
-  if (forwardList.empty()){ ErrLog(<< "No element in table tForward"); }
-  //protocolList = mBase->getAllProtocols();
+  if (forwardList.empty())
+  {
+    ErrLog(<< "No element in table tForward");
+  }
   protocolList = protocols.get();
-  if (protocolList.empty())  { ErrLog(<< "No element in table tProtocol"); }
-  //authList = mBase->getAllAuthorizations();
+  if (protocolList.empty())
+  {
+    ErrLog(<< "No element in table tProtocol");
+  }
   authList = auths.get();
-  if (authList.empty()) { ErrLog(<< "No element in table tAuthorization");}
-  //regList = mBase->getAllRegistrars();
+  if (authList.empty())
+  {
+    ErrLog(<< "No element in table tAuthorization");
+  }
   regList = regs.get();
-  if (regList.empty()) { ErrLog(<< "No element in table tRegistrar"); }
-  //routeList = mBase->getAllRoutes();
+  if (regList.empty())
+  {
+    ErrLog(<< "No element in table tRegistrar");
+  }
   routeList = routes.get();
-  if (routeList.empty()) { ErrLog(<< "No element in table tRoute"); }
+  if (routeList.empty())
+  {
+    ErrLog(<< "No element in table tRoute");
+  }
 }
 
 void

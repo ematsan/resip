@@ -20,8 +20,8 @@ RegMySQL::RegMySQL(const resip::Data& server,
     ,mDBPassword(password)
     ,mDBName(databaseName)
     ,mDBPort(port)
-    ,mConn(0)
-    ,mConnected(false){
+    ,mConn(nullptr)
+    {
       InfoLog(<<"RegMySQL constructor");
       InfoLog( << "Using MySQL DB with server=" << server << ", user=" << user << ", dbName=" << databaseName << ", port=" << port);
 
@@ -33,14 +33,15 @@ RegMySQL::RegMySQL(const resip::Data& server,
       else{
          connectDB();
       }
-      //connectDB();
+
 }
 
 RegMySQL::~RegMySQL(){
     InfoLog(<<"RegMySQL destructor");
     try
     {
-      if(mConn) disconnectDB();
+      if(mConn)
+          disconnectDB();
     }
     catch(std::exception const& a)
     {
@@ -54,11 +55,11 @@ RegMySQL::connectDB() const {
   disconnectDB();
 
   // Now try to connect
-  resip_assert(mConn == 0);
+  resip_assert(mConn == nullptr);
   resip_assert(mConnected == false);
 
   mConn = mysql_init(0);
-  if(mConn == 0)
+  if(mConn == nullptr)
   {
      ErrLog( << "MySQL init failed: insufficient memory.");
      return CR_OUT_OF_MEMORY;
@@ -73,12 +74,12 @@ RegMySQL::connectDB() const {
                                   0,                   // unix socket file
                                   CLIENT_MULTI_RESULTS); // client flags (enable multiple results, since some custom stored procedures might require this)
 
-  if (ret == 0)
+  if (ret == nullptr)
   {
      int rc = mysql_errno(mConn);
      ErrLog( << "MySQL connect failed: error=" << rc << ": " << mysql_error(mConn));
      mysql_close(mConn);
-     mConn = 0;
+     mConn = nullptr;
      mConnected = false;
      return rc;
   }
@@ -88,12 +89,14 @@ RegMySQL::connectDB() const {
      mConnected = true;
      return 0;
   }
+
 }
 
 void
 RegMySQL::shutdown()
 {
-  if(mConn) disconnectDB();
+  if(mConn)
+      disconnectDB();
 }
 
 void
@@ -102,7 +105,7 @@ RegMySQL::disconnectDB() const
   if(mConn)
   {
      mysql_close(mConn);
-     mConn = 0;
+     mConn = nullptr;
      mConnected = false;
   }
 }
@@ -125,7 +128,7 @@ RegMySQL::getAllUsers() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store UserRecordList result failed");
      return records;
   }
 
@@ -157,7 +160,7 @@ RegMySQL::getAllDomains() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store DomainRecordList result failed");
      return records;
   }
 
@@ -190,7 +193,7 @@ RegMySQL::getAllUserDomains() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store UserDomainRecordList result failed");
      return records;
   }
 
@@ -223,7 +226,7 @@ RegMySQL::getAllProtocols() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store ProtocolRecordList result failed");
      return records;
   }
 
@@ -255,7 +258,7 @@ RegMySQL::getAllForwards() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store ForwardRecordList result failed");
      return records;
   }
 
@@ -290,7 +293,7 @@ RegMySQL::getAllAuthorizations() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store AuthorizationRecordList result failed");
      return records;
   }
 
@@ -323,7 +326,7 @@ RegMySQL::getAllRegistrars() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store RegistrarRecordList result failed");
      return records;
   }
 
@@ -357,7 +360,7 @@ RegMySQL::getAllRoutes() const
   }
   if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store RouteRecordList result failed");
      return records;
   }
 
@@ -384,14 +387,14 @@ RegMySQL::getAllRoutes() const
 int
 RegMySQL::query(const resip::Data& queryCommand, UserRecord& rec) const
 {
-MYSQL_RES* result = 0;
+MYSQL_RES* result;
 if(query(queryCommand, &result) != 0)
 {
    return -2;
 }
-if (result == 0)
+if (result == nullptr)
 {
-   ErrLog( << "Base store result failed");
+   ErrLog( << "Base store UserRecord result failed");
    return -1;
 }
 
@@ -409,14 +412,14 @@ return 0;
 int
 RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec) const
 {
-  MYSQL_RES* result = 0;
+  MYSQL_RES* result;
   if(query(queryCommand, &result) != 0)
   {
      return -2;
   }
-  if (result == 0)
+  if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store DomainRecord result failed");
      return -1;
   }
 
@@ -435,14 +438,14 @@ RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec) const
 int
 RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec) const
 {
-  MYSQL_RES* result = 0;
+  MYSQL_RES* result;
     if(query(queryCommand, &result) != 0)
     {
        return -2;
     }
-    if (result == 0)
+    if (result == nullptr)
     {
-       ErrLog( << "Base store result failed");
+       ErrLog( << "Base store UserDomainRecord result failed");
        return -1;
     }
 
@@ -461,14 +464,14 @@ RegMySQL::query(const resip::Data& queryCommand, UserDomainRecord& rec) const
 int
 RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec) const
 {
-  MYSQL_RES* result = 0;
+  MYSQL_RES* result;
     if(query(queryCommand, &result) != 0)
     {
        return -2;
     }
-    if (result == 0)
+    if (result == nullptr)
     {
-       ErrLog( << "Base store result failed");
+       ErrLog( << "Base store ProtocolRecord result failed");
        return -1;
     }
 
@@ -486,14 +489,14 @@ RegMySQL::query(const resip::Data& queryCommand, ProtocolRecord& rec) const
 int
 RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec) const
 {
-  MYSQL_RES* result = 0;
+  MYSQL_RES* result;
   if(query(queryCommand, &result) != 0)
   {
      return -2;
   }
-  if (result == 0)
+  if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store AuthorizationRecord result failed");
      return -1;
   }
 
@@ -512,14 +515,14 @@ RegMySQL::query(const resip::Data& queryCommand, AuthorizationRecord& rec) const
 int
 RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec) const
 {
-  MYSQL_RES* result = 0;
+  MYSQL_RES* result;
   if(query(queryCommand, &result) != 0)
   {
      return -2;
   }
-  if (result == 0)
+  if (result == nullptr)
   {
-     ErrLog( << "Base store result failed");
+     ErrLog( << "Base store ForwardRecord result failed");
      return -1;
   }
 
@@ -539,14 +542,14 @@ RegMySQL::query(const resip::Data& queryCommand, ForwardRecord& rec) const
 int
 RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec) const
 {
-  MYSQL_RES* result = 0;
+  MYSQL_RES* result;
     if(query(queryCommand, &result) != 0)
     {
        return -2;
     }
-    if (result == 0)
+    if (result == nullptr)
     {
-       ErrLog( << "Base store result failed");
+       ErrLog( << "Base store RegistrarRecord result failed");
        return -1;
     }
 
@@ -566,14 +569,14 @@ RegMySQL::query(const resip::Data& queryCommand, RegistrarRecord& rec) const
 int
 RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec) const
 {
-  MYSQL_RES* result = 0;
+  MYSQL_RES* result;
     if(query(queryCommand, &result) != 0)
     {
        return -2;
     }
-    if (result == 0)
+    if (result == nullptr)
     {
-       ErrLog( << "Base store result failed");
+       ErrLog( << "Base store RouteRecord result failed");
        return -1;
      }
 
@@ -597,10 +600,10 @@ RegMySQL::query(const Data& queryCommand, MYSQL_RES** result) const
    int rc = 0;
    DebugLog( << "RegMySQL::query: executing query: " << queryCommand);
    std::lock_guard<std::mutex> lk(mMutex);
-   if(mConn == 0 || !mConnected)    rc = connectDB();
+   if(mConn == nullptr || !mConnected)    rc = connectDB();
    if(rc == 0)
    {
-      resip_assert(mConn!=0);
+      resip_assert(mConn!=nullptr);
       resip_assert(mConnected);
       rc = mysql_query(mConn,queryCommand.c_str());
       if(rc != 0)

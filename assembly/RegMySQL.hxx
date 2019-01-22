@@ -56,13 +56,8 @@ class RegMySQL: public RegDB
     resip::Data mDBName;
     unsigned int mDBPort;
 
-    mutable bool mConnected;
     mutable MYSQL* mConn;
-
-  // when multiple threads are in use with the same connection, you need to
-  // mutex calls to mysql_query and mysql_store_result:
     mutable std::mutex mMutex;
-
 };
 }
 #endif

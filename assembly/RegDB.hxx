@@ -2,11 +2,7 @@
 #define REGDB_HXX
 
 #include <vector>
-
 #include "rutil/Data.hxx"
-
-//#include <mysql/mysql.h>
-//#include <mysql/errmsg.h>
 
 #define RESIPROCATE_SUBSYSTEM Subsystem::TEST
 
@@ -15,6 +11,7 @@ namespace registrar{
 class RegDB{
   public:
 
+    RegDB():mConnected(false){}
     virtual ~RegDB() = default;
 
     //table of users
@@ -94,7 +91,7 @@ class RegDB{
     virtual void eraseUser(const Key& key) const;
     virtual UserRecord getUser(const Key& key) const;
     virtual int query(const resip::Data& queryCommand, UserRecord& result) const = 0;
-    virtual UserRecordList getAllUsers() const = 0;    
+    virtual UserRecordList getAllUsers() const = 0;
     virtual int findUserId(UserRecord& rec) const;
 
     // functions for Domain Records
@@ -161,6 +158,8 @@ class RegDB{
     virtual void shutdown() = 0;
 
     virtual int query(const resip::Data& queryCommand) const = 0;
+
+    mutable bool mConnected;
 };
 }
 #endif
