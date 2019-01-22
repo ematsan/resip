@@ -40,7 +40,7 @@ RegMySQL::~RegMySQL(){
     InfoLog(<<"RegMySQL destructor");
     try
     {
-      if(mConn)
+      if(mConn != nullptr)
           disconnectDB();
     }
     catch(std::exception const& a)
@@ -55,8 +55,18 @@ RegMySQL::connectDB() const {
   disconnectDB();
 
   // Now try to connect
-  resip_assert(mConn == nullptr);
-  resip_assert(mConnected == false);
+  //resip_assert(mConn == nullptr);
+  //resip_assert(mConnected == false);
+  if (mConn != nullptr)
+    {
+      ErrLog(<<"mConn != nullptr. Base connected");
+      return -1;
+    }
+  if (mConnected)
+  {
+    ErrLog(<<"mConnected = true, Base connected");
+    return -2;
+  }
 
   mConn = mysql_init(0);
   if(mConn == nullptr)
@@ -95,14 +105,14 @@ RegMySQL::connectDB() const {
 void
 RegMySQL::shutdown()
 {
-  if(mConn)
+  if(mConn != nullptr)
       disconnectDB();
 }
 
 void
 RegMySQL::disconnectDB() const
 {
-  if(mConn)
+  if(mConn != nullptr)
   {
      mysql_close(mConn);
      mConn = nullptr;
@@ -377,14 +387,13 @@ RegMySQL::query(const resip::Data& queryCommand, DomainRecord& rec) const
      ErrLog( << "Base store DomainRecord result failed");
      return -1;
   }
-
-  MYSQL_ROW row=mysql_fetch_row(result);
+  MYSQL_ROW row = mysql_fetch_row(result);
   if(row)
    {
        int col = 0;
-       rec.mIdDomain          = Data(row[col++]).convertInt();
-       rec.mDomain          = Data(row[col++]);
-       rec.mIdRealm          = Data(row[col++]).convertInt();
+       rec.mIdDomain  = Data(row[col++]).convertInt();
+       rec.mDomain    = Data(row[col++]);
+       rec.mIdRealm   = Data(row[col++]).convertInt();
    }
   mysql_free_result(result);
   return 0;
@@ -551,15 +560,25 @@ RegMySQL::query(const resip::Data& queryCommand, RouteRecord& rec) const
 
 int
 RegMySQL::query(const Data& queryCommand, MYSQL_RES** result) const
+//RegMySQL::query(const Data& query, MYSQL_RES** result) const
 {
    int rc = 0;
+//   const Data queryCommand = query;
    DebugLog( << "RegMySQL::query: executing query: " << queryCommand);
    std::lock_guard<std::mutex> lk(mMutex);
    if(mConn == nullptr || !mConnected)    rc = connectDB();
    if(rc == 0)
    {
-      resip_assert(mConn!=nullptr);
-      resip_assert(mConnected);
+      if (mConn == nullptr)
+        {
+          ErrLog(<<"mConn == nullptr. Base not connected");
+          return -1;
+        }
+      if (!mConnected)
+      {
+        ErrLog(<<"mConnected == false. Base not connected");
+        return -2;
+      }
       rc = mysql_query(mConn,queryCommand.c_str());
       if(rc != 0)
       {

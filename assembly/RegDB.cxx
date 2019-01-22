@@ -4,6 +4,7 @@
 
 using namespace registrar;
 using namespace resip;
+using namespace std;
 
 /*************************************************************************/
 /*                        USER                                           */
@@ -64,7 +65,7 @@ RegDB::findUserId(UserRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiduser FROM tuser"
+     ds << "SELECT fiduser, fname FROM tuser"
         << " WHERE fname='" << rec.mName
         << "'";
   }
@@ -138,7 +139,7 @@ RegDB::findDomainId(DomainRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fiddomain FROM tdomain"
+     ds << "SELECT fiddomain, fdomain, fidrealm FROM tdomain"
         << " WHERE fdomain='" << rec.mDomain
         << "'";
   }
@@ -212,7 +213,7 @@ RegDB::findUserDomainId(UserDomainRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidud FROM tuserdomain"
+     ds << "SELECT fidud, fiddomainfk, fiduserfk FROM tuserdomain"
         << " WHERE fiddomainfk = '" << rec.mIdDomainFk
         << "' and fiduserfk = '" << rec.mIdUserFk
         << "'";
@@ -287,7 +288,7 @@ RegDB::findProtocolId(ProtocolRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidprotocol FROM tprotocol"
+     ds << "SELECT fidprotocol, fprotocol FROM tprotocol"
         << " WHERE fprotocol = '" << rec.mProtocol
         << "'";
   }
@@ -362,8 +363,8 @@ RegDB::findForwardId(ForwardRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidforward FROM tforward"
-        << " WHERE fidforwardfk = '" << rec.mIdDomainFk
+     ds << "SELECT fidforward, fidprotocolfk, fiddomainfk, fport FROM tforward"
+        << " WHERE fiddomainfk = '" << rec.mIdDomainFk
         << "' and fidprotocol = '" << rec.mIdProtocolFk
         << "' and fport = '" << rec.mPort
         << "'";
@@ -438,7 +439,7 @@ RegDB::findAuthorizationId(AuthorizationRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidauth FROM tauthorization"
+     ds << "SELECT fidauth, fidudfk, fpassword FROM tauthorization"
         << " WHERE fidudfk = '" << rec.mIdUserDomainFk
         << "' and fpassword = '" << rec.mPassword
         << "'";
@@ -527,7 +528,7 @@ RegDB::findRegistrarId(RegistrarRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidreg FROM tregistrar"
+     ds << "SELECT fidreg, fidudfk, fcallid, fidmainfk FROM tregistrar"
         << " WHERE fidudfk = '" << rec.mIdUserDomainFk
         << "' and fidmainfk = '" << rec.mIdMainFk
         << "' and fcallid = '" << rec.mCallId
@@ -623,7 +624,7 @@ RegDB::findRouteId(RouteRecord& rec) const
   Data command;
   {
      DataStream ds(command);
-     ds << "SELECT fidroute FROM troute"
+     ds << "SELECT fidroute, fidregfk, fidforwardfk, ftime, fexpires FROM troute"
         << " WHERE fidregfk = '" << rec.mIdRegFk
         << "' and fidforwardfk = '" << rec.mIdForwardFk
       //  << "' and ftime = '" << rec.mTime
