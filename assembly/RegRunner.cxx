@@ -91,7 +91,7 @@ RegRunner::run(int argc, char** argv)
     unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
 
     mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
-    if (!mBase->mConnected)
+    if (!mBase->getConnected())
        return false;
   }
   catch(std::exception const& ex)

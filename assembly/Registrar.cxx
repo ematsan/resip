@@ -270,7 +270,7 @@ Registrar::analisysRequest(resip::SipMessage sip)
                         {
                           if ((rec.mIdRegFk == idreg)  && (rec.mIdForwardFk == idForward))
                           {
-                             mBase->eraseRoute(Data(rec.mIdRoute));
+                             mBase->eraseRoute(rec.mIdRoute);
                              upd = true;
                              routeList.erase(routeList.begin() + i);
                            }
@@ -293,7 +293,7 @@ Registrar::analisysRequest(resip::SipMessage sip)
                                          Data(ltm->tm_hour) + ":"+
                                          Data(ltm->tm_min) + ":" +
                                          Data(ltm->tm_sec);
-                             mBase->updateRoute(Data(rec.mIdRoute), rec);
+                             mBase->updateRoute(rec.mIdRoute, rec);
                              upd = true;
                            }
                         }
@@ -343,7 +343,7 @@ Registrar::removeAllContacts(resip::SipMessage* sip)
         {
           if (rec.mIdRegFk == idreg)
           {
-             mBase->eraseRoute(Data(rec.mIdRoute));
+             mBase->eraseRoute(rec.mIdRoute);
              routeList.erase(routeList.begin()+i);
            }
            i++;
@@ -668,7 +668,7 @@ Registrar::findRegistrar(const unsigned int& to,
            if(callid != rec.mCallId)
            {
              rec.mCallId = callid;
-             mBase->updateRegistrar(Data(rec.mIdReg),rec);
+             mBase->updateRegistrar(rec.mIdReg,rec);
            }
            idreg = rec.mIdReg;
            break;
