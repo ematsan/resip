@@ -88,8 +88,7 @@ RegRunner::run(int argc, char** argv)
     Data dbuser = mRegConfig->getConfigData("DBUser", "registrar");
     Data dbpassword = mRegConfig->getConfigData("DBPassword", "");
     Data dbname = mRegConfig->getConfigData("DBName", "registrar");
-    unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);
-
+    unsigned int dbport = mRegConfig->getConfigInt("DBPort", 3306);    
     mBase = new RegMySQL(dbserver, dbuser, dbpassword, dbname, dbport);
     if (!mBase->getConnected())
        return false;

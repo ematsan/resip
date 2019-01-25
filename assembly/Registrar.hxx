@@ -10,7 +10,6 @@
 #include "resip/stack/NameAddr.hxx"
 
 #include "RegDB.hxx"
-#include "RegMySQL.hxx"
 
 namespace resip
 {
@@ -65,10 +64,6 @@ class thread_pool
       {
         try {
           task();
-        }
-        catch (RegMySQL::MySQLError)
-        {
-          std::cerr << "Error in mySQL\n\n\n\n\n" << std::endl;
         }
         catch(std::exception const& a)
         {

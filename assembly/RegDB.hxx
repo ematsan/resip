@@ -200,53 +200,53 @@ class RegDB{
     typedef std::vector<RouteRecord> RouteRecordList;
 
     // functions for User Records
-    virtual bool addUser(const UserRecord& rec) const = 0;
-    virtual bool eraseUser(const Key& key) const = 0;
+    virtual void addUser(const UserRecord& rec) const = 0;
+    virtual void eraseUser(const Key& key) const = 0;
     virtual int findUserId(const UserRecord& rec) const = 0;
     virtual UserRecord getUser(const Key& key) const = 0;
     virtual UserRecordList getAllUsers() const = 0;
     // functions for Domain Records
-    virtual bool addDomain(const DomainRecord& rec) const = 0;
-    virtual bool eraseDomain(const Key& key) const = 0;
+    virtual void addDomain(const DomainRecord& rec) const = 0;
+    virtual void eraseDomain(const Key& key) const = 0;
     virtual DomainRecord getDomain(const Key& key) const = 0;
     virtual int findDomainId(const DomainRecord& rec) const = 0;
     virtual DomainRecordList getAllDomains() const = 0;
     // functions for User Domain Records
-    virtual bool addUserDomain(const UserDomainRecord& rec) const = 0;
-    virtual bool eraseUserDomain(const Key& key) const = 0;
+    virtual void addUserDomain(const UserDomainRecord& rec) const = 0;
+    virtual void eraseUserDomain(const Key& key) const = 0;
     virtual UserDomainRecord getUserDomain(const Key& key) const = 0;
     virtual int findUserDomainId(const UserDomainRecord& rec) const = 0;
     virtual UserDomainRecordList getAllUserDomains()  const = 0;
     // functions for Protocol Records
-    virtual bool addProtocol(const ProtocolRecord& rec) const = 0;
-    virtual bool eraseProtocol(const Key& key) const = 0;
+    virtual void addProtocol(const ProtocolRecord& rec) const = 0;
+    virtual void eraseProtocol(const Key& key) const = 0;
     virtual ProtocolRecord getProtocol(const Key& key) const = 0;
     virtual int findProtocolId(const ProtocolRecord& rec) const = 0;
     virtual ProtocolRecordList getAllProtocols()  const = 0;
     // functions for Authorization Records
-    virtual bool addAuthorization(const AuthorizationRecord& rec) const = 0;
-    virtual bool eraseAuthorization(const Key& key) const = 0;
+    virtual void addAuthorization(const AuthorizationRecord& rec) const = 0;
+    virtual void eraseAuthorization(const Key& key) const = 0;
     virtual AuthorizationRecord getAuthorization(const Key& key) const = 0;
     virtual int findAuthorizationId(const AuthorizationRecord& rec) const = 0;
     virtual AuthorizationRecordList getAllAuthorizations() const = 0;
     // functions for Forward Records
-    virtual bool addForward(const ForwardRecord& rec) const = 0;
-    virtual bool eraseForward(const Key& key) const = 0;
+    virtual void addForward(const ForwardRecord& rec) const = 0;
+    virtual void eraseForward(const Key& key) const = 0;
     virtual ForwardRecord getForward(const Key& key) const = 0;
     virtual int findForwardId(const ForwardRecord& rec) const = 0;
     virtual ForwardRecordList getAllForwards() const = 0;
     // functions for Registrar Records
-    virtual bool addRegistrar(const RegistrarRecord& rec) const = 0;
-    virtual bool eraseRegistrar(const Key& key) const = 0;
+    virtual void addRegistrar(const RegistrarRecord& rec) const = 0;
+    virtual void eraseRegistrar(const Key& key) const = 0;
     virtual RegistrarRecord getRegistrar(const Key& key) const = 0;
-    virtual bool updateRegistrar(const Key& key, const RegistrarRecord& rec) const = 0;
+    virtual void updateRegistrar(const Key& key, const RegistrarRecord& rec) const = 0;
     virtual int findRegistrarId(const RegistrarRecord& rec) const = 0;
     virtual RegistrarRecordList getAllRegistrars() const = 0;
     // functions for Route Records
-    virtual bool addRoute(const RouteRecord& rec) const = 0;
-    virtual bool eraseRoute(const Key& key) const = 0;
+    virtual void addRoute(const RouteRecord& rec) const = 0;
+    virtual void eraseRoute(const Key& key) const = 0;
     virtual RouteRecord getRoute(const Key& key) const = 0;
-    virtual bool updateRoute(const Key& key, const RouteRecord& rec) const = 0;
+    virtual void updateRoute(const Key& key, const RouteRecord& rec) const = 0;
     virtual int findRouteId(const RouteRecord& rec) const = 0;
     virtual RouteRecordList getAllRoutes()  const = 0;
 

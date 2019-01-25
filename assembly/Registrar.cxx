@@ -188,27 +188,27 @@ void
 //Registrar::analisysRequest(resip::SipMessage* sip)
 Registrar::analisysRequest(resip::SipMessage sip)
 {
-  Auths& auth =  sip.header(h_Authorizations);
-  //test Authorization
-  if (!testAuthorization(&sip))
+  try
   {
-     send403(&sip, "User not register");
-     return;
-   }
-  //test Registrar
-  unsigned int idreg = findOrAddRegistrar(&sip);
-  if (0 == idreg)
-  {
-     send403(&sip, "User not have access to add record");
-     return;
-   }
-
-  if(sip.exists(h_Contacts))
+    Auths& auth =  sip.header(h_Authorizations);
+    //test Authorization
+    if (!testAuthorization(&sip))
+    {
+      send403(&sip, "User not register");
+      return;
+    }
+    //test Registrar
+    unsigned int idreg = findOrAddRegistrar(&sip);
+    if (0 == idreg)
+    {
+      send403(&sip, "User not have access to add record");
+      return;
+    }
+    if(sip.exists(h_Contacts))
         {
            NameAddr& to = sip.header(h_To);
            NameAddr& from = sip.header(h_From);
            CallId& callid = sip.header(h_CallId);
-
            Data fromUserName = from.uri().user();
            Data fromUserHost = from.uri().host();
            Data toUserName = to.uri().user();
@@ -250,7 +250,6 @@ Registrar::analisysRequest(resip::SipMessage sip)
                       }
 
                       NameAddr addr = *i;
-
                       if (addr.exists(p_expires))
                          expires = addr.param(p_expires);
 
@@ -328,6 +327,12 @@ Registrar::analisysRequest(resip::SipMessage sip)
                       send200(&sip, *i);
                    }
         }
+      }
+      catch (RegMySQL::MySQLError)
+      {
+        ErrLog(<< "Error in Data Base");
+        send500(&sip);
+      }
 }
 
 void
