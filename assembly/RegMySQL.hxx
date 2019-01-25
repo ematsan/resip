@@ -23,6 +23,8 @@ class RegMySQL: public RegDB
             const resip::Data& password,
             const resip::Data& databaseName,
             unsigned int port);
+    RegMySQL (const RegMySQL&) = delete ;
+    RegMySQL& operator= ( const RegMySQL& ) = delete ;
     virtual ~RegMySQL();
 
     virtual int connectDB() const override;

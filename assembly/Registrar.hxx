@@ -121,6 +121,8 @@ class Registrar : public resip::ThreadIf
                  resip::Data realm,
                  RegDB* mdatabase,
                  const std::vector<resip::Data>& configDomains);
+      Registrar (const Registrar&) = delete ;
+      Registrar& operator= ( const Registrar& ) = delete ;                 
       ~Registrar();
 
       void thread();

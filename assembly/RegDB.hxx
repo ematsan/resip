@@ -10,6 +10,8 @@ class RegDB{
   public:
 
     RegDB():mConnected(false){}
+    RegDB (const RegDB&) = delete ;
+    RegDB& operator= ( const RegDB& ) = delete ;
     virtual ~RegDB() = default;
 
     virtual int connectDB() const = 0;

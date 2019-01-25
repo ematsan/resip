@@ -29,6 +29,8 @@ namespace registrar
   {
   public:
      RegRunner();
+     RegRunner (const RegRunner&) = delete ;
+     RegRunner& operator= ( const RegRunner& ) = delete ;
      virtual ~RegRunner();
 
      virtual bool run(int argc, char** argv);
